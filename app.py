@@ -339,11 +339,7 @@ elif st.session_state.page == "hub":
     ticker_tape_html = """
     <!DOCTYPE html>
     <html>
-    <head>
-    <style>
-      body { margin: 0; background: transparent; overflow: hidden; }
-    </style>
-    </head>
+    <head><style>body { margin: 0; background: transparent; overflow: hidden; }</style></head>
     <body>
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
@@ -378,58 +374,83 @@ elif st.session_state.page == "hub":
         st.markdown("""
         <div class="terminal-panel">
             <div class="panel-heading"><span>⚡ NASDAQ 100 HEATMAP</span><span><div class="live-dot-green"></div>LIVE</span></div>
-            <div style="flex-grow: 1; overflow: hidden; position: relative;">
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
-                {
-                  "exchanges": [],
-                  "dataSource": "NASDAQ100",
-                  "grouping": "sector",
-                  "blockSize": "market_cap_basic",
-                  "blockColor": "change",
-                  "locale": "fr",
-                  "symbolUrl": "",
-                  "colorTheme": "dark",
-                  "hasTopBar": false,
-                  "isTransparent": true,
-                  "width": "100%",
-                  "height": "100%"
-                }
-                </script>
-            </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Heatmap TradingView encapsulée proprement dans components.html
+        heatmap_html = """
+        <!DOCTYPE html>
+        <html>
+        <head><style>body { margin: 0; background: #0d1117; overflow: hidden; }</style></head>
+        <body>
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+          <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+          {
+            "exchanges": [],
+            "dataSource": "NASDAQ100",
+            "grouping": "sector",
+            "blockSize": "market_cap_basic",
+            "blockColor": "change",
+            "locale": "fr",
+            "symbolUrl": "",
+            "colorTheme": "dark",
+            "hasTopBar": false,
+            "isTransparent": true,
+            "width": "100%",
+            "height": "100%"
+          }
+          </script>
+        </div>
+        </body>
+        </html>
+        """
+        components.html(heatmap_html, height=470)
 
     with col_center:
         st.markdown("""
         <div class="terminal-panel" style="gap: 6px;">
             <div style="height: 49%; display: flex; flex-direction: column;">
                 <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE (ACTUS ROUGES)</span><span>TRADINGVIEW</span></div>
-                <div style="flex-grow: 1; overflow-y: auto;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                    {
-                      "colorTheme": "dark",
-                      "isTransparent": true,
-                      "width": "100%",
-                      "height": "100%",
-                      "locale": "fr",
-                      "importanceFilter": "1"
-                    }
-                    </script>
-                </div>
             </div>
-            <div style="height: 49%; display: flex; flex-direction: column;">
-                <div class="panel-heading"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX CONTINU</span></div>
-                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; flex-grow: 1; overflow-y: auto; font-size: 0.75rem; color: #8b949e;">
-                    <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
-                        <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
-                    </div>
-                    <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
-                        <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
-                    </div>
-                    <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
-                        <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
-                    </div>
-                </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Calendrier Économique TradingView filtré sur les actus "haut impact" (importance = 1)
+        calendar_html = """
+        <!DOCTYPE html>
+        <html>
+        <head><style>body { margin: 0; background: transparent; overflow: hidden; }</style></head>
+        <body>
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+          {
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "width": "100%",
+            "height": "210",
+            "locale": "fr",
+            "importanceFilter": "1"
+          }
+          </script>
+        </div>
+        </body>
+        </html>
+        """
+        components.html(calendar_html, height=215)
+
+        st.markdown("""
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; height: 180px; overflow-y: auto; font-size: 0.75rem; color: #8b949e; margin-top: 8px;">
+            <div class="panel-heading" style="margin-bottom: 6px;"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX</span></div>
+            <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
+                <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
+            </div>
+            <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
+                <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
+            </div>
+            <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
+                <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
             </div>
         </div>
         """, unsafe_allow_html=True)
