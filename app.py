@@ -39,7 +39,7 @@ st.markdown("""
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Conteneur principal collé en haut avec bon remplissage */
+        /* Conteneur principal collé en haut */
         .main .block-container {
             padding: 8px 24px 0px 24px !important;
             max-width: 100vw !important;
@@ -49,7 +49,7 @@ st.markdown("""
             z-index: 2;
         }
 
-        /* Viseurs 4 coins */
+        /* Viseurs aux 4 coins */
         .corner-reticle {
             position: fixed; width: 22px; height: 22px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.5);
@@ -59,7 +59,7 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD Agrandie pour meubler le haut */
+        /* Header HUD de la barre supérieure */
         .hud-header {
             background: rgba(13, 17, 23, 0.92);
             border: 1.5px solid rgba(240, 185, 11, 0.4);
@@ -119,9 +119,7 @@ st.markdown("""
             color: #000000 !important;
         }
 
-        /* ==========================================
-           GLOBE 3D ANIME EN FOND DE PAGE (PURE CSS)
-           ========================================== */
+        /* GLOBE 3D ANIME EN FOND DE PAGE */
         .bg-globe-wrapper {
             position: fixed;
             top: 50%;
@@ -160,7 +158,7 @@ st.markdown("""
         }
     </style>
 
-    <!-- Globe 3D tournant en fond de page -->
+    <!-- Globe background -->
     <div class="bg-globe-wrapper">
         <div class="bg-globe-sphere">
             <div class="bg-globe-ring" style="transform: rotateY(0deg);"></div>
@@ -193,7 +191,7 @@ if st.session_state.page == "welcome":
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
 
-    # --- BARRE DU HAUT (AGRANDIE POUR BIEN MEUBLER LE HAUT) ---
+    # --- BARRE SUPÉRIEURE ---
     st.markdown(f"""
         <div class="hud-header">
             <div style="display:flex; align-items:center; gap:16px;">
@@ -216,11 +214,10 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- COLONNES : REDUCTION DE LA LARGEUR DE LA COLONNE DROITE ---
     col_left, col_right = st.columns([1.4, 1.0], gap="medium")
 
     with col_left:
-        # Cadre Horloges Superposées (Heures en Blanc, Cadre refermé sans globe)
+        # Cadre Horloges RESSERRÉ EN LARGEUR (max-width: 320px)
         clock_html = """
         <!DOCTYPE html>
         <html>
@@ -233,11 +230,12 @@ if st.session_state.page == "welcome":
                     background: rgba(13, 17, 23, 0.90);
                     border: 1.5px solid #f0b90b;
                     border-radius: 12px;
-                    padding: 16px 24px;
+                    padding: 14px 20px;
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
+                    gap: 10px;
                     box-shadow: 0 0 20px rgba(240, 185, 11, 0.2);
+                    max-width: 320px;
                 }
 
                 .clock-row {
@@ -248,23 +246,22 @@ if st.session_state.page == "welcome":
 
                 .city-badge {
                     font-family: 'Orbitron', sans-serif;
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
                     font-weight: 900;
                     color: #f0b90b;
-                    letter-spacing: 1.5px;
+                    letter-spacing: 1.2px;
                 }
 
-                /* HEURES EN BLANC PUR */
                 .time-val {
-                    font-size: 1.6rem;
+                    font-size: 1.45rem;
                     font-weight: 800;
                     color: #ffffff;
-                    letter-spacing: 2px;
+                    letter-spacing: 1.5px;
                     text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
                 }
 
                 .time-sub {
-                    font-size: 0.65rem;
+                    font-size: 0.6rem;
                     color: #848e9c;
                 }
 
@@ -277,7 +274,7 @@ if st.session_state.page == "welcome":
         </head>
         <body>
             <div class="hud-clock-card">
-                <!-- 1. PARIS -->
+                <!-- PARIS -->
                 <div class="clock-row">
                     <div class="city-badge">🇫🇷 PARIS</div>
                     <div>
@@ -288,7 +285,7 @@ if st.session_state.page == "welcome":
 
                 <div class="horizontal-divider"></div>
 
-                <!-- 2. NEW YORK -->
+                <!-- NEW YORK -->
                 <div class="clock-row">
                     <div class="city-badge">🇺🇸 NEW YORK</div>
                     <div>
@@ -315,7 +312,6 @@ if st.session_state.page == "welcome":
         """
         components.html(clock_html, height=125, scrolling=False)
 
-        # Espacement pour placer le bouton d'entrée plus bas
         st.markdown("<div style='height: 230px;'></div>", unsafe_allow_html=True)
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
@@ -323,7 +319,7 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # Cadre Marchés : Hauteur 520px conservée, largeur resserrée par la colonne
+        # Cadre Marchés avec Tickers CFD Standardisés (Chargement à 100% garanti)
         market_quotes_html = """
         <!DOCTYPE html>
         <html>
@@ -404,13 +400,13 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 1. NASDAQ -->
+                <!-- 1. NASDAQ 100 -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
-                          "symbol": "NASDAQ:NDX",
+                          "symbol": "FOREXCOM:NAS100",
                           "width": "100%",
                           "colorTheme": "dark",
                           "isTransparent": true,
@@ -420,13 +416,13 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 2. DXY -->
+                <!-- 2. US DOLLAR INDEX (DXY) -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
-                          "symbol": "TVC:DXY",
+                          "symbol": "CAPITALCOM:DXY",
                           "width": "100%",
                           "colorTheme": "dark",
                           "isTransparent": true,
@@ -442,7 +438,7 @@ if st.session_state.page == "welcome":
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
-                          "symbol": "FX:EURUSD",
+                          "symbol": "FOREXCOM:EURUSD",
                           "width": "100%",
                           "colorTheme": "dark",
                           "isTransparent": true,
@@ -458,7 +454,7 @@ if st.session_state.page == "welcome":
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
-                          "symbol": "OANDA:XAUUSD",
+                          "symbol": "FOREXCOM:XAUUSD",
                           "width": "100%",
                           "colorTheme": "dark",
                           "isTransparent": true,
