@@ -351,7 +351,6 @@ if current_page == "welcome":
     </nav>
 
     <script>
-        // MOTEUR PRIX TEMPS RÉEL
         const marketData = {
             us100: { price: 21240.10, change: 1.12 },
             us500: { price: 5992.40, change: 0.58 },
@@ -399,7 +398,6 @@ if current_page == "welcome":
         setInterval(simulateLiveMarketTicks, 1200);
         updateRealtimeBTC();
 
-        // SCÈNE 3D GLOBE
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x080b10, 0.012);
@@ -659,8 +657,12 @@ if current_page == "welcome":
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // REDIRECTION VERS LA PAGE HUB NOIRE
+        // REDIRECTION STREAMLIT SÉCURISÉE DEPUIS L'IFRAME
+        let isTransitioning = false;
         function launchTerminalWarp() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
             let warpProgress = 0;
             const warpInterval = setInterval(() => {
                 warpProgress += 0.05;
@@ -668,7 +670,8 @@ if current_page == "welcome":
                 starsGroup.rotation.z += 0.1;
                 if (warpProgress >= 1.0) {
                     clearInterval(warpInterval);
-                    window.open('./?page=hub', '_top');
+                    // Forcer la fenêtre principale Streamlit à recharger avec la page hub
+                    window.top.location.search = '?page=hub';
                 }
             }, 20);
         }
@@ -730,7 +733,6 @@ if current_page == "welcome":
 elif current_page == "hub":
     st.markdown("""
         <style>
-            /* Écran 100% noir */
             header[data-testid="stHeader"] { visibility: hidden !important; }
             footer { visibility: hidden !important; }
             .stApp {
@@ -761,7 +763,6 @@ elif current_page == "hub":
             st.query_params.clear()
             st.rerun()
 
-    # Espace noir vierge à personnaliser
     st.markdown("""
         <div style="height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
             <h1 style="color: #ffffff; font-family: sans-serif; font-weight: 300; letter-spacing: 2px;">
