@@ -182,80 +182,6 @@
             100% { transform: scale(0.9); opacity: 0.7; }
         }
 
-        /* Audio Indicator Badge & Visualizer */
-        .audio-indicator {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(0, 243, 255, 0.08);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            padding: 6px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .audio-indicator:hover {
-            background: rgba(0, 243, 255, 0.18);
-            box-shadow: 0 0 15px var(--cyan-glow);
-        }
-
-        .equalizer-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 14px;
-        }
-
-        .eq-bar {
-            width: 3px;
-            background: var(--cyan-neon);
-            border-radius: 2px;
-            height: 4px;
-            animation: eq-anim 1.2s ease-in-out infinite alternate;
-        }
-        .eq-bar:nth-child(1) { animation-delay: 0.1s; }
-        .eq-bar:nth-child(2) { animation-delay: 0.3s; }
-        .eq-bar:nth-child(3) { animation-delay: 0.5s; }
-        .eq-bar:nth-child(4) { animation-delay: 0.2s; }
-        .eq-bar:nth-child(5) { animation-delay: 0.4s; }
-
-        .audio-indicator.paused .eq-bar {
-            animation: none;
-            height: 3px !important;
-            opacity: 0.4;
-        }
-
-        @keyframes eq-anim {
-            0% { height: 3px; }
-            100% { height: 16px; }
-        }
-
-        .audio-text {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--cyan-neon);
-            font-weight: 600;
-        }
-
-        /* Volume Controls Box */
-        .volume-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(8, 11, 16, 0.6);
-            padding: 4px 10px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .volume-slider {
-            width: 60px;
-            height: 4px;
-            accent-color: var(--cyan-neon);
-            cursor: pointer;
-        }
-
         /* Left Hero HUD Card */
         .left-hero-panel {
             position: fixed;
@@ -617,11 +543,6 @@
             gap: 12px;
         }
 
-        /* Audio File Custom Selector Trigger */
-        .hidden-file-input {
-            display: none;
-        }
-
         /* Responsive Mobile Adjustments */
         @media (max-width: 1024px) {
             .left-hero-panel { width: 320px; left: 20px; top: 90px; }
@@ -667,30 +588,6 @@
             <div class="status-item" style="color: var(--cyan-neon);">
                 <span>LATENCY: <span id="ping-val">14</span>ms</span>
             </div>
-            
-            <!-- Audio Indicator Badge with Mute/Play Toggle -->
-            <div class="audio-indicator" id="audio-toggle-btn" title="Espace / Clic pour activer/couper le son">
-                <div class="equalizer-bars" id="eq-bars">
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                </div>
-                <span class="audio-text" id="audio-status-label">AC/DC - Back In Black</span>
-            </div>
-
-            <!-- Volume Controller -->
-            <div class="volume-controls">
-                <span style="font-size: 0.7rem; color: var(--text-muted);">🔊</span>
-                <input type="range" class="volume-slider" id="volume-range" min="0" max="1" step="0.05" value="0.8">
-            </div>
-
-            <!-- Custom MP3 File Load Trigger -->
-            <button style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:var(--text-muted); padding:4px 8px; border-radius:6px; font-size:0.65rem; cursor:pointer;" onclick="document.getElementById('audio-file-input').click()">
-                📂 Custom Audio
-            </button>
-            <input type="file" id="audio-file-input" class="hidden-file-input" accept="audio/mp3,audio/wav">
         </div>
     </header>
 
@@ -702,12 +599,12 @@
 
         <div class="clock-section">
             <div class="clock-block">
-                <span class="clock-label">PARIS (UTC+1)</span>
+                <span class="clock-label">PARIS</span>
                 <span class="clock-time" id="clock-paris">00:00:00</span>
             </div>
             <div class="clock-block">
-                <span class="clock-label">UTC / ZULU</span>
-                <span class="clock-time" id="clock-utc">00:00:00</span>
+                <span class="clock-label">NEW YORK</span>
+                <span class="clock-time" id="clock-ny">00:00:00</span>
             </div>
         </div>
 
@@ -728,7 +625,6 @@
 
         <div class="hotkey-legend">
             <span><span class="hotkey-badge">ENTRÉE</span> Démarrer</span>
-            <span><span class="hotkey-badge">ESPACE</span> Audio</span>
             <span><span class="hotkey-badge">R</span> Reset Globe</span>
         </div>
     </div>
@@ -890,137 +786,7 @@
         </div>
     </div>
 
-    <!-- Hidden Audio HTML5 Tag -->
-    <audio id="acdc-audio" loop preload="auto">
-        <source src="AC DC Back In Black (1).mp3" type="audio/mp3">
-        <source src="acdc.mp3" type="audio/mp3">
-    </audio>
-
     <script>
-        const audioElement = document.getElementById('acdc-audio');
-        const audioBtn = document.getElementById('audio-toggle-btn');
-        const audioLabel = document.getElementById('audio-status-label');
-        const eqBars = document.getElementById('eq-bars');
-        const volumeRange = document.getElementById('volume-range');
-        const fileInput = document.getElementById('audio-file-input');
-
-        let isAudioPlaying = false;
-        let audioContext = null;
-        let synthInterval = null;
-        let fadeTimer = null;
-
-        // Custom File Upload Handler
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                audioElement.src = url;
-                audioLabel.textContent = file.name.substring(0, 20) + '...';
-                playACDCClip();
-            }
-        });
-
-        // Web Audio Synthesizer Fallback (Rock Guitar Riff Generator)
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playSynthRockRiff() {
-            initAudioContext();
-            if (synthInterval) clearInterval(synthInterval);
-
-            audioLabel.textContent = "SYNTH ROCK RIFF ACTIVE";
-            isAudioPlaying = true;
-            audioBtn.classList.remove('paused');
-
-            const notes = [164.81, 196.00, 220.00, 164.81, 246.94, 220.00]; // E3, G3, A3 riff
-            let idx = 0;
-
-            synthInterval = setInterval(() => {
-                if (!isAudioPlaying) {
-                    clearInterval(synthInterval);
-                    return;
-                }
-                try {
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
-                    const dist = audioContext.createWaveShaper();
-
-                    // Distorted rock guitar simulation
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(notes[idx % notes.length], audioContext.currentTime);
-
-                    gain.gain.setValueAtTime(0.12 * volumeRange.value, audioContext.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.35);
-
-                    osc.connect(gain);
-                    gain.connect(audioContext.destination);
-
-                    osc.start();
-                    osc.stop(audioContext.currentTime + 0.35);
-                    idx++;
-                } catch(e) {}
-            }, 300);
-        }
-
-        // AC/DC Clip Slicer (Second 10 to 35 with 2.5s fade-out)
-        function playACDCClip() {
-            if (fadeTimer) clearTimeout(fadeTimer);
-
-            audioElement.volume = volumeRange.value;
-            audioElement.currentTime = 10; // Jump to 10 seconds
-
-            audioElement.play().then(() => {
-                isAudioPlaying = true;
-                audioBtn.classList.remove('paused');
-                audioLabel.textContent = "AC/DC - Back In Black";
-
-                // Schedule Fade Out at 32.5s (2.5s before 35s mark)
-                const playDurationMs = (35 - 10) * 1000;
-                const fadeStartMs = playDurationMs - 2500;
-
-                fadeTimer = setTimeout(() => {
-                    const fadeStepMs = 50;
-                    const steps = 2500 / fadeStepMs;
-                    const volStep = audioElement.volume / steps;
-
-                    const fadeInterval = setInterval(() => {
-                        if (audioElement.volume > volStep) {
-                            audioElement.volume -= volStep;
-                        } else {
-                            audioElement.volume = 0;
-                            audioElement.pause();
-                            isAudioPlaying = false;
-                            audioBtn.classList.add('paused');
-                            clearInterval(fadeInterval);
-                        }
-                    }, fadeStepMs);
-                }, fadeStartMs);
-
-            }).catch(err => {
-                // Fallback to Web Audio Synth if MP3 is missing/blocked
-                playSynthRockRiff();
-            });
-        }
-
-        function toggleAudio() {
-            if (isAudioPlaying) {
-                audioElement.pause();
-                if (synthInterval) clearInterval(synthInterval);
-                isAudioPlaying = false;
-                audioBtn.classList.add('paused');
-            } else {
-                playACDCClip();
-            }
-        }
-
-        audioBtn.addEventListener('click', toggleAudio);
-        volumeRange.addEventListener('input', (e) => {
-            audioElement.volume = e.target.value;
-        });
-
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x080b10, 0.012);
@@ -1333,7 +1099,7 @@
         }
         initSparklines();
 
-        // Clocks Refresh (Paris & UTC)
+        // Clocks Refresh (Paris & New York)
         function updateClocks() {
             const now = new Date();
             
@@ -1342,13 +1108,13 @@
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
             }).format(now);
 
-            const utcTime = new Intl.DateTimeFormat('fr-FR', {
-                timeZone: 'UTC',
+            const nyTime = new Intl.DateTimeFormat('fr-FR', {
+                timeZone: 'America/New_York',
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
             }).format(now);
 
             document.getElementById('clock-paris').textContent = parisTime;
-            document.getElementById('clock-utc').textContent = utcTime;
+            document.getElementById('clock-ny').textContent = nyTime;
             
             // Random Ping Generator
             document.getElementById('ping-val').textContent = Math.floor(12 + Math.random() * 6);
@@ -1368,8 +1134,6 @@
         };
 
         function launchTerminalWarp() {
-            if (!isAudioPlaying) playACDCClip();
-
             let warpProgress = 0;
             const warpInterval = setInterval(() => {
                 warpProgress += 0.05;
@@ -1385,13 +1149,10 @@
 
         document.getElementById('btn-enter-app').addEventListener('click', launchTerminalWarp);
 
-        // Global Keyboard Shortcuts (ENTER: Launch, SPACE: Audio, R: Reset View)
+        // Global Keyboard Shortcuts (ENTER: Launch, R: Reset View)
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Enter') {
                 launchTerminalWarp();
-            } else if (e.code === 'Space') {
-                e.preventDefault();
-                toggleAudio();
             } else if (e.code === 'KeyR') {
                 targetRotation.x = 0.2;
                 targetRotation.y = 0;
