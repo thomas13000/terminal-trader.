@@ -1,4 +1,3 @@
-from deep_translator import GoogleTranslator
 import feedparser
 import streamlit as st
 import streamlit.components.v1 as components
@@ -14,22 +13,14 @@ if "page" not in st.session_state:
   st.session_state.page = "welcome"
 
 
-# Fonction pour récupérer et traduire automatiquement les actus Yahoo Finance en Français
+# Fonction pour récupérer les actus Yahoo Finance en direct (stable)
 def fetch_yahoo_news():
   try:
     feed = feedparser.parse("https://finance.yahoo.com/news/rssindex")
     news_items = []
-    translator = GoogleTranslator(source="auto", target="fr")
-
     for entry in feed.entries[:8]:  # Récupère 8 actus
-      title = entry.title
-      try:
-        # Traduction automatique du titre en français
-        translated = translator.translate(title)
-        news_items.append(translated if translated else title)
-      except Exception:
-        news_items.append(title)  # Fallback sur l'original en cas de souci
-
+      if hasattr(entry, "title"):
+        news_items.append(entry.title)
     return (
         news_items
         if news_items
@@ -467,7 +458,7 @@ elif st.session_state.page == "hub":
     components.html(heatmap_panel_html, height=480)
 
   # ==========================
-  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE TRADUIT (FRAGMENT AUTO-REFRESH)
+  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE LIVE
   # ==========================
   with col_center:
     calendar_panel_html = """
@@ -536,7 +527,7 @@ elif st.session_state.page == "hub":
         """
     components.html(calendar_panel_html, height=230)
 
-    # Fragment automatique se mettant à jour toutes les 60 secondes en arrière-plan
+    # Fragment automatique mis à jour en arrière-plan sans risque d'erreur Google 500
     @st.fragment(run_every=60)
     def live_yahoo_news_widget():
       live_news = fetch_yahoo_news()
@@ -608,7 +599,7 @@ elif st.session_state.page == "hub":
             </head>
             <body>
             <div class="panel-heading">
-                <span>🌐 FLUX LIVE YAHOO FINANCE (TRADUIT)</span>
+                <span>🌐 FLUX LIVE YAHOO FINANCE (NEWS)</span>
                 <span><div class="live-dot-green"></div>EN DIRECT (AUTO-REFRESH)</span>
             </div>
             <div class="macro-content" id="scroll-container">
@@ -640,7 +631,6 @@ elif st.session_state.page == "hub":
             """
       components.html(macro_panel_html, height=230)
 
-    # Appel du widget fragment dynamique
     live_yahoo_news_widget()
 
   # ==========================
