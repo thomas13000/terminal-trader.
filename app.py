@@ -209,7 +209,7 @@ if st.session_state.page == "welcome":
             </div>
             <div style="display:flex; gap:20px; align-items:center;">
                 <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
-                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
+                    MS SERVEUR : <span style="color:#ffffff; font-weight:700;">{latency_ms} ms</span>
                 </div>
                 <div class="mono-text" style="color:#00f3ff; font-weight:700; font-size:0.85rem;">{time_utc} UTC</div>
                 <div class="mono-text hud-green" style="background:rgba(14,203,129,0.12); padding:5px 12px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:6px; font-weight:700;">
@@ -471,11 +471,10 @@ if st.session_state.page == "welcome":
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE (BARRE UNIFIÉE PRO)
+# PAGE 2 : HUB / WORKSPACE
 # ==========================================
 elif st.session_state.page == "hub":
 
-    # LE BOUTON ACCUEIL EST INTÉGRÉ PARFAITEMENT DANS LA BARRE SUPÉRIEURE HUD
     page2_header_html = """
     <!DOCTYPE html>
     <html>
@@ -616,7 +615,6 @@ elif st.session_state.page == "hub":
                 box-shadow: 0 0 8px #0ecb81;
             }
 
-            /* BOUTON ACCUEIL PARFAITEMENT ALIGNÉ DANS LA BARRE */
             .hud-btn-accueil {
                 background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%);
                 color: #080b10;
@@ -670,7 +668,7 @@ elif st.session_state.page == "hub":
 
             <div class="right-status">
                 <div class="status-badge">
-                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700; margin-left:4px;">__LATENCY__ ms</span>
+                    MS SERVEUR : <span style="color:#ffffff; font-weight:700; margin-left:4px;">__LATENCY__ ms</span>
                 </div>
                 <div class="online-badge">
                     <span class="online-dot"></span>
