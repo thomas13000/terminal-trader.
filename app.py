@@ -467,7 +467,7 @@ elif st.session_state.page == "hub":
     components.html(heatmap_panel_html, height=480)
 
   # ==========================
-  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE TRADUIT (DÉFILEMENT AUTO)
+  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE TRADUIT (FRAGMENT AUTO-REFRESH)
   # ==========================
   with col_center:
     calendar_panel_html = """
@@ -536,108 +536,112 @@ elif st.session_state.page == "hub":
         """
     components.html(calendar_panel_html, height=230)
 
-    # Récupération et traduction dynamique des flux Yahoo Finance
-    live_news = fetch_yahoo_news()
+    # Fragment automatique se mettant à jour toutes les 60 secondes en arrière-plan
+    @st.fragment(run_every=60)
+    def live_yahoo_news_widget():
+      live_news = fetch_yahoo_news()
 
-    # Construction des blocs HTML traduits en français
-    news_html_blocks = ""
-    colors = ["#f0b90b", "#58a6ff", "#3fb950", "#d29922", "#bc8cff"]
-    for i, title in enumerate(live_news):
-      color = colors[i % len(colors)]
-      news_html_blocks += f"""
-        <div style="margin-bottom: 10px; border-left: 2px solid {color}; padding-left: 6px; line-height: 1.4;">
-            <span style="color: {color}; font-weight: bold;">[YAHOO LIVE]</span> : {title}
-        </div>
-        """
-
-    macro_panel_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
-          body {{
-              margin: 0;
-              background: rgba(13, 17, 23, 0.95);
-              border: 1px solid rgba(240, 185, 11, 0.25);
-              border-radius: 4px;
-              padding: 8px;
-              box-sizing: border-box;
-              height: 225px;
-              display: flex;
-              flex-direction: column;
-              font-family: 'Share Tech Mono', monospace;
-              overflow: hidden;
-              box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-          }}
-          .panel-heading {{
-              font-family: 'Orbitron', sans-serif;
-              font-size: 0.75rem;
-              color: #f0b90b;
-              border-bottom: 1px solid #30363d;
-              padding-bottom: 4px;
-              margin-bottom: 6px;
-              letter-spacing: 1px;
-              text-transform: uppercase;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex-shrink: 0;
-          }}
-          .live-dot-green {{
-              width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
-              box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
-          }}
-          .macro-content {{
-              background: #161b22;
-              border: 1px solid #30363d;
-              border-radius: 3px;
-              padding: 8px;
-              flex-grow: 1;
-              overflow-y: hidden;
-              font-size: 0.75rem;
-              color: #8b949e;
-              position: relative;
-          }}
-          .scroll-inner {{
-              position: absolute;
-              width: 95%;
-          }}
-        </style>
-        </head>
-        <body>
-        <div class="panel-heading">
-            <span>🌐 FLUX LIVE YAHOO FINANCE (TRADUIT)</span>
-            <span><div class="live-dot-green"></div>EN DIRECT (AUTO-SCROLL)</span>
-        </div>
-        <div class="macro-content" id="scroll-container">
-            <div class="scroll-inner" id="scroll-inner">
-                {news_html_blocks}
-                <div style="height: 40px;"></div>
+      news_html_blocks = ""
+      colors = ["#f0b90b", "#58a6ff", "#3fb950", "#d29922", "#bc8cff"]
+      for i, title in enumerate(live_news):
+        color = colors[i % len(colors)]
+        news_html_blocks += f"""
+            <div style="margin-bottom: 10px; border-left: 2px solid {color}; padding-left: 6px; line-height: 1.4;">
+                <span style="color: {color}; font-weight: bold;">[YAHOO LIVE]</span> : {title}
             </div>
-        </div>
-        
-        <script>
-        const container = document.getElementById('scroll-container');
-        const inner = document.getElementById('scroll-inner');
-        
-        function autoScroll() {{
-            if (container.scrollTop >= inner.scrollHeight - container.clientHeight) {{
-                container.scrollTop = 0;
-            }} else {{
-                container.scrollTop += 0.6;
+            """
+
+      macro_panel_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+              body {{
+                  margin: 0;
+                  background: rgba(13, 17, 23, 0.95);
+                  border: 1px solid rgba(240, 185, 11, 0.25);
+                  border-radius: 4px;
+                  padding: 8px;
+                  box-sizing: border-box;
+                  height: 225px;
+                  display: flex;
+                  flex-direction: column;
+                  font-family: 'Share Tech Mono', monospace;
+                  overflow: hidden;
+                  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+              }}
+              .panel-heading {{
+                  font-family: 'Orbitron', sans-serif;
+                  font-size: 0.75rem;
+                  color: #f0b90b;
+                  border-bottom: 1px solid #30363d;
+                  padding-bottom: 4px;
+                  margin-bottom: 6px;
+                  letter-spacing: 1px;
+                  text-transform: uppercase;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  flex-shrink: 0;
+              }}
+              .live-dot-green {{
+                  width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
+                  box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
+              }}
+              .macro-content {{
+                  background: #161b22;
+                  border: 1px solid #30363d;
+                  border-radius: 3px;
+                  padding: 8px;
+                  flex-grow: 1;
+                  overflow-y: hidden;
+                  font-size: 0.75rem;
+                  color: #8b949e;
+                  position: relative;
+              }}
+              .scroll-inner {{
+                  position: absolute;
+                  width: 95%;
+              }}
+            </style>
+            </head>
+            <body>
+            <div class="panel-heading">
+                <span>🌐 FLUX LIVE YAHOO FINANCE (TRADUIT)</span>
+                <span><div class="live-dot-green"></div>EN DIRECT (AUTO-REFRESH)</span>
+            </div>
+            <div class="macro-content" id="scroll-container">
+                <div class="scroll-inner" id="scroll-inner">
+                    {news_html_blocks}
+                    <div style="height: 40px;"></div>
+                </div>
+            </div>
+            
+            <script>
+            const container = document.getElementById('scroll-container');
+            const inner = document.getElementById('scroll-inner');
+            
+            function autoScroll() {{
+                if (container.scrollTop >= inner.scrollHeight - container.clientHeight) {{
+                    container.scrollTop = 0;
+                }} else {{
+                    container.scrollTop += 0.6;
+                }}
             }}
-        }}
-        
-        let scrollInterval = setInterval(autoScroll, 40);
-        
-        container.onmouseover = () => clearInterval(scrollInterval);
-        container.onmouseout = () => scrollInterval = setInterval(autoScroll, 40);
-        </script>
-        </body>
-        </html>
-        """
-    components.html(macro_panel_html, height=230)
+            
+            let scrollInterval = setInterval(autoScroll, 40);
+            
+            container.onmouseover = () => clearInterval(scrollInterval);
+            container.onmouseout = () => scrollInterval = setInterval(autoScroll, 40);
+            </script>
+            </body>
+            </html>
+            """
+      components.html(macro_panel_html, height=230)
+
+    # Appel du widget fragment dynamique
+    live_yahoo_news_widget()
 
   # ==========================
   # COLONNE DROITE : WATCHLIST
