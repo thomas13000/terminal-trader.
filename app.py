@@ -122,7 +122,7 @@ st.markdown("""
             color: #000000 !important;
         }
 
-        /* GLOBE 3D EN FOND DE PAGE (TEINTE PLUS VIVE & PRONONCÉE) */
+        /* GLOBE 3D EN FOND DE PAGE (TEINTE VIVE) */
         .bg-globe-wrapper {
             position: fixed;
             top: 50%;
@@ -133,7 +133,7 @@ st.markdown("""
             margin-left: -300px;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.38; /* Opacité renforcée pour un rendu bien plus visible */
+            opacity: 0.38;
             perspective: 1000px;
         }
 
@@ -151,8 +151,8 @@ st.markdown("""
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid #f0b90b; /* Trait plus épais et couleur or vive */
-            box-shadow: 0 0 15px rgba(240, 185, 11, 0.6); /* Lueur accrue */
+            border: 2px solid #f0b90b;
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.6);
         }
 
         @keyframes spinGlobeBg {
@@ -187,14 +187,13 @@ st.markdown("""
 
 
 # ==========================================
-# PAGE 1 : WELCOME SCREEN
+# PAGE 1 : WELCOME SCREEN (ACCUEIL)
 # ==========================================
 if st.session_state.page == "welcome":
 
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
 
-    # --- BARRE SUPÉRIEURE ---
     st.markdown(f"""
         <div class="hud-header">
             <div style="display:flex; align-items:center; gap:16px;">
@@ -220,7 +219,6 @@ if st.session_state.page == "welcome":
     col_left, col_right = st.columns([1.4, 1.0], gap="medium")
 
     with col_left:
-        # Cadre Horloges RESSERRÉ EN LARGEUR
         clock_html = """
         <!DOCTYPE html>
         <html>
@@ -277,7 +275,6 @@ if st.session_state.page == "welcome":
         </head>
         <body>
             <div class="hud-clock-card">
-                <!-- PARIS -->
                 <div class="clock-row">
                     <div class="city-badge">🇫🇷 PARIS</div>
                     <div>
@@ -288,7 +285,6 @@ if st.session_state.page == "welcome":
 
                 <div class="horizontal-divider"></div>
 
-                <!-- NEW YORK -->
                 <div class="clock-row">
                     <div class="city-badge">🇺🇸 NEW YORK</div>
                     <div>
@@ -315,7 +311,6 @@ if st.session_state.page == "welcome":
         """
         components.html(clock_html, height=125, scrolling=False)
 
-        # Espacement ajusté pour éviter tout dépassement vertical
         st.markdown("<div style='height: 190px;'></div>", unsafe_allow_html=True)
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
@@ -323,7 +318,6 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # Cadre Marchés CFD
         market_quotes_html = """
         <!DOCTYPE html>
         <html>
@@ -404,7 +398,6 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 1. NASDAQ 100 -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
@@ -420,7 +413,6 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 2. US DOLLAR INDEX (DXY) -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
@@ -436,7 +428,6 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 3. EUR / USD -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
@@ -452,7 +443,6 @@ if st.session_state.page == "welcome":
                     </div>
                 </div>
 
-                <!-- 4. GOLD -->
                 <div class="quote-row">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
@@ -476,20 +466,214 @@ if st.session_state.page == "welcome":
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE
+# PAGE 2 : HUB / WORKSPACE (PAGE SECONDAIRE)
 # ==========================================
 elif st.session_state.page == "hub":
 
-    if st.button("← RETOUR AU MENU PRINCIPAL"):
-        st.session_state.page = "welcome"
-        st.rerun()
+    # BARRE SUPÉRIEURE PAGE 2 AVEC LOGO, MS, PARIS, NEW YORK & BOUTON RETOUR
+    page2_header_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&family=Inter:wght@600;700&display=swap');
+            
+            * {{ box-sizing: border-box; }}
+            body {{ margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }}
 
-    st.markdown("<br>", unsafe_allow_html=True)
+            .hud-header-p2 {{
+                background: rgba(13, 17, 23, 0.94);
+                border: 1.5px solid rgba(240, 185, 11, 0.45);
+                border-radius: 12px;
+                padding: 10px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
+            }}
+
+            .left-brand {{
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }}
+
+            .logo-icon {{
+                width: 36px;
+                height: 36px;
+                background: linear-gradient(135deg, #f0b90b, #d4a007);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 900;
+                color: #000;
+                font-size: 1.1rem;
+                box-shadow: 0 0 12px rgba(240,185,11,0.6);
+            }}
+
+            .title-p2 {{
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 900;
+                color: #ffffff;
+                font-size: 1.1rem;
+                letter-spacing: 2px;
+                line-height: 1.1;
+            }}
+
+            .hud-gold {{ color: #f0b90b; }}
+
+            .subtitle-p2 {{
+                font-size: 0.65rem;
+                color: #848e9c;
+                letter-spacing: 1px;
+            }}
+
+            /* BLOC HORLOGES PARALLELES DANS LA BARRE */
+            .header-clocks-container {{
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(240, 185, 11, 0.25);
+                padding: 6px 18px;
+                border-radius: 8px;
+            }}
+
+            .clock-item {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }}
+
+            .clock-flag {{
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.7rem;
+                font-weight: 900;
+                color: #f0b90b;
+            }}
+
+            .clock-time {{
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: #ffffff;
+                letter-spacing: 1px;
+                text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            }}
+
+            .clock-divider {{
+                width: 1px;
+                height: 22px;
+                background: rgba(240, 185, 11, 0.3);
+            }}
+
+            /* BLOC STATUT ET SERVEUR */
+            .right-status {{
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }}
+
+            .status-badge {{
+                background: rgba(255,255,255,0.05);
+                padding: 5px 12px;
+                border-radius: 6px;
+                border: 1px solid rgba(255,255,255,0.1);
+                font-size: 0.78rem;
+                color: #848e9c;
+            }}
+
+            .online-badge {{
+                background: rgba(14,203,129,0.12);
+                padding: 5px 12px;
+                border-radius: 20px;
+                border: 1px solid rgba(14,203,129,0.3);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 700;
+                color: #0ecb81;
+                font-size: 0.78rem;
+            }}
+
+            .online-dot {{
+                width: 7px;
+                height: 7px;
+                background: #0ecb81;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #0ecb81;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="hud-header-p2">
+            <!-- TITRE ET BRANDING -->
+            <div class="left-brand">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <div class="title-p2">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="subtitle-p2">QUANTITATIVE WORKSPACE</div>
+                </div>
+            </div>
+
+            <!-- HORLOGES PARIS & NEW YORK EN TEMPS RÉEL DANS LA BARRE -->
+            <div class="header-clocks-container">
+                <div class="clock-item">
+                    <span class="clock-flag">🇫🇷 PARIS</span>
+                    <span class="clock-time" id="p2-paris">--:--:--</span>
+                </div>
+
+                <div class="clock-divider"></div>
+
+                <div class="clock-item">
+                    <span class="clock-flag">🇺🇸 NEW YORK</span>
+                    <span class="clock-time" id="p2-ny">--:--:--</span>
+                </div>
+            </div>
+
+            <!-- SERVEUR MS & STATUT ONLINE -->
+            <div class="right-status">
+                <div class="status-badge">
+                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
+                </div>
+                <div class="online-badge">
+                    <span class="online-dot"></span>
+                    ONLINE
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function updateP2Clocks() {{
+                const now = new Date();
+                const parisStr = now.toLocaleTimeString('fr-FR', {{ timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+                const nyStr = now.toLocaleTimeString('en-US', {{ timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+                
+                document.getElementById('p2-paris').innerText = parisStr;
+                document.getElementById('p2-ny').innerText = nyStr;
+            }}
+            setInterval(updateP2Clocks, 1000);
+            updateP2Clocks();
+        </script>
+    </body>
+    </html>
+    """
+    components.html(page2_header_html, height=65, scrolling=False)
+
+    col_btn, _ = st.columns([1.5, 8.5])
+    with col_btn:
+        if st.button("← RETOUR À L'ACCUEIL"):
+            st.session_state.page = "welcome"
+            st.rerun()
+
     st.markdown("""
-        <div class="hud-card">
-            <div class="hud-title">🚀 PAGE 2 : HUB DU TERMINAL</div>
-            <p style="color:#848e9c; margin-top:8px;">
-                Interface prête pour l'intégration des modules de trading de la Page 2.
+        <div class="hud-card" style="margin-top:10px;">
+            <div class="hud-title" style="font-size:1.1rem; color:#f0b90b;">
+                🚀 WORKSPACE EN DÉVELOPPEMENT
+            </div>
+            <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
+                La barre supérieure est désormais configurée. Indiquez les modules (charts, IA vocale, scanners, carnet d'ordres...) à intégrer dans cette Page 2.
             </p>
         </div>
     """, unsafe_allow_html=True)
