@@ -155,7 +155,7 @@ if st.session_state.page == "welcome":
     """, unsafe_allow_html=True)
 
     # --- DISPOSITION EN 2 COLONNES ---
-    col_left, col_right = st.columns([2, 1.2], gap="medium")
+    col_left, col_right = st.columns([1.8, 1.4], gap="medium")
 
     with col_left:
         st.markdown("""
@@ -179,7 +179,7 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # Cadre Jaune englobant des mini-cartes individuelles pour chaque actif
+        # Cadre Jaune englobant les 4 cartes (NASDAQ, DXY, EUR/USD, GOLD) avec courbes
         market_cards_html = """
         <!DOCTYPE html>
         <html>
@@ -201,9 +201,6 @@ if st.session_state.page == "welcome":
                     border-radius: 14px;
                     padding: 12px;
                     box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
                 }
 
                 .container-header {
@@ -211,6 +208,7 @@ if st.session_state.page == "welcome":
                     justify-content: space-between;
                     align-items: center;
                     padding-bottom: 8px;
+                    margin-bottom: 10px;
                     border-bottom: 1px solid rgba(240, 185, 11, 0.25);
                 }
 
@@ -251,14 +249,18 @@ if st.session_state.page == "welcome":
                     100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
                 }
 
-                /* Carte individuelle d'actif */
+                .grid-2x2 {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+
                 .asset-card {
-                    background: rgba(22, 27, 34, 0.8);
+                    background: rgba(22, 27, 34, 0.85);
                     border: 1px solid rgba(240, 185, 11, 0.2);
                     border-radius: 10px;
+                    height: 135px;
                     overflow: hidden;
-                    height: 110px;
-                    transition: border-color 0.2s ease;
                 }
 
                 .asset-card:hover {
@@ -275,78 +277,96 @@ if st.session_state.page == "welcome":
                     </div>
                     <div class="pulse-tag">
                         <span class="pulse-dot"></span>
-                        <span>LIVE</span>
+                        <span>LIVE STREAM</span>
                     </div>
                 </div>
 
-                <!-- CASE 1 : NASDAQ -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                          "symbol": "FOREXCOM:NSXUSD",
-                          "width": "100%",
-                          "height": "110",
-                          "locale": "fr",
-                          "dateRange": "1D",
-                          "colorTheme": "dark",
-                          "isTransparent": true,
-                          "autosize": false,
-                          "largeChartUrl": "",
-                          "chartOnly": false
-                        }
-                        </script>
+                <div class="grid-2x2">
+                    <!-- 1. NASDAQ -->
+                    <div class="asset-card">
+                        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+                            <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                            {
+                              "symbol": "FOREXCOM:NSXUSD",
+                              "width": "100%",
+                              "height": "100%",
+                              "locale": "fr",
+                              "dateRange": "1D",
+                              "colorTheme": "dark",
+                              "isTransparent": true,
+                              "autosize": true,
+                              "largeChartUrl": ""
+                            }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- 2. DXY (INDEX DOLLAR) -->
+                    <div class="asset-card">
+                        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+                            <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                            {
+                              "symbol": "CAPITALCOM:DXY",
+                              "width": "100%",
+                              "height": "100%",
+                              "locale": "fr",
+                              "dateRange": "1D",
+                              "colorTheme": "dark",
+                              "isTransparent": true,
+                              "autosize": true,
+                              "largeChartUrl": ""
+                            }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- 3. EUR / USD -->
+                    <div class="asset-card">
+                        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+                            <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                            {
+                              "symbol": "FX:EURUSD",
+                              "width": "100%",
+                              "height": "100%",
+                              "locale": "fr",
+                              "dateRange": "1D",
+                              "colorTheme": "dark",
+                              "isTransparent": true,
+                              "autosize": true,
+                              "largeChartUrl": ""
+                            }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- 4. GOLD (OR) -->
+                    <div class="asset-card">
+                        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+                            <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                            {
+                              "symbol": "OANDA:XAUUSD",
+                              "width": "100%",
+                              "height": "100%",
+                              "locale": "fr",
+                              "dateRange": "1D",
+                              "colorTheme": "dark",
+                              "isTransparent": true,
+                              "autosize": true,
+                              "largeChartUrl": ""
+                            }
+                            </script>
+                        </div>
                     </div>
                 </div>
-
-                <!-- CASE 2 : OR (GOLD) -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                          "symbol": "OANDA:XAUUSD",
-                          "width": "100%",
-                          "height": "110",
-                          "locale": "fr",
-                          "dateRange": "1D",
-                          "colorTheme": "dark",
-                          "isTransparent": true,
-                          "autosize": false,
-                          "largeChartUrl": "",
-                          "chartOnly": false
-                        }
-                        </script>
-                    </div>
-                </div>
-
-                <!-- CASE 3 : BITCOIN -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                          "symbol": "BINANCE:BTCUSDT",
-                          "width": "100%",
-                          "height": "110",
-                          "locale": "fr",
-                          "dateRange": "1D",
-                          "colorTheme": "dark",
-                          "isTransparent": true,
-                          "autosize": false,
-                          "largeChartUrl": "",
-                          "chartOnly": false
-                        }
-                        </script>
-                    </div>
-                </div>
-
             </div>
         </body>
         </html>
         """
-        components.html(market_cards_html, height=450, scrolling=False)
+        components.html(market_cards_html, height=365, scrolling=False)
 
 
 # ==========================================
