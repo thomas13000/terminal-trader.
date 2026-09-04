@@ -1,9 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# ==========================================
-# CONFIGURATION DE LA PAGE
-# ==========================================
 st.set_page_config(
     page_title="Terminal Trader Pro",
     page_icon="⚡",
@@ -14,11 +11,7 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
-# ==========================================
-# PAGE 1 : ACCUEIL DESIGN ORIGINAL + WIDGETS
-# ==========================================
 if st.session_state.page == "welcome":
-    
     st.markdown("""
         <style>
         header {visibility: hidden;}
@@ -88,7 +81,6 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # Affichage du terminal avec le globe en fond et les panneaux d'origine
     components.html("""
     <!DOCTYPE html>
     <html>
@@ -144,16 +136,16 @@ if st.session_state.page == "welcome":
         <div class="clock-time" id="ny" style="margin-bottom: 0;">--:--:--</div>
     </div>
 
-    <!-- Panneau Droit : Widgets TradingView Officiels -->
+    <!-- Panneau Droit : Widgets TradingView CFD Officiels -->
     <div class="panel" style="padding: 10px 15px;">
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {"symbol": "FX_IDC:EURUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+          {"symbol": "OANDA:EURUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {"symbol": "NASDAQ:IXIC", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+          {"symbol": "CAPITALCOM:US100", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
@@ -163,7 +155,7 @@ if st.session_state.page == "welcome":
         </div>
         <div class="tradingview-widget-container">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {"symbol": "COMEX:GC1!", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+          {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
     </div>
@@ -214,9 +206,6 @@ if st.session_state.page == "welcome":
         st.session_state.page = "hub"
         st.rerun()
 
-# ==========================================
-# PAGE 2 : HUB (WORKSPACE)
-# ==========================================
 elif st.session_state.page == "hub":
     st.success("✅ AUTHENTIFICATION RÉUSSIE.")
     if st.button("← DISCONNECT"):
