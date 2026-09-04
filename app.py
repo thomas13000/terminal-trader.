@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import yfinance as yf
+import pandas as pd
 
 # ==========================================
 # CONFIGURATION DE LA PAGE
@@ -19,46 +20,42 @@ if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 # ==========================================
-# RÉCUPÉRATION DES VRAIS PRIX VIA PYTHON (YFINANCE)
+# RÉCUPÉRATION ROBUSTE DES PRIX VIA YFINANCE
 # ==========================================
-@st.cache_data(ttl=15) # Met en cache pour 15 secondes pour éviter de surcharger l'API
+@st.cache_data(ttl=30)
 def get_market_data():
+    symbols = ["EURUSD=X", "NQ=F", "DX-Y.NYB", "GC=F"]
     data = {
         "eur": {"price": 1.0850, "pct": 0.0, "up": True},
         "nas": {"price": 19000.0, "pct": 0.0, "up": True},
         "dxy": {"price": 104.0, "pct": 0.0, "up": True},
         "gold": {"price": 2350.0, "pct": 0.0, "up": True}
     }
-    try:
-        tickers = yf.Tickers("EURUSD=X NQ=F DX-Y.NYB GC=F")
-        
-        # EUR/USD
-        eur_info = tickers.tickers["EURUSD=X"].fast_info
-        data["eur"]["price"] = eur_info.last_price
-        data["eur"]["pct"] = ((eur_info.last_price - eur_info.previous_close) / eur_info.previous_close) * 100
-        data["eur"]["up"] = data["eur"]["pct'] >= 0
-
-        # NASDAQ
-        nas_info = tickers.tickers["NQ=F"].fast_info
-        data["nas"]["price"] = nas_info.last_price
-        data["nas"]["pct"] = ((nas_info.last_price - nas_info.previous_close) / nas_info.previous_close) * 100
-        data["nas"]["up"] = data["nas"]["pct"] >= 0
-
-        # DXY
-        dxy_info = tickers.tickers["DX-Y.NYB"].fast_info
-        data["dxy"]["price"] = dxy_info.last_price
-        data["dxy"]["pct"] = ((dxy_info.last_price - dxy_info.previous_close) / dxy_info.previous_close) * 100
-        data["dxy"]["up"] = data["dxy"]["pct"] >= 0
-
-        # GOLD
-        gold_info = tickers.tickers["GC=F"].fast_info
-        data["gold"]["price"] = gold_info.last_price
-        data["gold"]["pct"] = ((gold_info.last_price - gold_info.previous_close) / gold_info.previous_close) * 100
-        data["gold"]["up"] = data["gold"]["pct"] >= 0
-
-    except Exception as e:
-        print("Erreur yfinance:", e)
     
+    try:
+        # Téléchargement des 5 derniers jours pour s'assurer d'avoir les données de clôture et du jour
+        df = yf.download(symbols, period="5d", progress=False)['Close']
+        
+        mapping = {
+            "EURUSD=X": "eur",
+            "NQ=F": "nas",
+            "DX-Y.NYB": "dxy",
+            "GC=F": "gold"
+        }
+        
+        for sym, key in mapping.items():
+            if sym in df.columns:
+                series = df[sym].dropna()
+                if len(series) >= 2:
+                    current = series.iloc[-1]
+                    previous = series.iloc[-2]
+                    pct = ((current - previous) / previous) * 100
+                    data[key]["price"] = float(current)
+                    data[key]["pct"] = float(pct)
+                    data[key]["up"] = pct >= 0
+    except Exception as e:
+        print("Erreur de récupération:", e)
+        
     return data
 
 market = get_market_data()
@@ -68,7 +65,6 @@ market = get_market_data()
 # ==========================================
 if st.session_state.page == "welcome":
     
-    # --- 1. CSS GLOBAL : SUPPRESSION DU SCROLL ET DES MARGES ---
     st.markdown("""
         <style>
         header {visibility: hidden;}
@@ -138,7 +134,6 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 2. LE DASHBOARD AVEC DONNÉES INJECTÉES PAR PYTHON ---
     html_dashboard = f"""
     <!DOCTYPE html>
     <html>
@@ -228,7 +223,6 @@ if st.session_state.page == "welcome":
     
     components.html(html_dashboard, height=620)
 
-    # --- 3. BOUTON CONNECT SYSTEM ---
     st.markdown("""
         <style>
         div.stButton {
