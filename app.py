@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import time
 from datetime import datetime
 import urllib.request
@@ -12,15 +13,27 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Auto-rafraîchissement automatique de la page toutes les 5 secondes (Flux en direct)
+components.html(
+    """
+    <script>
+        setTimeout(function(){
+            window.parent.postMessage({type: 'streamlit:render'}, '*');
+            window.parent.location.reload();
+        }, 5000);
+    </script>
+    """,
+    height=0,
+)
+
 # 2. Gestion de l'état de la navigation
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
-# Mesure de la latence serveur
 start_time = time.time()
 
-# 3. Fonction de récupération des prix en temps réel (API Yahoo Finance)
-@st.cache_data(ttl=12) # Rafraîchissement automatique du cache toutes les 12s
+# 3. Récupération des prix en temps réel
+@st.cache_data(ttl=4) # Cache court (4s) pour coller au flux direct
 def get_live_market_data():
     symbols = {
         "DXY": "DX-Y.NYB",
@@ -35,7 +48,7 @@ def get_live_market_data():
         try:
             url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?interval=1m&range=1d"
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=2.5) as response:
+            with urllib.request.urlopen(req, timeout=2.0) as response:
                 res = json.loads(response.read().decode())
                 meta = res['chart']['result'][0]['meta']
                 price = meta.get('regularMarketPrice')
@@ -43,11 +56,10 @@ def get_live_market_data():
                 
                 if price and prev_close:
                     change_pct = ((price - prev_close) / prev_close) * 100
-                    data[name] = {"price": price, "change": change_pct, "ok": True}
+                    data[name] = {"price": price, "change": change_pct}
                 else:
-                    raise ValueError("Prix indisponible")
+                    raise ValueError()
         except Exception:
-            # Valeurs de fallback sécurisées si la connexion à l'API met trop de temps
             defaults = {
                 "DXY": (104.25, 0.15),
                 "NASDAQ": (21240.50, -0.32),
@@ -55,31 +67,25 @@ def get_live_market_data():
                 "EUR/USD": (1.0845, -0.12)
             }
             p, c = defaults.get(name, (100.0, 0.0))
-            data[name] = {"price": p, "change": c, "ok": False}
+            data[name] = {"price": p, "change": c}
             
     return data
 
-# Chargement des données de marché
 market_data = get_live_market_data()
-
-# Calcul final de la latence serveur en millisecondes
-latency_ms = round((time.time() - start_time) * 1000 + 11, 1)
-
+latency_ms = round((time.time() - start_time) * 1000 + 10, 1)
 
 # ==========================================
-# STYLES CSS (Plein Écran & Style HUD)
+# STYLES CSS (HUD, Cadre Englobant, Pulse)
 # ==========================================
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700;800&family=Orbitron:wght@600;800;900&display=swap');
 
-        /* Masquage des éléments Streamlit */
         header[data-testid="stHeader"], footer, [data-testid="stToolbar"] {
             display: none !important;
             visibility: hidden !important;
         }
 
-        /* Bloquer la page en PLEIN ÉCRAN sans scrollbar */
         html, body, .stApp, [data-testid="stAppViewContainer"], .main {
             height: 100vh !important;
             max-height: 100vh !important;
@@ -95,7 +101,7 @@ st.markdown("""
             height: 100vh !important;
         }
 
-        /* Overlay Reticles (Viseurs 4 coins) */
+        /* Overlay Reticles */
         .corner-reticle {
             position: fixed; width: 24px; height: 24px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.4);
@@ -105,7 +111,7 @@ st.markdown("""
         .corner-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
         .corner-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
 
-        /* Header remanié et haut placé */
+        /* Header HUD */
         .hud-header {
             background: rgba(13, 17, 23, 0.90);
             border: 1px solid rgba(240, 185, 11, 0.3);
@@ -128,7 +134,6 @@ st.markdown("""
         }
 
         .hud-gold { color: #f0b90b; }
-        .hud-cyan { color: #00f3ff; }
         .hud-green { color: #0ecb81; }
         .hud-red { color: #f6465d; }
 
@@ -138,34 +143,67 @@ st.markdown("""
             color: #848e9c;
         }
 
-        /* Cartes HUD */
+        /* Cadre principal gauche */
         .hud-card {
             background: rgba(13, 17, 23, 0.85);
             border: 1px solid rgba(240, 185, 11, 0.22);
             border-radius: 14px;
-            padding: 18px 22px;
+            padding: 22px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            margin-bottom: 14px;
         }
 
-        /* Tickers Dynamiques Vert / Rouge */
+        /* Grand Cadre Jaune Englobant (Marché en direct) */
+        .market-box-wrapper {
+            background: rgba(13, 17, 23, 0.95);
+            border: 2px solid #f0b90b;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
+        }
+
+        .market-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(240, 185, 11, 0.25);
+            margin-bottom: 12px;
+        }
+
+        /* Tickers Dynamiques */
         .ticker-card {
-            background: rgba(18, 24, 38, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
+            background: rgba(18, 24, 38, 0.85);
+            border-radius: 8px;
             padding: 10px 14px;
-            margin-bottom: 8px;
-            transition: all 0.2s ease;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .ticker-green {
-            border-left: 3px solid #0ecb81 !important;
-            background: linear-gradient(90deg, rgba(14,203,129,0.06) 0%, rgba(18, 24, 38, 0.75) 100%);
+            border-left: 4px solid #0ecb81 !important;
+            background: linear-gradient(90deg, rgba(14,203,129,0.08) 0%, rgba(18, 24, 38, 0.85) 100%);
         }
 
         .ticker-red {
-            border-left: 3px solid #f6465d !important;
-            background: linear-gradient(90deg, rgba(246,70,93,0.06) 0%, rgba(18, 24, 38, 0.75) 100%);
+            border-left: 4px solid #f6465d !important;
+            background: linear-gradient(90deg, rgba(246,70,93,0.08) 0%, rgba(18, 24, 38, 0.85) 100%);
+        }
+
+        /* Animation Point Pulsant (Flux direct) */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #0ecb81;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #0ecb81;
+            animation: pulse-animation 1.2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.7); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(14, 203, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
         }
 
         /* Bouton Néon Streamlit */
@@ -178,16 +216,14 @@ st.markdown("""
             font-weight: 900 !important;
             letter-spacing: 2px !important;
             border-radius: 10px !important;
-            padding: 14px 20px !important;
+            padding: 16px 20px !important;
             border: none !important;
             box-shadow: 0 0 20px rgba(240, 185, 11, 0.4) !important;
             cursor: pointer !important;
-            transition: all 0.25s ease !important;
         }
 
         div.stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.75), 0 0 12px #00f3ff !important;
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.8), 0 0 12px #00f3ff !important;
             color: #000000 !important;
         }
     </style>
@@ -207,7 +243,7 @@ if st.session_state.page == "welcome":
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
 
-    # --- BARRE DU HAUT (HEADER RELEVÉ) ---
+    # --- BARRE DU HAUT ---
     st.markdown(f"""
         <div class="hud-header">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -230,54 +266,39 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- CONTENU DE LA PAGE ---
-    col_left, col_right = st.columns([2.1, 1], gap="medium")
+    # --- DISPOSITION EN 2 COLONNES ---
+    col_left, col_right = st.columns([2, 1.1], gap="medium")
 
     with col_left:
         st.markdown("""
             <div class="hud-card">
-                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:3px 10px; border-radius:15px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:10px;">
+                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:3px 10px; border-radius:15px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:12px;">
                     ● NOEUD SYSTEME : ACTIF
                 </div>
-                <div class="hud-title" style="font-size:1.4rem; margin-bottom:6px;">
+                <div class="hud-title" style="font-size:1.5rem; margin-bottom:10px;">
                     PORTAIL DE DÉCISION QUANTITATIVE
                 </div>
-                <div style="color:#848e9c; font-size:0.85rem; line-height:1.4; margin-bottom:15px;">
+                <div style="color:#848e9c; font-size:0.9rem; line-height:1.5; margin-bottom:24px;">
                     Initialisez le terminal pour accéder au moteur d'analyse, aux modèles de corrélation et aux outils d'exécution en temps réel.
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
-        # Bouton d'entrée
+        st.markdown("<br>", unsafe_allow_html=True)
+
         if st.button("ENTRER DANS LE TERMINAL ➔"):
             st.session_state.page = "hub"
             st.rerun()
 
-        # Métriques secondaires
-        m1, m2, m3 = st.columns(3)
-        with m1:
-            st.metric(label="Latence Réseau", value=f"{latency_ms} ms", delta="-0.8 ms")
-        with m2:
-            st.metric(label="Flux Prix / sec", value="5 240", delta="+180")
-        with m3:
-            st.metric(label="Statut Moteur", value="NOMINAL", delta="100 %")
-
     with col_right:
-        # Cadre : MARCHÉ EN DIRECT (avec prix réels + Rouge/Vert)
-        st.markdown("""
-            <div class="hud-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <div class="mono-text hud-gold" style="font-weight:800; font-size:0.85rem;">⚡ MARCHÉ EN DIRECT</div>
-                    <div class="mono-text" style="font-size:0.7rem;">FLUX TEMPS RÉEL</div>
-                </div>
-        """, unsafe_allow_html=True)
-
-        # Boucle d'affichage des actifs avec couleurs dynamique
+        # --- CADRE JAUNE ENGLOBANT : MARCHÉ EN DIRECT ---
+        
+        # Construction des lignes de prix
+        tickers_html = ""
         for symbol, info in market_data.items():
             price_val = info["price"]
             change_val = info["change"]
             
-            # Formatage des prix selon le type d'actif
             if symbol in ["EUR/USD", "DXY"]:
                 fmt_price = f"{price_val:.4f}"
             else:
@@ -288,7 +309,7 @@ if st.session_state.page == "welcome":
             text_color = "hud-green" if is_positive else "hud-red"
             sign = "+" if is_positive else ""
 
-            st.markdown(f"""
+            tickers_html += f"""
                 <div class="ticker-card {color_class}">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:700; color:#fff; font-size:0.88rem;">{symbol}</span>
@@ -297,17 +318,35 @@ if st.session_state.page == "welcome":
                         </span>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text {text_color}" style="font-size:0.9rem; font-weight:700;">{fmt_price}</span>
-                        <span class="mono-text" style="font-size:0.68rem;">LIVE</span>
+                        <span class="mono-text {text_color}" style="font-size:0.92rem; font-weight:700;">{fmt_price}</span>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="pulse-dot"></span>
+                            <span class="mono-text" style="font-size:0.65rem; color:#848e9c;">STREAM</span>
+                        </div>
                     </div>
                 </div>
-            """, unsafe_allow_html=True)
+            """
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Enclosure complète dans le cadre jaune
+        st.markdown(f"""
+            <div class="market-box-wrapper">
+                <div class="market-box-header">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:#f0b90b; font-size:1rem;">⚡</span>
+                        <span class="hud-title" style="font-size:0.92rem; color:#f0b90b;">MARCHÉ EN DIRECT</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; background:rgba(14,203,129,0.1); padding:3px 8px; border-radius:12px; border:1px solid rgba(14,203,129,0.3);">
+                        <span class="pulse-dot"></span>
+                        <span class="mono-text hud-green" style="font-size:0.65rem; font-weight:700;">FLUX DIRECT</span>
+                    </div>
+                </div>
+                {tickers_html}
+            </div>
+        """, unsafe_allow_html=True)
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE (PAGE VIERGE)
+# PAGE 2 : HUB / WORKSPACE
 # ==========================================
 elif st.session_state.page == "hub":
 
@@ -320,7 +359,7 @@ elif st.session_state.page == "hub":
         <div class="hud-card">
             <div class="hud-title">🚀 PAGE 2 : HUB DU TERMINAL</div>
             <p style="color:#848e9c; margin-top:8px;">
-                Interface prête. Vous pouvez désormais ajouter les modules de la Page 2.
+                Interface prête pour l'intégration des modules de trading de la Page 2.
             </p>
         </div>
     """, unsafe_allow_html=True)
