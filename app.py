@@ -25,7 +25,7 @@ if st.session_state.page == "welcome":
         
         .block-container { 
             padding-top: 0.5rem !important; 
-            padding-bottom: 0.5rem !important;
+            padding-bottom: 0.2rem !important;
             padding-left: 2rem !important;
             padding-right: 2rem !important;
             max-width: 100% !important;
@@ -40,7 +40,7 @@ if st.session_state.page == "welcome":
             background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             border: 1px solid #30363d;
             border-bottom: 1px solid rgba(240, 185, 11, 0.6);
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
@@ -102,7 +102,7 @@ if st.session_state.page == "welcome":
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
-          height: 680px; 
+          height: 600px; 
           padding: 0 20px; 
           overflow: hidden;
           position: relative;
@@ -114,10 +114,10 @@ if st.session_state.page == "welcome":
           pointer-events: none;
       }
       .globe { 
-          width: 520px; height: 520px; border-radius: 50%; 
+          width: 580px; height: 580px; border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
-          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
+          box-shadow: inset -55px -55px 90px rgba(0,0,0,0.95), 0 0 55px rgba(240, 185, 11, 0.15); 
           animation: spin 45s linear infinite;
           opacity: 0.85;
       }
@@ -181,14 +181,15 @@ if st.session_state.page == "welcome":
     </script>
     </body>
     </html>
-    """, height=680)
+    """, height=600)
 
     st.markdown("""
         <style>
         div.stButton {
             display: flex;
             justify-content: center;
-            margin-bottom: 5px; 
+            margin-top: -15px; 
+            margin-bottom: 2px;
             flex-shrink: 0;
         }
         div.stButton > button {
@@ -196,10 +197,10 @@ if st.session_state.page == "welcome":
             color: #848e9c !important; 
             border: 1px solid rgba(240, 185, 11, 0.3) !important; 
             font-family: 'Courier New', Courier, monospace !important;
-            font-size: 0.95rem !important;
+            font-size: 0.9rem !important;
             font-weight: 600 !important;
             letter-spacing: 4px !important; 
-            padding: 10px 40px !important;
+            padding: 8px 35px !important;
             border-radius: 2px !important; 
             transition: all 0.4s ease !important;
             text-transform: uppercase !important;
