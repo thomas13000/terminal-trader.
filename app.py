@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Gestion stricte de la navigation (State & Query Params)
+# 2. Gestion de la navigation
 if "page" in st.query_params:
     st.session_state.page = st.query_params["page"]
 
@@ -26,7 +26,7 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS GLOBAUX (HUD & GLOBE 3D)
+# STYLES CSS GLOBAUX & CORRECTION HARMONISATION
 # ==========================================
 st.markdown("""
     <style>
@@ -36,7 +36,7 @@ st.markdown("""
             visibility: hidden !important;
         }
 
-        /* VERROUILLAGE ET AJUSTEMENT DU DÉFILEMENT */
+        /* Lock plein écran */
         html, body, .stApp, [data-testid="stAppViewContainer"], .main, [data-testid="stVerticalBlock"] {
             height: 100vh !important;
             max-height: 100vh !important;
@@ -48,7 +48,7 @@ st.markdown("""
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Conteneur principal fixe */
+        /* Zone de contenu principale */
         .main .block-container {
             padding: 10px 20px 0px 20px !important;
             max-width: 100vw !important;
@@ -59,7 +59,7 @@ st.markdown("""
             z-index: 2;
         }
 
-        /* Viseurs aux 4 coins */
+        /* Viseurs HUD aux angles */
         .corner-reticle {
             position: fixed; width: 22px; height: 22px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.6);
@@ -69,7 +69,7 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD */
+        /* Header HUD global (Page d'accueil) */
         .hud-header {
             background: rgba(13, 17, 23, 0.94);
             border: 1.5px solid rgba(240, 185, 11, 0.45);
@@ -107,29 +107,44 @@ st.markdown("""
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Boutons Néon Streamlit */
+        /* Égalisation des colonnes Streamlit */
+        div[data-testid="stColumn"] {
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        /* Boutons néon calibrés pour le HUD */
+        div.stButton {
+            width: 100% !important;
+        }
+
         div.stButton > button {
             width: 100% !important;
+            height: 52px !important;
+            min-height: 52px !important;
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 1rem !important;
+            font-size: 0.85rem !important;
             font-weight: 900 !important;
-            letter-spacing: 2px !important;
-            border-radius: 8px !important;
-            padding: 12px 20px !important;
-            border: none !important;
-            box-shadow: 0 0 20px rgba(240, 185, 11, 0.5) !important;
+            letter-spacing: 1.5px !important;
+            border-radius: 10px !important;
+            padding: 0px 12px !important;
+            border: 1.5px solid rgba(240, 185, 11, 0.6) !important;
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.3) !important;
             cursor: pointer !important;
             transition: all 0.2s ease-in-out !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
+            box-shadow: 0 0 25px rgba(240, 185, 11, 0.8), 0 0 10px #00f3ff !important;
             color: #000000 !important;
         }
 
-        /* GLOBE 3D EN FOND DE PAGE */
+        /* GLOBE 3D ARRIÈRE-PLAN */
         .bg-globe-wrapper {
             position: fixed;
             top: 50%;
@@ -185,7 +200,7 @@ st.markdown("""
         </div>
     </div>
 
-    <!-- Viseurs HUD -->
+    <!-- Viseurs de bordure -->
     <div class="corner-reticle corner-tl"></div>
     <div class="corner-reticle corner-tr"></div>
     <div class="corner-reticle corner-bl"></div>
@@ -321,7 +336,7 @@ if st.session_state.page == "welcome":
         st.markdown("""
             <div class="hud-card" style="margin-top: 15px; margin-bottom: 20px;">
                 <div style="font-family:'Orbitron'; font-size:0.95rem; font-weight:800; color:#f0b90b; letter-spacing:1px;">
-                    ⚡ ACCÈS SYSTEME AUTORISÉ
+                    ⚡ ACCÈS SYSTÈME AUTORISÉ
                 </div>
                 <div style="color:#848e9c; font-size:0.8rem; margin-top:6px; line-height:1.4;">
                     Bienvenue dans l'interface quantitative. Flux de marché synchronisés en temps réel via passerelle ultra-basse latence.
@@ -329,7 +344,7 @@ if st.session_state.page == "welcome":
             </div>
         """, unsafe_allow_html=True)
 
-        if st.button("ENTRER DANS LE TERMINAL ➔"):
+        if st.button("ENTRER DANS LE TERMINAL ➔", key="btn_enter"):
             go_to_page("hub")
             st.rerun()
 
@@ -477,19 +492,18 @@ if st.session_state.page == "welcome":
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE
+# PAGE 2 : HUB / WORKSPACE (BARRE CORRIGÉE)
 # ==========================================
 elif st.session_state.page == "hub":
 
-    # Barre supérieure native + HTML synchronisé pour retour Accueil fluide
     col_hdr_left, col_hdr_mid, col_hdr_right = st.columns([1.2, 1.2, 1.0], gap="small")
 
     with col_hdr_left:
         st.markdown(f"""
-            <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:6px 14px; display:flex; align-items:center; gap:10px; height:52px;">
-                <div style="width:30px; height:30px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.95rem;">⚡</div>
+            <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:0 14px; display:flex; align-items:center; gap:10px; height:52px; box-sizing:border-box;">
+                <div style="width:30px; height:30px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.95rem; box-shadow:0 0 8px rgba(240,185,11,0.5);">⚡</div>
                 <div>
-                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; font-size:0.95rem; line-height:1;">TERMINAL TRADER <span style="color:#f0b90b;">PRO</span></div>
+                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; font-size:0.9rem; line-height:1.1;">TERMINAL TRADER <span style="color:#f0b90b;">PRO</span></div>
                     <div style="font-family:'JetBrains Mono'; font-size:0.58rem; color:#848e9c; letter-spacing:0.8px;">QUANTITATIVE WORKSPACE</div>
                 </div>
             </div>
@@ -502,12 +516,13 @@ elif st.session_state.page == "hub":
         <head>
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&display=swap');
+                * { box-sizing: border-box; }
                 body { margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }
                 .clocks-box {
                     background: rgba(13, 17, 23, 0.94);
                     border: 1.5px solid rgba(240, 185, 11, 0.45);
                     border-radius: 10px;
-                    padding: 6px 14px;
+                    padding: 0 14px;
                     display: flex;
                     align-items: center;
                     justify-content: space-around;
@@ -515,7 +530,7 @@ elif st.session_state.page == "hub":
                 }
                 .clock-item { display: flex; align-items: center; gap: 6px; }
                 .flag { font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: #f0b90b; }
-                .val { font-size: 0.95rem; font-weight: 800; color: #ffffff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
+                .val { font-size: 0.85rem; font-weight: 800; color: #ffffff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
                 .divider { width: 1px; height: 18px; background: rgba(240, 185, 11, 0.3); }
             </style>
         </head>
@@ -546,25 +561,25 @@ elif st.session_state.page == "hub":
         components.html(header_clocks_html, height=52, scrolling=False)
 
     with col_hdr_right:
-        col_btn1, col_btn2 = st.columns([1.1, 1.0])
-        with col_btn1:
+        col_ms, col_back = st.columns([1, 1], gap="small")
+        with col_ms:
             st.markdown(f"""
-                <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:6px 10px; height:52px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-size:0.7rem; color:#848e9c;">
-                    MS : <span style="color:#ffffff; font-weight:700; margin-left:4px;">{latency_ms} ms</span>
+                <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; height:52px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-size:0.75rem; color:#848e9c; box-sizing:border-box;">
+                    MS : <span style="color:#ffffff; font-weight:700; margin-left:5px;">{latency_ms} ms</span>
                 </div>
             """, unsafe_allow_html=True)
-        with col_btn2:
-            if st.button("← ACCUEIL"):
+        with col_back:
+            if st.button("← ACCUEIL", key="btn_back_home"):
                 go_to_page("welcome")
                 st.rerun()
 
     st.markdown("""
-        <div class="hud-card" style="margin-top:10px;">
+        <div class="hud-card" style="margin-top:12px;">
             <div class="hud-title" style="font-size:1.1rem; color:#f0b90b;">
                 🚀 WORKSPACE QUANTITATIF ACTIF
             </div>
             <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
-                Le bouton <strong>← ACCUEIL</strong> permet de revenir à l'écran titre instantanément.
+                La barre supérieure est alignée. Tu peux rajouter tes modules et widgets d'analyse ci-dessous.
             </p>
         </div>
     """, unsafe_allow_html=True)
