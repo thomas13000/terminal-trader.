@@ -1,3 +1,4 @@
+import feedparser
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -5,17 +6,40 @@ st.set_page_config(
     page_title="Terminal Trader Pro",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
 if "page" not in st.session_state:
-    st.session_state.page = "welcome"
+  st.session_state.page = "welcome"
+
+
+# Fonction pour récupérer les actus en direct de Yahoo Finance
+def fetch_yahoo_news():
+  try:
+    # Flux RSS officiel Yahoo Finance Actualités & Marchés
+    feed = feedparser.parse("https://finance.yahoo.com/news/rssindex")
+    news_items = []
+    for entry in feed.entries[
+        :5
+    ]:  # Récupère les 5 dernières dépêches en direct
+      title = entry.title
+      # Nettoyage rapide du titre si besoin
+      news_items.append(title)
+    return (
+        news_items
+        if news_items
+        else ["Aucune actualité récente disponible."]
+    )
+  except Exception as e:
+    return [f"Erreur de flux en direct : {str(e)}"]
+
 
 # ==========================================
 # PAGE 1 : WELCOME / AUTH SCREEN
 # ==========================================
 if st.session_state.page == "welcome":
-    st.markdown("""
+  st.markdown(
+      """
         <style>
         html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
             overflow: hidden !important;
@@ -92,9 +116,12 @@ if st.session_state.page == "welcome":
                 <div class="online-box"><div class="online-dot"></div>SYS. ONLINE</div>
             </div>
         </div>
-    """, unsafe_allow_html=True)
+    """,
+      unsafe_allow_html=True,
+  )
 
-    components.html("""
+  components.html(
+      """
     <!DOCTYPE html>
     <html>
     <head>
@@ -182,9 +209,12 @@ if st.session_state.page == "welcome":
     </script>
     </body>
     </html>
-    """, height=600)
+    """,
+      height=600,
+  )
 
-    st.markdown("""
+  st.markdown(
+      """
         <style>
         div.stButton {
             display: flex;
@@ -214,17 +244,20 @@ if st.session_state.page == "welcome":
             box-shadow: 0 0 15px rgba(240, 185, 11, 0.15) !important; 
         }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+      unsafe_allow_html=True,
+  )
 
-    if st.button("CONNECT SYSTEM"):
-        st.session_state.page = "hub"
-        st.rerun()
+  if st.button("CONNECT SYSTEM"):
+    st.session_state.page = "hub"
+    st.rerun()
 
 # ==========================================
 # PAGE 2 : EXECUTIVE HUB DASHBOARD
 # ==========================================
 elif st.session_state.page == "hub":
-    st.markdown("""
+  st.markdown(
+      """
         <style>
         html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
             overflow: hidden !important;
@@ -249,10 +282,13 @@ elif st.session_state.page == "hub":
             overflow: hidden !important;
         }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+      unsafe_allow_html=True,
+  )
 
-    # En-tête Global du Hub
-    components.html("""
+  # En-tête Global du Hub
+  components.html(
+      """
     <!DOCTYPE html>
     <html>
     <head>
@@ -306,10 +342,12 @@ elif st.session_state.page == "hub":
         </script>
     </body>
     </html>
-    """, height=45)
+    """,
+      height=45,
+  )
 
-    # Ruban Ticker Tape NASDAQ
-    ticker_tape_html = """
+  # Ruban Ticker Tape NASDAQ
+  ticker_tape_html = """
     <!DOCTYPE html>
     <html>
     <head><style>body { margin: 0; background: transparent; overflow: hidden; }</style></head>
@@ -339,15 +377,15 @@ elif st.session_state.page == "hub":
     </body>
     </html>
     """
-    components.html(ticker_tape_html, height=48)
+  components.html(ticker_tape_html, height=48)
 
-    col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
+  col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
-    # ==========================
-    # COLONNE GAUCHE : HEATMAP NASDAQ ENCADRÉE
-    # ==========================
-    with col_left:
-        heatmap_panel_html = """
+  # ==========================
+  # COLONNE GAUCHE : HEATMAP NASDAQ
+  # ==========================
+  with col_left:
+    heatmap_panel_html = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -421,13 +459,13 @@ elif st.session_state.page == "hub":
         </body>
         </html>
         """
-        components.html(heatmap_panel_html, height=480)
+    components.html(heatmap_panel_html, height=480)
 
-    # ==========================
-    # COLONNE CENTRE : CALENDRIER ÉCO (ROUGES) + MACRO
-    # ==========================
-    with col_center:
-        calendar_panel_html = """
+  # ==========================
+  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE LIVE
+  # ==========================
+  with col_center:
+    calendar_panel_html = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -491,15 +529,29 @@ elif st.session_state.page == "hub":
         </body>
         </html>
         """
-        components.html(calendar_panel_html, height=230)
+    components.html(calendar_panel_html, height=230)
 
-        macro_panel_html = """
+    # Récupération dynamique des flux Yahoo Finance
+    live_news = fetch_yahoo_news()
+
+    # Construction dynamique des blocs HTML pour les actus Yahoo Finance
+    news_html_blocks = ""
+    colors = ["#f0b90b", "#58a6ff", "#3fb950", "#d29922", "#bc8cff"]
+    for i, title in enumerate(live_news):
+      color = colors[i % len(colors)]
+      news_html_blocks += f"""
+        <div style="margin-bottom: 6px; border-left: 2px solid {color}; padding-left: 6px;">
+            <span style="color: {color}; font-weight: bold;">[YAHOO LIVE]</span> : {title}
+        </div>
+        """
+
+    macro_panel_html = f"""
         <!DOCTYPE html>
         <html>
         <head>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
-          body {
+          body {{
               margin: 0;
               background: rgba(13, 17, 23, 0.95);
               border: 1px solid rgba(240, 185, 11, 0.25);
@@ -512,8 +564,8 @@ elif st.session_state.page == "hub":
               font-family: 'Share Tech Mono', monospace;
               overflow: hidden;
               box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-          }
-          .panel-heading {
+          }}
+          .panel-heading {{
               font-family: 'Orbitron', sans-serif;
               font-size: 0.75rem;
               color: #f0b90b;
@@ -526,12 +578,12 @@ elif st.session_state.page == "hub":
               justify-content: space-between;
               align-items: center;
               flex-shrink: 0;
-          }
-          .live-dot-green {
+          }}
+          .live-dot-green {{
               width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
               box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
-          }
-          .macro-content {
+          }}
+          .macro-content {{
               background: #161b22;
               border: 1px solid #30363d;
               border-radius: 3px;
@@ -540,35 +592,27 @@ elif st.session_state.page == "hub":
               overflow-y: auto;
               font-size: 0.75rem;
               color: #8b949e;
-          }
+          }}
         </style>
         </head>
         <body>
         <div class="panel-heading">
-            <span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span>
-            <span><div class="live-dot-green"></div>FLUX</span>
+            <span>🌐 FLUX LIVE YAHOO FINANCE</span>
+            <span><div class="live-dot-green"></div>EN DIRECT</span>
         </div>
         <div class="macro-content">
-            <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
-                <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
-            </div>
-            <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
-                <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
-            </div>
-            <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
-                <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
-            </div>
+            {news_html_blocks}
         </div>
         </body>
         </html>
         """
-        components.html(macro_panel_html, height=230)
+    components.html(macro_panel_html, height=230)
 
-    # ==========================
-    # COLONNE DROITE : WATCHLIST ENCADRÉE
-    # ==========================
-    with col_right:
-        watchlist_panel_html = """
+  # ==========================
+  # COLONNE DROITE : WATCHLIST
+  # ==========================
+  with col_right:
+    watchlist_panel_html = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -641,12 +685,13 @@ elif st.session_state.page == "hub":
         </body>
         </html>
         """
-        components.html(watchlist_panel_html, height=480)
+    components.html(watchlist_panel_html, height=480)
 
-    # Bouton de déconnexion en bas
-    col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
-    with col_btn2:
-        st.markdown("""
+  # Bouton de déconnexion en bas
+  col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
+  with col_btn2:
+    st.markdown(
+        """
             <style>
             div.stButton > button {
                 background-color: transparent !important;
@@ -664,7 +709,9 @@ elif st.session_state.page == "hub":
                 color: #f0b90b !important; 
             }
             </style>
-        """, unsafe_allow_html=True)
-        if st.button("← DÉCONNEXION"):
-            st.session_state.page = "welcome"
-            st.rerun()
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button("← DÉCONNEXION"):
+      st.session_state.page = "welcome"
+      st.rerun()
