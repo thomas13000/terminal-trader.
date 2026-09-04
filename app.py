@@ -14,7 +14,6 @@ if "page" not in st.session_state:
 if st.session_state.page == "welcome":
     st.markdown("""
         <style>
-        /* Verrouillage total du scroll pour un affichage plein écran */
         html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
             overflow: hidden !important;
             height: 100vh !important;
@@ -26,13 +25,14 @@ if st.session_state.page == "welcome":
         
         .block-container { 
             padding-top: 0.5rem !important; 
-            padding-bottom: 0rem !important;
-            padding-left: 1.5rem !important;
-            padding-right: 1.5rem !important;
+            padding-bottom: 0.5rem !important;
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
             max-width: 100% !important;
             height: 100vh !important;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             overflow: hidden !important;
         }
         
@@ -40,12 +40,11 @@ if st.session_state.page == "welcome":
             background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             border: 1px solid #30363d;
             border-bottom: 1px solid rgba(240, 185, 11, 0.6);
-            padding: 8px 20px;
+            padding: 10px 20px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px;
             flex-shrink: 0;
         }
         .top-title {
@@ -103,8 +102,8 @@ if st.session_state.page == "welcome":
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
-          height: 500px; 
-          padding: 0 5px; 
+          height: 680px; 
+          padding: 0 20px; 
           overflow: hidden;
           position: relative;
       }
@@ -115,10 +114,10 @@ if st.session_state.page == "welcome":
           pointer-events: none;
       }
       .globe { 
-          width: 680px; height: 680px; border-radius: 50%; 
+          width: 520px; height: 520px; border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
-          box-shadow: inset -60px -60px 100px rgba(0,0,0,0.95), 0 0 60px rgba(240, 185, 11, 0.15); 
+          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
           animation: spin 45s linear infinite;
           opacity: 0.85;
       }
@@ -127,13 +126,13 @@ if st.session_state.page == "welcome":
       .panel { 
           background: rgba(13, 17, 23, 0.85); 
           border: 1px solid rgba(240, 185, 11, 0.25); 
-          border-radius: 4px; padding: 15px; 
+          border-radius: 4px; padding: 20px; 
           box-shadow: 0 0 25px rgba(0,0,0,0.9); 
           backdrop-filter: blur(6px); width: 280px; z-index: 10;
       }
       
-      .clock-title { font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 0.8rem; margin-bottom: 2px; }
-      .clock-time { font-size: 2.1rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 12px; font-weight: bold;}
+      .clock-title { font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 0.85rem; margin-bottom: 2px; }
+      .clock-time { font-size: 2.3rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 15px; font-weight: bold;}
     </style>
     </head>
     <body>
@@ -149,7 +148,7 @@ if st.session_state.page == "welcome":
     </div>
 
     <!-- Panneau Droit : Widgets TradingView CFD Officiels -->
-    <div class="panel" style="padding: 8px 12px;">
+    <div class="panel" style="padding: 10px 15px;">
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
           {"symbol": "OANDA:EURUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
@@ -182,14 +181,14 @@ if st.session_state.page == "welcome":
     </script>
     </body>
     </html>
-    """, height=520)
+    """, height=680)
 
     st.markdown("""
         <style>
         div.stButton {
             display: flex;
             justify-content: center;
-            margin-top: 5px; 
+            margin-bottom: 5px; 
             flex-shrink: 0;
         }
         div.stButton > button {
@@ -197,10 +196,10 @@ if st.session_state.page == "welcome":
             color: #848e9c !important; 
             border: 1px solid rgba(240, 185, 11, 0.3) !important; 
             font-family: 'Courier New', Courier, monospace !important;
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
             font-weight: 600 !important;
             letter-spacing: 4px !important; 
-            padding: 10px 35px !important;
+            padding: 10px 40px !important;
             border-radius: 2px !important; 
             transition: all 0.4s ease !important;
             text-transform: uppercase !important;
