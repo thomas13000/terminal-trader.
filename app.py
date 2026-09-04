@@ -249,41 +249,6 @@ elif st.session_state.page == "hub":
             overflow: hidden !important;
         }
 
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-left: 3px solid #f85149;
-            padding: 4px 0;
-            margin-top: 4px;
-            margin-bottom: 6px;
-            flex-shrink: 0;
-            border-radius: 2px;
-            display: flex;
-            align-items: center;
-        }
-        .ticker-badge {
-            background: #f85149;
-            color: white;
-            font-weight: bold;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            margin-left: 8px;
-            margin-right: 12px;
-            border-radius: 2px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .ticker-text {
-            color: #f0f6fc;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .terminal-panel {
             background: rgba(13, 17, 23, 0.95);
             border: 1px solid rgba(240, 185, 11, 0.25);
@@ -371,12 +336,118 @@ elif st.session_state.page == "hub":
     </html>
     """, height=45)
 
-    st.markdown("""
+    red_news = [
+        {"time": "14:30", "text": "USD — Indice des prix à la consommation (CPI) m/m"},
+        {"time": "16:00", "text": "USD — Indice de confiance des consommateurs CB"},
+        {"time": "18:00", "text": "EUR — Discours de la Présidente de la BCE Christine Lagarde"},
+        {"time": "20:00", "text": "USD — Publications des Minutes du FOMC"},
+        {"time": "22:30", "text": "USD — Stocks de pétrole brut API"}
+    ]
+
+    news_html_items = "".join([
+        f'<span class="news-item"><span class="news-time">[{item["time"]}]</span> <span class="news-badge">ROUGE</span> {item["text"]}</span><span class="news-separator">&bull;&bull;&bull;</span>' 
+        for item in red_news
+    ])
+
+    infinite_news_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+      
+      body {{
+          margin: 0;
+          background: #161b22;
+          overflow: hidden;
+          font-family: 'Share Tech Mono', monospace;
+          display: flex;
+          align-items: center;
+          height: 32px;
+          border: 1px solid #30363d;
+          border-left: 3px solid #f85149;
+          border-radius: 2px;
+      }}
+      
+      .ticker-wrap {{
+          width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+      }}
+      
+      .ticker-label {{
+          background: #f85149;
+          color: white;
+          font-weight: bold;
+          padding: 3px 8px;
+          font-size: 0.7rem;
+          margin-right: 12px;
+          border-radius: 2px;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          z-index: 10;
+          flex-shrink: 0;
+      }}
+
+      .ticker-move {{
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 35s linear infinite;
+      }}
+
+      .ticker-move:hover {{
+          animation-play-state: paused;
+      }}
+
+      .news-item {{
+          color: #f0f6fc;
+          font-size: 0.8rem;
+          letter-spacing: 0.5px;
+          margin-right: 30px;
+      }}
+
+      .news-time {{
+          color: #58a6ff;
+          font-weight: bold;
+      }}
+
+      .news-badge {{
+          color: #f85149;
+          font-weight: bold;
+          font-size: 0.7rem;
+          border: 1px solid #f85149;
+          padding: 1px 3px;
+          border-radius: 2px;
+          margin-right: 5px;
+      }}
+
+      .news-separator {{
+          color: #30363d;
+          margin-right: 30px;
+      }}
+
+      @keyframes marquee {{
+          0% {{ transform: translateX(0%); }}
+          100% {{ transform: translateX(-50%); }}
+      }}
+    </style>
+    </head>
+    <body>
         <div class="ticker-wrap">
-            <span class="ticker-badge">URGENT</span>
-            <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
+            <div class="ticker-label">ACTUS ROUGES</div>
+            <div class="ticker-move">
+                {news_html_items}
+                {news_html_items}
+            </div>
         </div>
-    """, unsafe_allow_html=True)
+    </body>
+    </html>
+    """
+
+    components.html(infinite_news_html, height=38)
 
     col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
