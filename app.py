@@ -92,18 +92,18 @@ if st.session_state.page == "welcome":
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
-          height: 600px; 
+          height: 740px; 
           padding: 0 10px; 
           overflow: hidden;
           position: relative;
       }
       
       .globe-container { 
-          position: absolute; top: 50%; left: 50%;
+          position: absolute; top: 53%; left: 50%;
           transform: translate(-50%, -50%); z-index: 1; 
       }
       .globe { 
-          width: 620px; height: 620px; border-radius: 50%; 
+          width: 700px; height: 700px; border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
           box-shadow: inset -60px -60px 100px rgba(0,0,0,0.95), 0 0 60px rgba(240, 185, 11, 0.15); 
@@ -113,7 +113,7 @@ if st.session_state.page == "welcome":
       @keyframes spin { from { background-position: 0 0; } to { background-position: 1500px 0; } }
 
       .panel { 
-          background: rgba(13, 17, 23, 0.8); 
+          background: rgba(13, 17, 23, 0.85); 
           border: 1px solid rgba(240, 185, 11, 0.25); 
           border-radius: 4px; padding: 20px; 
           box-shadow: 0 0 25px rgba(0,0,0,0.9); 
@@ -170,7 +170,7 @@ if st.session_state.page == "welcome":
     </script>
     </body>
     </html>
-    """, height=620)
+    """, height=740)
 
     st.markdown("""
         <style>
@@ -204,7 +204,7 @@ if st.session_state.page == "welcome":
 
     if st.button("CONNECT SYSTEM"):
         st.session_state.page = "hub"
-        st.rerun()
+        st.rer()
 
 elif st.session_state.page == "hub":
     st.success("✅ AUTHENTIFICATION RÉUSSIE.")
