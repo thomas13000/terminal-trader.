@@ -248,38 +248,10 @@ elif st.session_state.page == "hub":
             flex-direction: column;
             overflow: hidden !important;
         }
-
-        .terminal-panel {
-            background: rgba(13, 17, 23, 0.95);
-            border: 1px solid rgba(240, 185, 11, 0.25);
-            border-radius: 4px;
-            padding: 8px;
-            height: 74vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
-        .panel-heading {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: #f0b90b;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 4px;
-            margin-bottom: 6px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .live-dot-green {
-            width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
-            box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
-        }
         </style>
     """, unsafe_allow_html=True)
 
+    # En-tête Global du Hub
     components.html("""
     <!DOCTYPE html>
     <html>
@@ -336,6 +308,7 @@ elif st.session_state.page == "hub":
     </html>
     """, height=45)
 
+    # Ruban Ticker Tape NASDAQ
     ticker_tape_html = """
     <!DOCTYPE html>
     <html>
@@ -370,79 +343,212 @@ elif st.session_state.page == "hub":
 
     col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
+    # ==========================
+    # COLONNE GAUCHE : HEATMAP NASDAQ ENCADRÉE
+    # ==========================
     with col_left:
-        st.markdown("""
-        <div class="terminal-panel">
-            <div class="panel-heading"><span>⚡ NASDAQ 100 HEATMAP</span><span><div class="live-dot-green"></div>LIVE</span></div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Heatmap TradingView encapsulée proprement dans components.html
-        heatmap_html = """
+        heatmap_panel_html = """
         <!DOCTYPE html>
         <html>
-        <head><style>body { margin: 0; background: #0d1117; overflow: hidden; }</style></head>
-        <body>
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-          <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
-          {
-            "exchanges": [],
-            "dataSource": "NASDAQ100",
-            "grouping": "sector",
-            "blockSize": "market_cap_basic",
-            "blockColor": "change",
-            "locale": "fr",
-            "symbolUrl": "",
-            "colorTheme": "dark",
-            "hasTopBar": false,
-            "isTransparent": true,
-            "width": "100%",
-            "height": "100%"
+        <head>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+          body {
+              margin: 0;
+              background: rgba(13, 17, 23, 0.95);
+              border: 1px solid rgba(240, 185, 11, 0.25);
+              border-radius: 4px;
+              padding: 8px;
+              box-sizing: border-box;
+              height: 470px;
+              display: flex;
+              flex-direction: column;
+              font-family: 'Share Tech Mono', monospace;
+              overflow: hidden;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.6);
           }
-          </script>
+          .panel-heading {
+              font-family: 'Orbitron', sans-serif;
+              font-size: 0.75rem;
+              color: #f0b90b;
+              border-bottom: 1px solid #30363d;
+              padding-bottom: 4px;
+              margin-bottom: 6px;
+              letter-spacing: 1px;
+              text-transform: uppercase;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-shrink: 0;
+          }
+          .live-dot-green {
+              width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
+              box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
+          }
+          .widget-wrapper {
+              flex-grow: 1;
+              position: relative;
+              overflow: hidden;
+          }
+        </style>
+        </head>
+        <body>
+        <div class="panel-heading">
+            <span>⚡ NASDAQ 100 HEATMAP</span>
+            <span><div class="live-dot-green"></div>LIVE</span>
         </div>
-        </body>
-        </html>
-        """
-        components.html(heatmap_html, height=470)
-
-    with col_center:
-        st.markdown("""
-        <div class="terminal-panel" style="gap: 6px;">
-            <div style="height: 49%; display: flex; flex-direction: column;">
-                <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE (ACTUS ROUGES)</span><span>TRADINGVIEW</span></div>
+        <div class="widget-wrapper">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+              <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+              {
+                "exchanges": [],
+                "dataSource": "NASDAQ100",
+                "grouping": "sector",
+                "blockSize": "market_cap_basic",
+                "blockColor": "change",
+                "locale": "fr",
+                "symbolUrl": "",
+                "colorTheme": "dark",
+                "hasTopBar": false,
+                "isTransparent": true,
+                "width": "100%",
+                "height": "100%"
+              }
+              </script>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-        
-        # Calendrier Économique TradingView filtré sur les actus "haut impact" (importance = 1)
-        calendar_html = """
+        </body>
+        </html>
+        """
+        components.html(heatmap_panel_html, height=480)
+
+    # ==========================
+    # COLONNE CENTRE : CALENDRIER ÉCO (ROUGES) + MACRO
+    # ==========================
+    with col_center:
+        calendar_panel_html = """
         <!DOCTYPE html>
         <html>
-        <head><style>body { margin: 0; background: transparent; overflow: hidden; }</style></head>
-        <body>
-        <div class="tradingview-widget-container">
-          <div class="tradingview-widget-container__widget"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-          {
-            "colorTheme": "dark",
-            "isTransparent": true,
-            "width": "100%",
-            "height": "210",
-            "locale": "fr",
-            "importanceFilter": "1"
+        <head>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+          body {
+              margin: 0;
+              background: rgba(13, 17, 23, 0.95);
+              border: 1px solid rgba(240, 185, 11, 0.25);
+              border-radius: 4px;
+              padding: 8px;
+              box-sizing: border-box;
+              height: 225px;
+              display: flex;
+              flex-direction: column;
+              font-family: 'Share Tech Mono', monospace;
+              overflow: hidden;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.6);
           }
-          </script>
+          .panel-heading {
+              font-family: 'Orbitron', sans-serif;
+              font-size: 0.75rem;
+              color: #f0b90b;
+              border-bottom: 1px solid #30363d;
+              padding-bottom: 4px;
+              margin-bottom: 6px;
+              letter-spacing: 1px;
+              text-transform: uppercase;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-shrink: 0;
+          }
+          .widget-wrapper {
+              flex-grow: 1;
+              position: relative;
+              overflow: hidden;
+          }
+        </style>
+        </head>
+        <body>
+        <div class="panel-heading">
+            <span>📅 CALENDRIER ÉCONOMIQUE (ACTUS ROUGES)</span>
+            <span>TRADINGVIEW</span>
+        </div>
+        <div class="widget-wrapper">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+              <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+              {
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "width": "100%",
+                "height": "100%",
+                "locale": "fr",
+                "importanceFilter": "1"
+              }
+              </script>
+            </div>
         </div>
         </body>
         </html>
         """
-        components.html(calendar_html, height=215)
+        components.html(calendar_panel_html, height=230)
 
-        st.markdown("""
-        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; height: 180px; overflow-y: auto; font-size: 0.75rem; color: #8b949e; margin-top: 8px;">
-            <div class="panel-heading" style="margin-bottom: 6px;"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX</span></div>
+        macro_panel_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+          body {
+              margin: 0;
+              background: rgba(13, 17, 23, 0.95);
+              border: 1px solid rgba(240, 185, 11, 0.25);
+              border-radius: 4px;
+              padding: 8px;
+              box-sizing: border-box;
+              height: 225px;
+              display: flex;
+              flex-direction: column;
+              font-family: 'Share Tech Mono', monospace;
+              overflow: hidden;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+          }
+          .panel-heading {
+              font-family: 'Orbitron', sans-serif;
+              font-size: 0.75rem;
+              color: #f0b90b;
+              border-bottom: 1px solid #30363d;
+              padding-bottom: 4px;
+              margin-bottom: 6px;
+              letter-spacing: 1px;
+              text-transform: uppercase;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-shrink: 0;
+          }
+          .live-dot-green {
+              width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
+              box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
+          }
+          .macro-content {
+              background: #161b22;
+              border: 1px solid #30363d;
+              border-radius: 3px;
+              padding: 8px;
+              flex-grow: 1;
+              overflow-y: auto;
+              font-size: 0.75rem;
+              color: #8b949e;
+          }
+        </style>
+        </head>
+        <body>
+        <div class="panel-heading">
+            <span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span>
+            <span><div class="live-dot-green"></div>FLUX</span>
+        </div>
+        <div class="macro-content">
             <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
                 <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
             </div>
@@ -453,37 +559,91 @@ elif st.session_state.page == "hub":
                 <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        </body>
+        </html>
+        """
+        components.html(macro_panel_html, height=230)
 
+    # ==========================
+    # COLONNE DROITE : WATCHLIST ENCADRÉE
+    # ==========================
     with col_right:
-        st.markdown("""
-        <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <div class="panel-heading"><span>🔥 TOP PERF & WATCHLIST</span><span>INSTRUMENTS</span></div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
+        watchlist_panel_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+          body {
+              margin: 0;
+              background: rgba(13, 17, 23, 0.95);
+              border: 1px solid rgba(240, 185, 11, 0.25);
+              border-radius: 4px;
+              padding: 8px;
+              box-sizing: border-box;
+              height: 470px;
+              display: flex;
+              flex-direction: column;
+              font-family: 'Share Tech Mono', monospace;
+              overflow: hidden;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+          }
+          .panel-heading {
+              font-family: 'Orbitron', sans-serif;
+              font-size: 0.75rem;
+              color: #f0b90b;
+              border-bottom: 1px solid #30363d;
+              padding-bottom: 4px;
+              margin-bottom: 6px;
+              letter-spacing: 1px;
+              text-transform: uppercase;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-shrink: 0;
+          }
+          .quotes-container {
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              overflow: hidden;
+          }
+        </style>
+        </head>
+        <body>
+        <div class="panel-heading">
+            <span>🔥 TOP PERF & WATCHLIST</span>
+            <span>INSTRUMENTS</span>
+        </div>
+        <div class="quotes-container">
+            <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+              {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+              </script>
+            </div>
+            <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+              {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+              </script>
+            </div>
+            <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+              {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+              </script>
+            </div>
+            <div class="tradingview-widget-container">
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+              {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+              </script>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        </body>
+        </html>
+        """
+        components.html(watchlist_panel_html, height=480)
 
+    # Bouton de déconnexion en bas
     col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
     with col_btn2:
         st.markdown("""
