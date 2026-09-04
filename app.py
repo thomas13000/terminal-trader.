@@ -1,15 +1,13 @@
 import base64
 import datetime
-import json
+import glob
 import os
-import time
-import numpy as np
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
 # ---------------------------------------------------------
-# 1. CONFIGURATION STREAMLIT & THEME SOMBRE PRO TRADER
+# 1. CONFIGURATION STREAMLIT & THEME DARK PRO
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="TERMINAL TRADER PRO",
@@ -18,18 +16,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS pour look Pro Trader / Binance Dark
 st.markdown(
     """
 <style>
-    /* Style global */
     .stApp {
         background-color: #0b0e11;
         color: #eaecef;
         font-family: 'Inter', sans-serif;
     }
-    
-    /* En-tête personnalisé */
     .header-container {
         display: flex;
         align-items: center;
@@ -66,52 +60,24 @@ st.markdown(
         50% { transform: scale(1.2); opacity: 1; }
         100% { transform: scale(0.95); opacity: 0.8; }
     }
-    
-    /* Cartes & Métriques */
     .metric-card {
         background: #1e2329;
         border: 1px solid #2b313a;
         border-radius: 10px;
         padding: 16px;
         text-align: center;
-        transition: border-color 0.2s;
     }
-    .metric-card:hover {
-        border-color: #f0b90b;
-    }
-    .metric-title { font-size: 0.75rem; color: #848e9c; font-weight: 600; text-transform: uppercase; }
-    .metric-val { font-size: 1.5rem; font-weight: 800; color: #ffffff; margin: 4px 0; }
+    .metric-title { font-size: 0.75rem; color: #848e9c; font-weight: 600; }
+    .metric-val { font-size: 1.4rem; font-weight: 800; color: #ffffff; margin: 4px 0; }
     .val-up { color: #0ecb81; font-weight: 700; font-size: 0.85rem; }
     .val-down { color: #f6465d; font-weight: 700; font-size: 0.85rem; }
-
-    /* Onglets surmesure */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #181a20;
-        padding: 8px;
-        border-radius: 10px;
-        border: 1px solid #2b313a;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 42px;
-        white-space: pre-wrap;
-        background-color: transparent;
-        border-radius: 6px;
-        color: #848e9c;
-        font-weight: 700;
-        font-size: 0.85rem;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #f0b90b !important;
-        color: #0b0e11 !important;
-    }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------
-# 2. INITIALISATION SESSION STATE (Alertes & Portfolio)
+# 2. INITIALISATION DES ALERTES & DU PORTEFEUILLE
 # ---------------------------------------------------------
 if "alerts" not in st.session_state:
     st.session_state.alerts = [
@@ -138,20 +104,39 @@ if "capital" not in st.session_state:
 
 
 # ---------------------------------------------------------
-# 3. CHARGEMENT AUDIO BASE64 (acdc.mp3)
+# 3. CHARGEMENT AUDIO SPÉCIFIQUE (AC DC Back In Black (1).mp3)
 # ---------------------------------------------------------
-def load_audio_b64(filename="acdc.mp3"):
-    if os.path.exists(filename):
-        with open(filename, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    return ""
+def load_audio_b64():
+    # 1. Nom exact spécifié
+    target_filename = "AC DC Back In Black (1).mp3"
+
+    # Liste de recherche intelligente
+    candidates = [target_filename, "acdc.mp3"]
+
+    # Ajout de tous les fichiers .mp3 trouvés dans le répertoire
+    mp3_in_dir = glob.glob("*.mp3")
+    for mp3 in mp3_in_dir:
+        if mp3 not in candidates:
+            candidates.append(mp3)
+
+    for filename in candidates:
+        if os.path.exists(filename):
+            try:
+                with open(filename, "rb") as f:
+                    data = f.read()
+                    if len(data) > 0:
+                        return base64.b64encode(data).decode(), filename
+            except Exception:
+                continue
+
+    return "", None
 
 
-audio_b64 = load_audio_b64("acdc.mp3")
+audio_b64, audio_filename_found = load_audio_b64()
 
 
 # ---------------------------------------------------------
-# 4. OVERLAY 3D WELCOME SCREEN + GESTION AUDIO (10s -> 35s)
+# 4. ÉCRAN D'ACCUEIL 3D + DÉCLENCHEMENT AUDIO (10s -> 35s)
 # ---------------------------------------------------------
 def render_welcome_screen(audio_data):
     audio_src = f"data:audio/mp3;base64,{audio_data}" if audio_data else ""
@@ -224,7 +209,7 @@ def render_welcome_screen(audio_data):
             <div class="clock-main" id="clock-display">00:00:00</div>
             <div class="clock-sub">HEURE DE PARIS — MARKET STANDBY</div>
             <button class="btn-enter" onclick="enterTerminalWithAudio()">ENTRER DANS LE TERMINAL ➔</button>
-            <div class="hint-bottom">Cliquez n'importe où pour activer la session</div>
+            <div class="hint-bottom">Cliquez n'importe où pour lancer la session & l'audio</div>
         </div>
 
         <div class="side-panel" onclick="event.stopPropagation()">
@@ -253,7 +238,7 @@ def render_welcome_screen(audio_data):
     <script>
         const audioDataUri = "{audio_src}";
         
-        // --- TIMING MUSICAL (10s -> 35s) ---
+        // --- EXTRAIT MUSICAL (Début 10s -> Fin 35s avec Fondu) ---
         const startSecond = 10;
         const endSecond   = 35;
         const fadeSec     = 2.5;
@@ -290,10 +275,10 @@ def render_welcome_screen(audio_data):
                                     }}
                                 }}, intervalMs);
                             }}, fadeStartMs);
-                        }}).catch(e => console.log("Audio notice:", e));
+                        }}).catch(e => console.log("Info lecture audio:", e));
                     }}
                 }} catch(e) {{
-                    console.log("Audio init error:", e);
+                    console.log("Erreur audio:", e);
                 }}
             }}
             dismissOverlay();
@@ -409,19 +394,27 @@ def render_welcome_screen(audio_data):
     components.html(html_code, height=0)
 
 
-# Lancement de l'écran 3D au démarrage
+# Exécution de l'écran 3D + Audio
 render_welcome_screen(audio_b64)
 
+
 # ---------------------------------------------------------
-# 5. BARRE LATÉRALE (SIDEBAR) & SELECTION D'ACTIFS
+# 5. BARRE LATÉRALE (SIDEBAR) & INFORMATIONS AUDIO
 # ---------------------------------------------------------
 with st.sidebar:
     st.image(
         "https://img.icons8.com/fluency/96/000000/financial-analytics.png",
-        width=60,
+        width=50,
     )
     st.title("⚡ TERMINAL PRO")
     st.caption("Version 4.2 — Institutional Grade")
+
+    st.markdown("---")
+    st.subheader("🎵 Statut Audio")
+    if audio_filename_found:
+        st.success(f"Fichier détecté :\n`{audio_filename_found}`")
+    else:
+        st.error("⚠️ Fichier audio non trouvé")
 
     st.markdown("---")
     selected_asset = st.selectbox(
@@ -444,20 +437,13 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.subheader("💼 Portefeuille Simulé")
     st.session_state.capital = st.number_input(
-        "Capital Total ($)", value=st.session_state.capital, step=1000.0
+        "Capital ($)", value=st.session_state.capital, step=1000.0
     )
 
-    st.markdown("---")
-    audio_enabled = st.toggle("🔔 Notifications Sonores", value=True)
-    if audio_b64:
-        st.success("🎵 Musique AC/DC prête")
-    else:
-        st.warning("⚠️ acdc.mp3 non détecté")
 
 # ---------------------------------------------------------
-# 6. EN-TÊTE PRINCIPAL DE LA PAGE D'ACCUEIL
+# 6. EN-TÊTE PRINCIPAL
 # ---------------------------------------------------------
 now_str = datetime.datetime.now().strftime("%H:%M:%S")
 
@@ -468,17 +454,17 @@ st.markdown(
         <h2 style="margin:0; font-weight:900; color:#fff; font-family:'JetBrains Mono';">
             ⚡ TERMINAL TRADER PRO — <span style="color:#f0b90b;">{selected_asset.split(':')[-1]}</span>
         </h2>
-        <span style="color:#848e9c; font-size:0.8rem;">Session En Cours | Heure Serveur : {now_str} UTC</span>
+        <span style="color:#848e9c; font-size:0.8rem;">Market Feed Active | Serveur : {now_str} UTC</span>
     </div>
     <div class="status-badge">
-        <span class="pulse-dot"></span> SERVEUR FLUX EN DIRECT
+        <span class="pulse-dot"></span> DIRECT MARCHE
     </div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# Banner Metrics
+# Métriques rapides
 m1, m2, m3, m4, m5 = st.columns(5)
 with m1:
     st.markdown(
@@ -509,26 +495,23 @@ with m5:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 7. ONGLETS DE NAVIGATION DU TERMINAL
+# 7. ONGLETS ET FONCTIONNALITÉS
 # ---------------------------------------------------------
 tab_chart, tab_alerts, tab_news, tab_calc = st.tabs(
     [
-        "📈 Graphique & Carnet d'Ordres",
-        "🚨 Système d'Alertes",
-        "📰 Actualités & Macro",
+        "📈 Graphique & Orderbook",
+        "🚨 Gestionnaire d'Alertes",
+        "📰 Flux d'Actualités",
         "🧮 Calculateur de Risque",
     ]
 )
 
-# =========================================================
-# TAB 1 : GRAPHIQUE TRADINGVIEW & CARNET D'ORDRES
-# =========================================================
+# TAB 1 : Graphique & Carnet
 with tab_chart:
     col_chart, col_side = st.columns([3, 1])
 
     with col_chart:
-        st.subheader("📊 Chart Interactif temps réel")
-
+        st.subheader("📊 Chart TradingView Interactif")
         tv_chart_code = f"""
         <div class="tradingview-widget-container" style="height:580px;width:100%;">
           <div id="tradingview_advanced" style="height:580px;width:100%;"></div>
@@ -554,8 +537,7 @@ with tab_chart:
         components.html(tv_chart_code, height=590)
 
     with col_side:
-        st.subheader("⚡ Analyse Technique")
-
+        st.subheader("⚡ Jauge Technique")
         tv_tech_code = f"""
         <div class="tradingview-widget-container">
           <div class="tradingview-widget-container__widget"></div>
@@ -576,185 +558,108 @@ with tab_chart:
         """
         components.html(tv_tech_code, height=290)
 
-        st.subheader("📖 Carnet d'Ordres (Simulé)")
-        # Simulation d'un Carnet d'ordres rapide
-        bids = [
-            [96475.0, 1.25],
-            [96470.0, 2.10],
-            [96465.0, 0.85],
-            [96460.0, 3.40],
-        ]
-        asks = [
-            [96485.0, 0.90],
-            [96490.0, 1.80],
-            [96495.0, 2.50],
-            [96500.0, 4.10],
-        ]
-
+        st.subheader("📖 Carnet d'Ordres")
         st.markdown(
-            "**Vendeurs (Asks)**",
-        )
-        for p, q in reversed(asks):
-            st.markdown(
-                f"<div style='display:flex; justify-between; color:#f6465d; font-family:monospace; font-size:0.8rem;'><span>{p:.1f}</span> <span>{q:.2f} BTC</span></div>",
-                unsafe_allow_html=True,
-            )
-
-        st.markdown(
-            "<hr style='margin:4px 0; border-color:#2b313a;'>",
+            """
+        <div style="font-family:monospace; font-size:0.8rem; background:#181a20; padding:10px; border-radius:8px;">
+            <div style="color:#f6465d; display:flex; justify-content:space-between;"><span>96485.0</span><span>0.90 BTC</span></div>
+            <div style="color:#f6465d; display:flex; justify-content:space-between;"><span>96490.0</span><span>1.80 BTC</span></div>
+            <hr style="border-color:#2b313a; margin:4px 0;">
+            <div style="color:#0ecb81; display:flex; justify-content:space-between;"><span>96475.0</span><span>1.25 BTC</span></div>
+            <div style="color:#0ecb81; display:flex; justify-content:space-between;"><span>96470.0</span><span>2.10 BTC</span></div>
+        </div>
+        """,
             unsafe_allow_html=True,
         )
 
-        st.markdown("**Acheteurs (Bids)**")
-        for p, q in bids:
-            st.markdown(
-                f"<div style='display:flex; justify-between; color:#0ecb81; font-family:monospace; font-size:0.8rem;'><span>{p:.1f}</span> <span>{q:.2f} BTC</span></div>",
-                unsafe_allow_html=True,
-            )
-
-# =========================================================
-# TAB 2 : SYSTÈME D'ALERTES INTELILGENTES
-# =========================================================
+# TAB 2 : Alertes
 with tab_alerts:
     st.subheader("🚨 Gestionnaire d'Alertes de Prix")
+    c_add, c_list = st.columns([1, 2])
 
-    col_add, col_list = st.columns([1, 2])
-
-    with col_add:
-        st.markdown("### ➕ Créer une Alerte")
-        with st.form("form_add_alert", clear_on_submit=True):
+    with c_add:
+        with st.form("add_alert_form", clear_on_submit=True):
             sym = st.selectbox(
                 "Actif", ["BTCUSDT", "ETHUSDT", "US100", "EURUSD", "GOLD"]
             )
             target = st.number_input("Prix Cible", value=98000.0, step=10.0)
-            alert_type = st.selectbox(
+            atype = st.selectbox(
                 "Condition",
-                [
-                    "Franchissement Haussier",
-                    "Franchissement Baissier",
-                    "Ecart %",
-                ],
+                ["Franchissement Haussier", "Franchissement Baissier"],
             )
 
-            submitted = st.form_submit_button("🔔 Programmer l'Alerte")
-            if submitted:
-                new_id = len(st.session_state.alerts) + 1
-                new_alert = {
-                    "id": new_id,
-                    "symbol": sym,
-                    "target": target,
-                    "type": alert_type,
-                    "status": "Active",
-                    "created": datetime.datetime.now().strftime("%H:%M:%S"),
-                }
-                st.session_state.alerts.append(new_alert)
-                st.success(f"Alerte créée pour {sym} à {target} !")
+            if st.form_submit_button("🔔 Ajouter l'alerte"):
+                st.session_state.alerts.append(
+                    {
+                        "id": len(st.session_state.alerts) + 1,
+                        "symbol": sym,
+                        "target": target,
+                        "type": atype,
+                        "status": "Active",
+                        "created": datetime.datetime.now().strftime("%H:%M:%S"),
+                    }
+                )
+                st.success("Alerte enregistrée !")
 
-        st.markdown("---")
-        st.markdown("### 🧪 Tester le Déclencheur")
-        if st.button("🔊 Tester Sonnette d'Alerte"):
-            st.toast("🚨 ALERTE DÉCLENCHÉE : BTCUSDT a franchi 98,000 $ !")
+        if st.button("🔊 Tester Sonnette"):
+            st.toast("🚨 TEST ALERTE : Prix franchi !")
             st.balloons()
 
-    with col_list:
-        st.markdown("### 📋 Alertes Actives")
-
-        if len(st.session_state.alerts) > 0:
-            df_alerts = pd.DataFrame(st.session_state.alerts)
-            st.dataframe(df_alerts, use_container_width=True, hide_index=True)
-
-            if st.button("🗑️ Effacer toutes les alertes"):
+    with c_list:
+        if st.session_state.alerts:
+            df = pd.DataFrame(st.session_state.alerts)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            if st.button("Effacer tout"):
                 st.session_state.alerts = []
                 st.rerun()
-        else:
-            st.info("Aucune alerte configurée pour le moment.")
 
-# =========================================================
-# TAB 3 : ACTUALITÉS & CALENDRIER ÉCONOMIQUE
-# =========================================================
+# TAB 3 : News
 with tab_news:
     col_n1, col_n2 = st.columns(2)
-
     with col_n1:
-        st.subheader("📰 Fil d'Actualités Financières")
-        tv_news_code = """
+        st.subheader("📰 Fil d'Actualités")
+        components.html(
+            """
         <div class="tradingview-widget-container">
-          <div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-          {
-          "feedMode": "all_symbols",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "displayMode": "regular",
-          "width": "100%",
-          "height": 550,
-          "locale": "fr"
-        }
+          {"feedMode": "all_symbols", "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": 550, "locale": "fr"}
           </script>
-        </div>
-        """
-        components.html(tv_news_code, height=560)
+        </div>""",
+            height=560,
+        )
 
     with col_n2:
-        st.subheader("📅 Calendrier Économique Macro")
-        tv_cal_code = """
+        st.subheader("📅 Calendrier Économique")
+        components.html(
+            """
         <div class="tradingview-widget-container">
-          <div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-          {
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "width": "100%",
-          "height": 550,
-          "locale": "fr",
-          "importanceFilter": "-1,0,1"
-        }
+          {"colorTheme": "dark", "isTransparent": true, "width": "100%", "height": 550, "locale": "fr"}
           </script>
-        </div>
-        """
-        components.html(tv_cal_code, height=560)
+        </div>""",
+            height=560,
+        )
 
-# =========================================================
-# TAB 4 : CALCULATEUR DE RISQUE & TAILLE DE POSITION
-# =========================================================
+# TAB 4 : Calculateur
 with tab_calc:
     st.subheader("🧮 Calculateur de Management du Risque")
-
-    c1, c2 = st.columns(2)
-
-    with c1:
+    ca, cb = st.columns(2)
+    with ca:
         cap = st.number_input(
-            "Capital de Compte ($)", value=st.session_state.capital
+            "Capital ($)", value=st.session_state.capital, key="calc_cap"
         )
-        risk_pct = st.slider("Risque par Trade (%)", 0.25, 5.0, 1.0, step=0.25)
-        entry_price = st.number_input(
-            "Prix d'Entrée ($)", value=96500.0, step=50.0
-        )
-        stop_loss = st.number_input(
-            "Prix Stop Loss ($)", value=95200.0, step=50.0
-        )
-        take_profit = st.number_input(
-            "Prix Take Profit ($)", value=99500.0, step=50.0
-        )
+        risk = st.slider("Risque (%)", 0.25, 5.0, 1.0)
+        entry = st.number_input("Prix d'entrée ($)", value=96500.0)
+        sl = st.number_input("Stop Loss ($)", value=95200.0)
+        tp = st.number_input("Take Profit ($)", value=99500.0)
 
-    with c2:
-        risk_amount = cap * (risk_pct / 100.0)
-        sl_distance = abs(entry_price - stop_loss)
-        tp_distance = abs(take_profit - entry_price)
+    with cb:
+        risk_val = cap * (risk / 100.0)
+        dist_sl = abs(entry - sl)
+        dist_tp = abs(tp - entry)
+        pos_size = risk_val / dist_sl if dist_sl > 0 else 0
+        rr = dist_tp / dist_sl if dist_sl > 0 else 0
 
-        if sl_distance > 0:
-            position_size = risk_amount / sl_distance
-            ratio = tp_distance / sl_distance
-            potential_gain = position_size * tp_distance
-        else:
-            position_size = 0
-            ratio = 0
-            potential_gain = 0
-
-        st.markdown("### 📊 Résultats du Calcul")
-        st.metric("Montant Risqué ($)", f"{risk_amount:.2f} $")
-        st.metric(
-            "Taille de Position Recommandée", f"{position_size:.4f} Unités"
-        )
-        st.metric("Ratio Risque / Récompense (R:R)", f"1 : {ratio:.2f}")
-        st.metric("Gain Potentiel", f"+{potential_gain:.2f} $")
+        st.metric("Risque en Dollar ($)", f"{risk_val:.2f} $")
+        st.metric("Taille de Position", f"{pos_size:.4f} Unités")
+        st.metric("Ratio R:R", f"1 : {rr:.2f}")
