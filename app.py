@@ -109,15 +109,15 @@ if st.session_state.page == "welcome":
       }
       
       .globe-container { 
-          position: absolute; top: 50%; left: 50%;
+          position: absolute; top: 54%; left: 50%;
           transform: translate(-50%, -50%); z-index: 1; 
           pointer-events: none;
       }
       .globe { 
-          width: 580px; height: 580px; border-radius: 50%; 
+          width: 530px; height: 530px; border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
-          box-shadow: inset -55px -55px 90px rgba(0,0,0,0.95), 0 0 55px rgba(240, 185, 11, 0.15); 
+          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
           animation: spin 45s linear infinite;
           opacity: 0.85;
       }
@@ -188,7 +188,7 @@ if st.session_state.page == "welcome":
         div.stButton {
             display: flex;
             justify-content: center;
-            margin-top: -15px; 
+            margin-top: -20px; 
             margin-bottom: 2px;
             flex-shrink: 0;
         }
