@@ -1,3 +1,4 @@
+from deep_translator import GoogleTranslator
 import feedparser
 import streamlit as st
 import streamlit.components.v1 as components
@@ -13,13 +14,22 @@ if "page" not in st.session_state:
   st.session_state.page = "welcome"
 
 
-# Fonction pour récupérer les actus en direct de Yahoo Finance
+# Fonction pour récupérer et traduire automatiquement les actus Yahoo Finance en Français
 def fetch_yahoo_news():
   try:
     feed = feedparser.parse("https://finance.yahoo.com/news/rssindex")
     news_items = []
-    for entry in feed.entries[:8]:  # Récupère 8 actus pour alimenter le défilé
-      news_items.append(entry.title)
+    translator = GoogleTranslator(source="auto", target="fr")
+
+    for entry in feed.entries[:8]:  # Récupère 8 actus
+      title = entry.title
+      try:
+        # Traduction automatique du titre en français
+        translated = translator.translate(title)
+        news_items.append(translated if translated else title)
+      except Exception:
+        news_items.append(title)  # Fallback sur l'original en cas de souci
+
     return (
         news_items
         if news_items
@@ -457,7 +467,7 @@ elif st.session_state.page == "hub":
     components.html(heatmap_panel_html, height=480)
 
   # ==========================
-  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE LIVE (DÉFILEMENT AUTO)
+  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE TRADUIT (DÉFILEMENT AUTO)
   # ==========================
   with col_center:
     calendar_panel_html = """
@@ -526,10 +536,10 @@ elif st.session_state.page == "hub":
         """
     components.html(calendar_panel_html, height=230)
 
-    # Récupération dynamique des flux Yahoo Finance
+    # Récupération et traduction dynamique des flux Yahoo Finance
     live_news = fetch_yahoo_news()
 
-    # Construction des blocs HTML avec couleurs alternées
+    # Construction des blocs HTML traduits en français
     news_html_blocks = ""
     colors = ["#f0b90b", "#58a6ff", "#3fb950", "#d29922", "#bc8cff"]
     for i, title in enumerate(live_news):
@@ -584,7 +594,7 @@ elif st.session_state.page == "hub":
               border-radius: 3px;
               padding: 8px;
               flex-grow: 1;
-              overflow-y: hidden; /* Cache la barre de défilement pour un rendu propre */
+              overflow-y: hidden;
               font-size: 0.75rem;
               color: #8b949e;
               position: relative;
@@ -597,7 +607,7 @@ elif st.session_state.page == "hub":
         </head>
         <body>
         <div class="panel-heading">
-            <span>🌐 FLUX LIVE YAHOO FINANCE</span>
+            <span>🌐 FLUX LIVE YAHOO FINANCE (TRADUIT)</span>
             <span><div class="live-dot-green"></div>EN DIRECT (AUTO-SCROLL)</span>
         </div>
         <div class="macro-content" id="scroll-container">
@@ -611,18 +621,16 @@ elif st.session_state.page == "hub":
         const container = document.getElementById('scroll-container');
         const inner = document.getElementById('scroll-inner');
         
-        // Fonction de défilement automatique fluide
         function autoScroll() {{
             if (container.scrollTop >= inner.scrollHeight - container.clientHeight) {{
-                container.scrollTop = 0; // Revient en haut en boucle
+                container.scrollTop = 0;
             }} else {{
-                container.scrollTop += 0.6; // Vitesse de défilement
+                container.scrollTop += 0.6;
             }}
         }}
         
         let scrollInterval = setInterval(autoScroll, 40);
         
-        // Pause le défilement lorsque la souris survole le panneau
         container.onmouseover = () => clearInterval(scrollInterval);
         container.onmouseout = () => scrollInterval = setInterval(autoScroll, 40);
         </script>
