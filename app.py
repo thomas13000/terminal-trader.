@@ -503,7 +503,7 @@ if st.session_state.page == "welcome":
 # ==========================================
 elif st.session_state.page == "hub":
 
-    # BARRE UNIQUE IDENTIQUE À L'ACCUEIL
+    # En-tête HTML sans JavaScript pour éviter les conflits d'accolades f-string
     st.markdown(f"""
         <div class="hud-header">
             <!-- Bloc Gauche : Logo & Titre -->
@@ -536,7 +536,10 @@ elif st.session_state.page == "hub":
                 <a href="?page=welcome" target="_self" class="hud-nav-btn">← ACCUEIL</a>
             </div>
         </div>
+    """, unsafe_allow_html=True)
 
+    # Script JS séparé sans f-string pour éviter le problème d'analyseur Python
+    st.markdown("""
         <script>
             function updateHdrClocks() {
                 const now = new Date();
@@ -556,7 +559,7 @@ elif st.session_state.page == "hub":
                 🚀 WORKSPACE QUANTITATIF ACTIF
             </div>
             <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
-                La barre supérieure est désormais parfaitement unifiée. Tu peux cliquer sur <strong>← ACCUEIL</strong> dans la barre pour revenir à la page d'accueil à tout moment.
+                La barre supérieure est désormais unifiée sans aucune erreur de syntaxe. Tu peux switcher librement entre les pages avec le bouton <strong>← ACCUEIL</strong>.
             </p>
         </div>
     """, unsafe_allow_html=True)
