@@ -11,7 +11,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. État de la navigation
+# 2. Gestion de la navigation via URL & Session State
+if "page" in st.query_params:
+    st.session_state.page = st.query_params["page"]
+
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
@@ -19,7 +22,7 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS (VERROUILLAGE SCROLL + GLOBE VIF)
+# STYLES CSS GLOBAUX (HUD & GLOBE 3D)
 # ==========================================
 st.markdown("""
     <style>
@@ -62,7 +65,7 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD */
+        /* Header HUD Page 1 */
         .hud-header {
             background: rgba(13, 17, 23, 0.94);
             border: 1.5px solid rgba(240, 185, 11, 0.45);
@@ -101,25 +104,25 @@ st.markdown("""
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Bouton Néon Streamlit */
+        /* Bouton Néon Streamlit Page 1 */
         div.stButton > button {
             width: 100% !important;
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 0.88rem !important;
+            font-size: 1.05rem !important;
             font-weight: 900 !important;
-            letter-spacing: 1.5px !important;
+            letter-spacing: 2px !important;
             border-radius: 8px !important;
-            padding: 10px 14px !important;
+            padding: 14px 20px !important;
             border: none !important;
-            box-shadow: 0 0 20px rgba(240, 185, 11, 0.4) !important;
+            box-shadow: 0 0 25px rgba(240, 185, 11, 0.5) !important;
             cursor: pointer !important;
             transition: all 0.2s ease-in-out !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
+            box-shadow: 0 0 35px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
             color: #000000 !important;
         }
 
@@ -316,6 +319,7 @@ if st.session_state.page == "welcome":
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
             st.session_state.page = "hub"
+            st.query_params["page"] = "hub"
             st.rerun()
 
     with col_right:
@@ -467,213 +471,242 @@ if st.session_state.page == "welcome":
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE (PAGE SECONDAIRE)
+# PAGE 2 : HUB / WORKSPACE (BARRE UNIFIÉE PRO)
 # ==========================================
 elif st.session_state.page == "hub":
 
-    # BARRE SUPÉRIEURE INTEGREE AVEC LE BOUTON ACCUEIL DANS LA BARRE
-    col_hdr, col_btn = st.columns([8.2, 1.8])
+    # LE BOUTON ACCUEIL EST INTÉGRÉ PARFAITEMENT DANS LA BARRE SUPÉRIEURE HUD
+    page2_header_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&family=Inter:wght@600;700&display=swap');
+            
+            * { box-sizing: border-box; }
+            body { 
+                margin: 0; 
+                padding: 0; 
+                background: transparent; 
+                font-family: 'JetBrains Mono', monospace; 
+            }
 
-    with col_hdr:
-        page2_header_html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&family=Inter:wght@600;700&display=swap');
-                
-                * { box-sizing: border-box; }
-                body { margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }
+            .hud-header-p2 {
+                background: rgba(13, 17, 23, 0.94);
+                border: 1.5px solid rgba(240, 185, 11, 0.45);
+                border-radius: 12px;
+                padding: 8px 18px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
+                backdrop-filter: blur(20px);
+            }
 
-                .hud-header-p2 {
-                    background: rgba(13, 17, 23, 0.94);
-                    border: 1.5px solid rgba(240, 185, 11, 0.45);
-                    border-radius: 12px;
-                    padding: 8px 16px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
-                }
+            .left-brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
 
-                .left-brand {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                }
+            .logo-icon {
+                width: 34px;
+                height: 34px;
+                background: linear-gradient(135deg, #f0b90b, #d4a007);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 900;
+                color: #000;
+                font-size: 1.05rem;
+                box-shadow: 0 0 12px rgba(240,185,11,0.6);
+            }
 
-                .logo-icon {
-                    width: 32px;
-                    height: 32px;
-                    background: linear-gradient(135deg, #f0b90b, #d4a007);
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-family: 'Orbitron', sans-serif;
-                    font-weight: 900;
-                    color: #000;
-                    font-size: 1rem;
-                    box-shadow: 0 0 12px rgba(240,185,11,0.6);
-                }
+            .title-p2 {
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 900;
+                color: #ffffff;
+                font-size: 1.05rem;
+                letter-spacing: 1.5px;
+                line-height: 1.1;
+            }
 
-                .title-p2 {
-                    font-family: 'Orbitron', sans-serif;
-                    font-weight: 900;
-                    color: #ffffff;
-                    font-size: 1rem;
-                    letter-spacing: 1.5px;
-                    line-height: 1.1;
-                }
+            .hud-gold { color: #f0b90b; }
 
-                .hud-gold { color: #f0b90b; }
+            .subtitle-p2 {
+                font-size: 0.62rem;
+                color: #848e9c;
+                letter-spacing: 1px;
+            }
 
-                .subtitle-p2 {
-                    font-size: 0.6rem;
-                    color: #848e9c;
-                    letter-spacing: 1px;
-                }
+            .header-clocks-container {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(240, 185, 11, 0.25);
+                padding: 5px 16px;
+                border-radius: 8px;
+            }
 
-                .header-clocks-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(240, 185, 11, 0.25);
-                    padding: 5px 14px;
-                    border-radius: 8px;
-                }
+            .clock-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
-                .clock-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
+            .clock-flag {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.7rem;
+                font-weight: 900;
+                color: #f0b90b;
+            }
 
-                .clock-flag {
-                    font-family: 'Orbitron', sans-serif;
-                    font-size: 0.68rem;
-                    font-weight: 900;
-                    color: #f0b90b;
-                }
+            .clock-time {
+                font-size: 1.1rem;
+                font-weight: 800;
+                color: #ffffff;
+                letter-spacing: 1px;
+                text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            }
 
-                .clock-time {
-                    font-size: 1.05rem;
-                    font-weight: 800;
-                    color: #ffffff;
-                    letter-spacing: 1px;
-                    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-                }
+            .clock-divider {
+                width: 1px;
+                height: 20px;
+                background: rgba(240, 185, 11, 0.3);
+            }
 
-                .clock-divider {
-                    width: 1px;
-                    height: 20px;
-                    background: rgba(240, 185, 11, 0.3);
-                }
+            .right-status {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
 
-                .right-status {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                }
+            .status-badge {
+                background: rgba(255,255,255,0.05);
+                padding: 6px 12px;
+                border-radius: 6px;
+                border: 1px solid rgba(255,255,255,0.1);
+                font-size: 0.75rem;
+                color: #848e9c;
+                display: flex;
+                align-items: center;
+            }
 
-                .status-badge {
-                    background: rgba(255,255,255,0.05);
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    font-size: 0.72rem;
-                    color: #848e9c;
-                }
+            .online-badge {
+                background: rgba(14,203,129,0.12);
+                padding: 6px 12px;
+                border-radius: 20px;
+                border: 1px solid rgba(14,203,129,0.3);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 700;
+                color: #0ecb81;
+                font-size: 0.75rem;
+            }
 
-                .online-badge {
-                    background: rgba(14,203,129,0.12);
-                    padding: 4px 10px;
-                    border-radius: 20px;
-                    border: 1px solid rgba(14,203,129,0.3);
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-weight: 700;
-                    color: #0ecb81;
-                    font-size: 0.72rem;
-                }
+            .online-dot {
+                width: 6px;
+                height: 6px;
+                background: #0ecb81;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #0ecb81;
+            }
 
-                .online-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: #0ecb81;
-                    border-radius: 50%;
-                    box-shadow: 0 0 8px #0ecb81;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="hud-header-p2">
-                <div class="left-brand">
-                    <div class="logo-icon">⚡</div>
-                    <div>
-                        <div class="title-p2">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                        <div class="subtitle-p2">QUANTITATIVE WORKSPACE</div>
-                    </div>
-                </div>
+            /* BOUTON ACCUEIL PARFAITEMENT ALIGNÉ DANS LA BARRE */
+            .hud-btn-accueil {
+                background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%);
+                color: #080b10;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.75rem;
+                font-weight: 900;
+                letter-spacing: 1.2px;
+                border-radius: 6px;
+                padding: 7px 16px;
+                border: none;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                white-space: nowrap;
+            }
 
-                <div class="header-clocks-container">
-                    <div class="clock-item">
-                        <span class="clock-flag">🇫🇷 PARIS</span>
-                        <span class="clock-time" id="p2-paris">--:--:--</span>
-                    </div>
-
-                    <div class="clock-divider"></div>
-
-                    <div class="clock-item">
-                        <span class="clock-flag">🇺🇸 NEW YORK</span>
-                        <span class="clock-time" id="p2-ny">--:--:--</span>
-                    </div>
-                </div>
-
-                <div class="right-status">
-                    <div class="status-badge">
-                        MS : <span style="color:#00f3ff; font-weight:700;">__LATENCY__ ms</span>
-                    </div>
-                    <div class="online-badge">
-                        <span class="online-dot"></span>
-                        ONLINE
-                    </div>
+            .hud-btn-accueil:hover {
+                box-shadow: 0 0 25px rgba(240, 185, 11, 0.9), 0 0 12px #00f3ff;
+                color: #000000;
+                transform: translateY(-1px);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="hud-header-p2">
+            <div class="left-brand">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <div class="title-p2">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="subtitle-p2">QUANTITATIVE WORKSPACE</div>
                 </div>
             </div>
 
-            <script>
-                function updateP2Clocks() {
-                    const now = new Date();
-                    const parisStr = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    const nyStr = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
-                    document.getElementById('p2-paris').innerText = parisStr;
-                    document.getElementById('p2-ny').innerText = nyStr;
-                }
-                setInterval(updateP2Clocks, 1000);
-                updateP2Clocks();
-            </script>
-        </body>
-        </html>
-        """.replace("__LATENCY__", str(latency_ms))
+            <div class="header-clocks-container">
+                <div class="clock-item">
+                    <span class="clock-flag">🇫🇷 PARIS</span>
+                    <span class="clock-time" id="p2-paris">--:--:--</span>
+                </div>
 
-        components.html(page2_header_html, height=60, scrolling=False)
+                <div class="clock-divider"></div>
 
-    with col_btn:
-        st.markdown("<div style='margin-top:2px;'></div>", unsafe_allow_html=True)
-        if st.button("← ACCUEIL"):
-            st.session_state.page = "welcome"
-            st.rerun()
+                <div class="clock-item">
+                    <span class="clock-flag">🇺🇸 NEW YORK</span>
+                    <span class="clock-time" id="p2-ny">--:--:--</span>
+                </div>
+            </div>
+
+            <div class="right-status">
+                <div class="status-badge">
+                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700; margin-left:4px;">__LATENCY__ ms</span>
+                </div>
+                <div class="online-badge">
+                    <span class="online-dot"></span>
+                    ONLINE
+                </div>
+                <a href="?page=welcome" target="_top" class="hud-btn-accueil">
+                    ← ACCUEIL
+                </a>
+            </div>
+        </div>
+
+        <script>
+            function updateP2Clocks() {
+                const now = new Date();
+                const parisStr = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const nyStr = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                document.getElementById('p2-paris').innerText = parisStr;
+                document.getElementById('p2-ny').innerText = nyStr;
+            }
+            setInterval(updateP2Clocks, 1000);
+            updateP2Clocks();
+        </script>
+    </body>
+    </html>
+    """.replace("__LATENCY__", str(latency_ms))
+
+    components.html(page2_header_html, height=62, scrolling=False)
 
     st.markdown("""
         <div class="hud-card" style="margin-top:10px;">
             <div class="hud-title" style="font-size:1.1rem; color:#f0b90b;">
-                🚀 WORKSPACE EN DÉVELOPPEMENT
+                🚀 WORKSPACE QUANTITATIF PRÊT
             </div>
             <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
-                Le bouton d'accueil est désormais intégré sur la même ligne que la barre de statut.
+                La barre supérieure est désormais parfaitement unifiée et alignée.
             </p>
         </div>
     """, unsafe_allow_html=True)
