@@ -221,7 +221,7 @@ if st.session_state.page == "welcome":
         st.rerun()
 
 # ==========================================
-# PAGE 2 : EXECUTIVE HUB DASHBOARD
+# PAGE 2 : EXECUTIVE HUB DASHBOARD (Elite UI)
 # ==========================================
 elif st.session_state.page == "hub":
     st.markdown("""
@@ -238,8 +238,8 @@ elif st.session_state.page == "hub":
         footer {visibility: hidden;}
         
         .block-container { 
-            padding-top: 0.5rem !important; 
-            padding-bottom: 0.5rem !important;
+            padding-top: 0.4rem !important; 
+            padding-bottom: 0.4rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -254,17 +254,17 @@ elif st.session_state.page == "hub":
             background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             border: 1px solid #30363d;
             border-bottom: 1px solid rgba(240, 185, 11, 0.6);
-            padding: 8px 20px;
+            padding: 6px 15px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .hub-title {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #ffffff;
             margin: 0;
@@ -273,9 +273,9 @@ elif st.session_state.page == "hub":
         .hub-title span { color: #f0b90b; }
         .clocks-container {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #c9d1d9;
         }
         .clock-item span { color: #f0b90b; font-weight: bold; }
@@ -287,48 +287,62 @@ elif st.session_state.page == "hub":
             background: #161b22;
             border: 1px solid #30363d;
             border-left: 3px solid #f85149;
-            padding: 5px 0;
-            margin-bottom: 8px;
+            padding: 4px 0;
+            margin-bottom: 6px;
             flex-shrink: 0;
             border-radius: 2px;
+            display: flex;
+            align-items: center;
         }
         .ticker-badge {
             background: #f85149;
             color: white;
             font-weight: bold;
-            padding: 2px 8px;
-            font-size: 0.75rem;
-            margin-left: 10px;
-            margin-right: 15px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+            margin-right: 12px;
             border-radius: 2px;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .ticker-text {
             color: #f0f6fc;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Panels Style */
+        /* Unified Terminal Panels */
         .terminal-panel {
-            background: rgba(13, 17, 23, 0.9);
-            border: 1px solid rgba(240, 185, 11, 0.2);
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid rgba(240, 185, 11, 0.25);
             border-radius: 4px;
-            padding: 10px;
-            height: 72vh;
+            padding: 8px;
+            height: 74vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
         .panel-heading {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #f0b90b;
             border-bottom: 1px solid #30363d;
-            padding-bottom: 6px;
-            margin-bottom: 8px;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
             letter-spacing: 1px;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .live-dot-green {
+            width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
+            box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
         }
         </style>
         
@@ -341,34 +355,20 @@ elif st.session_state.page == "hub":
         </div>
 
         <div class="ticker-wrap">
-            <span class="ticker-badge">FLASH URGENT</span>
-            <span class="ticker-text">FED : Powell maintient les taux directeurs inchangés à 5.25% — Inflation sous surveillance — Volatilité attendue sur le NASDAQ & XAUUSD.</span>
+            <span class="ticker-badge">URGENT</span>
+            <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
         </div>
     """, unsafe_allow_html=True)
 
-    # Script JS pour mettre à jour les horloges en direct sur la page 2
-    components.html("""
-    <script>
-    function updateHubClocks() {
-        const now = new Date();
-        const parisTime = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
-        const nyTime = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
-        
-        // Comme les éléments sont dans le markdown parent, on peut cibler ou laisser le parent gérer, 
-        // ou injecter directement. Ici on s'assure de la fluidité.
-    }
-    setInterval(updateHubClocks, 1000);
-    </script>
-    """, height=0)
+    # 3 Column Strict Layout - 4 Core Elite Panels
+    col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
-    # Layout à 3 colonnes principales
-    col_left, col_center, col_right = st.columns([1.2, 1.3, 1.1])
-
+    # Module 1 : Heatmap Nasdaq (Gauche)
     with col_left:
         st.markdown("""
         <div class="terminal-panel">
-            <div class="panel-heading">⚡ NASDAQ HEATMAP (FINVIZ STYLE)</div>
-            <div style="flex-grow: 1; overflow: hidden;">
+            <div class="panel-heading"><span>⚡ NASDAQ 100 HEATMAP</span><span><div class="live-dot-green"></div>LIVE</span></div>
+            <div style="flex-grow: 1; overflow: hidden; position: relative;">
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
                 {
                   "exchanges": [],
@@ -389,11 +389,12 @@ elif st.session_state.page == "hub":
         </div>
         """, unsafe_allow_html=True)
 
+    # Modules 2 & 3 : Calendrier Éco & Macro/Géo (Centre)
     with col_center:
         st.markdown("""
-        <div class="terminal-panel" style="height: 72vh; display: flex; flex-direction: column; gap: 8px;">
-            <div style="height: 48%; display: flex; flex-direction: column;">
-                <div class="panel-heading">📅 CALENDRIER ÉCO (FOREX FACTORY STYLE)</div>
+        <div class="terminal-panel" style="gap: 6px;">
+            <div style="height: 49%; display: flex; flex-direction: column;">
+                <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE</span><span>FOREX FACTORY</span></div>
                 <div style="flex-grow: 1; overflow-y: auto;">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
                     {
@@ -407,39 +408,40 @@ elif st.session_state.page == "hub":
                     </script>
                 </div>
             </div>
-            <div style="height: 48%; display: flex; flex-direction: column;">
-                <div class="panel-heading">🌐 INFO MACRO & GÉOPOLITIQUE</div>
-                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 10px; flex-grow: 1; overflow-y: auto; font-size: 0.8rem; color: #8b949e;">
-                    <div style="margin-bottom: 8px; border-left: 2px solid #f0b90b; padding-left: 6px;">
-                        <span style="color: #f0b90b; font-weight: bold;">[11:02]</span> Tensions géopolitiques au Moyen-Orient : Impact direct sur les flux de pétrole brut et valeurs refuges (Or).
+            <div style="height: 49%; display: flex; flex-direction: column;">
+                <div class="panel-heading"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX CONTINU</span></div>
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; flex-grow: 1; overflow-y: auto; font-size: 0.75rem; color: #8b949e;">
+                    <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
+                        <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
                     </div>
-                    <div style="margin-bottom: 8px; border-left: 2px solid #58a6ff; padding-left: 6px;">
-                        <span style="color: #58a6ff; font-weight: bold;">[10:45]</span> BCE : Lagarde insiste sur une approche dépendante des données pour la prochaine baisse des taux en zone euro.
+                    <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
+                        <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
                     </div>
                     <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
-                        <span style="color: #3fb950; font-weight: bold;">[10:15]</span> NASDAQ Futures : Forte pression acheteuse sur les valeurs semi-conducteurs avant l'ouverture de Wall Street.
+                        <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
                     </div>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
+    # Module 4 : Top Performances & Watchlist (Droite)
     with col_right:
         st.markdown("""
         <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-                <div class="panel-heading">🔥 TOP PERF & WATCHLIST DU JOUR</div>
-                <div style="margin-bottom: 5px;">
+                <div class="panel-heading"><span>🔥 TOP PERF & WATCHLIST</span><span>INSTRUMENTS</span></div>
+                <div style="margin-bottom: 4px;">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                     {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
                     </script>
                 </div>
-                <div style="margin-bottom: 5px;">
+                <div style="margin-bottom: 4px;">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                     {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
                     </script>
                 </div>
-                <div style="margin-bottom: 5px;">
+                <div style="margin-bottom: 4px;">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                     {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
                     </script>
@@ -453,7 +455,7 @@ elif st.session_state.page == "hub":
         </div>
         """, unsafe_allow_html=True)
 
-    # Bouton Disconnect discret en bas de page pour revenir à la page 1
+    # Disconnect button footer section
     col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
     with col_btn2:
         st.markdown("""
@@ -463,9 +465,9 @@ elif st.session_state.page == "hub":
                 color: #848e9c !important; 
                 border: 1px solid rgba(240, 185, 11, 0.3) !important; 
                 font-family: 'Courier New', Courier, monospace !important;
-                font-size: 0.8rem !important;
+                font-size: 0.75rem !important;
                 letter-spacing: 2px !important; 
-                padding: 4px 20px !important;
+                padding: 2px 15px !important;
                 border-radius: 2px !important; 
                 width: 100% !important;
             }
@@ -475,6 +477,6 @@ elif st.session_state.page == "hub":
             }
             </style>
         """, unsafe_allow_html=True)
-        if st.button("← RETOUR ACCUEIL / GLOBE"):
+        if st.button("← DÉCONNEXION"):
             st.session_state.page = "welcome"
             st.rerun()
