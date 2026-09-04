@@ -1,6 +1,9 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
+# ==========================================
+# CONFIGURATION DE LA PAGE
+# ==========================================
 st.set_page_config(
     page_title="Terminal Trader Pro",
     page_icon="⚡",
@@ -11,7 +14,11 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
+# ==========================================
+# PAGE 1 : ACCUEIL DESIGN ORIGINAL + WIDGETS
+# ==========================================
 if st.session_state.page == "welcome":
+    
     st.markdown("""
         <style>
         header {visibility: hidden;}
@@ -35,7 +42,7 @@ if st.session_state.page == "welcome":
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .top-title {
             font-family: 'Courier New', Courier, monospace;
@@ -81,130 +88,104 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    col_clocks, col_globe, col_assets = st.columns([1, 1.8, 1])
+    # Affichage du terminal avec le globe en fond et les panneaux d'origine
+    components.html("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+      
+      body { 
+          margin: 0; background: transparent; color: #fff; 
+          font-family: 'Share Tech Mono', monospace; 
+          display: flex; justify-content: space-between; align-items: center; 
+          height: 560px; 
+          padding: 0 10px; 
+          overflow: hidden;
+          position: relative;
+      }
+      
+      .globe-container { 
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%, -50%); z-index: 1; 
+      }
+      .globe { 
+          width: 520px; height: 520px; border-radius: 50%; 
+          background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
+          background-size: cover;
+          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
+          animation: spin 45s linear infinite;
+          opacity: 0.85;
+      }
+      @keyframes spin { from { background-position: 0 0; } to { background-position: 1500px 0; } }
 
-    with col_clocks:
-        components.html("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
-          body { margin: 0; background: transparent; font-family: 'Share Tech Mono', monospace; }
-          .panel { 
-              background: rgba(13, 17, 23, 0.7); 
-              border: 1px solid rgba(240, 185, 11, 0.2); 
-              border-radius: 4px; padding: 25px; 
-              box-shadow: 0 0 20px rgba(0,0,0,0.8); 
-              backdrop-filter: blur(4px); width: 260px;
-          }
-          .clock-title { font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 0.9rem; margin-bottom: 2px; }
-          .clock-time { font-size: 2.4rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 15px; font-weight: bold;}
-        </style>
-        </head>
-        <body>
-        <div class="panel">
-            <div class="clock-title">PARIS (CET)</div>
-            <div class="clock-time" id="paris">--:--:--</div>
-            <div class="clock-title">NEW YORK (EST)</div>
-            <div class="clock-time" id="ny" style="margin-bottom: 0;">--:--:--</div>
-        </div>
-        <script>
-        function updateClocks() {
-            const now = new Date();
-            document.getElementById('paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
-            document.getElementById('ny').innerText = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
-        }
-        setInterval(updateClocks, 1000); updateClocks();
-        </script>
-        </body>
-        </html>
-        """, height=380)
+      .panel { 
+          background: rgba(13, 17, 23, 0.75); 
+          border: 1px solid rgba(240, 185, 11, 0.25); 
+          border-radius: 4px; padding: 20px; 
+          box-shadow: 0 0 25px rgba(0,0,0,0.9); 
+          backdrop-filter: blur(6px); width: 280px; z-index: 10;
+      }
+      
+      .clock-title { font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 0.85rem; margin-bottom: 2px; }
+      .clock-time { font-size: 2.3rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 15px; font-weight: bold;}
+    </style>
+    </head>
+    <body>
 
-    with col_globe:
-        components.html("""
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-          body { margin: 0; background: transparent; display: flex; justify-content: center; align-items: center; height: 380px; overflow: hidden; }
-          .globe { 
-              width: 340px; height: 340px; border-radius: 50%; 
-              background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
-              background-size: cover;
-              box-shadow: inset -30px -30px 60px rgba(0,0,0,0.95), 0 0 40px rgba(240, 185, 11, 0.15); 
-              animation: spin 45s linear infinite;
-              opacity: 0.85;
-          }
-          @keyframes spin { from { background-position: 0 0; } to { background-position: 1500px 0; } }
-        </style>
-        </head>
-        <body>
-        <div class="globe"></div>
-        </body>
-        </html>
-        """, height=380)
+    <div class="globe-container"><div class="globe"></div></div>
 
-    with col_assets:
-        components.html("""
-        <!DOCTYPE html>
-        <html>
-        <head><style>body { margin: 0; background: transparent; overflow: hidden; }</style></head>
-        <body>
-        <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+    <!-- Panneau Gauche : Horloges -->
+    <div class="panel">
+        <div class="clock-title">PARIS (CET)</div>
+        <div class="clock-time" id="paris">--:--:--</div>
+        <div class="clock-title">NEW YORK (EST)</div>
+        <div class="clock-time" id="ny" style="margin-bottom: 0;">--:--:--</div>
+    </div>
+
+    <!-- Panneau Droit : Widgets TradingView Officiels -->
+    <div class="panel" style="padding: 10px 15px;">
+        <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {
-          "symbol": "FX_IDC:EURUSD",
-          "width": "100%",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "locale": "fr"
-        }
+          {"symbol": "FX_IDC:EURUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
-        <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+        <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {
-          "symbol": "NASDAQ:IXIC",
-          "width": "100%",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "locale": "fr"
-        }
+          {"symbol": "NASDAQ:IXIC", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
-        <div class="tradingview-widget-container" style="margin-bottom: 4px;">
+        <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {
-          "symbol": "TVC:DXY",
-          "width": "100%",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "locale": "fr"
-        }
+          {"symbol": "TVC:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
         <div class="tradingview-widget-container">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {
-          "symbol": "COMEX:GC1!",
-          "width": "100%",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "locale": "fr"
-        }
+          {"symbol": "COMEX:GC1!", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
-        </body>
-        </html>
-        """, height=380)
+    </div>
+
+    <script>
+    function updateClocks() {
+        const now = new Date();
+        document.getElementById('paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
+        document.getElementById('ny').innerText = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
+    }
+    setInterval(updateClocks, 1000); updateClocks();
+    </script>
+    </body>
+    </html>
+    """, height=580)
 
     st.markdown("""
         <style>
         div.stButton {
             display: flex;
             justify-content: center;
-            margin-top: 10px; 
+            margin-top: -10px; 
         }
         div.stButton > button {
             background-color: transparent !important;
@@ -233,6 +214,9 @@ if st.session_state.page == "welcome":
         st.session_state.page = "hub"
         st.rerun()
 
+# ==========================================
+# PAGE 2 : HUB (WORKSPACE)
+# ==========================================
 elif st.session_state.page == "hub":
     st.success("✅ AUTHENTIFICATION RÉUSSIE.")
     if st.button("← DISCONNECT"):
