@@ -7,8 +7,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Navigation en mémoire sans impacter l'URL
-if "page" not in st.session_state:
+# Gestion de la navigation via URL et session
+if "page" in st.query_params:
+    st.session_state.page = st.query_params["page"]
+elif "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 # Initialisation de la liste des sites financiers
@@ -23,42 +25,45 @@ if "custom_sites" not in st.session_state:
     ]
 
 # ==========================================
-# PAGE 1 : WELCOME SCREEN (GLOBE 3D AVANCÉ)
+# PAGE 1 : WELCOME SCREEN (PLEIN ÉCRAN FIXE)
 # ==========================================
 if st.session_state.page == "welcome":
     st.markdown("""
         <style>
-            #root > div:nth-child(1) > div > div > div > div { padding: 0 !important; }
-            header { visibility: hidden !important; }
-            footer { visibility: hidden !important; }
-            .stApp { background-color: #080b10; overflow: hidden; }
-            iframe { border: none !important; width: 100vw !important; height: 100vh !important; }
-            .block-container { padding: 0 !important; max-width: 100% !important; }
+            /* Masquage des éléments Streamlit par défaut */
+            header, footer, [data-testid="stHeader"] { 
+                display: none !important; 
+                visibility: hidden !important; 
+            }
             
-            /* Conteneur hors écran pour le bouton relais */
-            .hidden-relay-btn {
-                position: absolute !important;
-                left: -9999px !important;
-                top: -9999px !important;
-                opacity: 0 !important;
-                pointer-events: none !important;
+            /* Verrouillage strict du scroll (plein écran immobile) */
+            html, body, .stApp, [data-testid="stAppViewContainer"], .main, .block-container {
+                overflow: hidden !important;
+                height: 100vh !important;
+                max-height: 100vh !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                position: fixed !important;
+            }
+            
+            iframe {
+                border: none !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                overflow: hidden !important;
+                display: block !important;
             }
         </style>
     """, unsafe_allow_html=True)
-
-    # Bouton relais masqué qui bascule vers le hub
-    st.markdown('<div class="hidden-relay-btn">', unsafe_allow_html=True)
-    if st.button("NAVIGATE_TO_HUB", key="btn_relay_hub"):
-        st.session_state.page = "hub"
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     welcome_html_code = """
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TERMINAL TRADER PRO — 3D Globe Welcome Screen</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +93,8 @@ if st.session_state.page == "welcome":
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body, html {
-            width: 100%; height: 100%; overflow: hidden;
+            width: 100vw; height: 100vh; overflow: hidden !important;
+            position: fixed; top: 0; left: 0; touch-action: none;
             background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans);
         }
 
@@ -379,19 +385,14 @@ if st.session_state.page == "welcome":
     </nav>
 
     <script>
-        // Déclenchement garanti de la navigation vers la page Hub
+        // Passage d'URL direct sans composant ni cadre intermédiaire Streamlit
         function navigateToHub() {
             try {
-                const parentDoc = window.parent.document;
-                const buttons = Array.from(parentDoc.querySelectorAll('button'));
-                const targetBtn = buttons.find(b => b.innerText && b.innerText.includes('NAVIGATE_TO_HUB'));
-                if (targetBtn) {
-                    targetBtn.click();
-                } else {
-                    console.warn('Bouton Streamlit non trouvé');
-                }
+                const url = new URL(window.parent.location.href);
+                url.searchParams.set('page', 'hub');
+                window.parent.location.href = url.href;
             } catch(e) {
-                console.error('Erreur navigation:', e);
+                window.location.search = '?page=hub';
             }
         }
 
@@ -748,7 +749,7 @@ if st.session_state.page == "welcome":
 </html>
     """
 
-    st.components.v1.html(welcome_html_code, height=920)
+    st.components.v1.html(welcome_html_code, height=1000, scrolling=False)
 
 # ==========================================
 # PAGE 2 : HUB FINANCIER
@@ -809,6 +810,7 @@ elif st.session_state.page == "hub":
         st.markdown("<p style='color: #848e9c; font-size: 0.9rem;'>Centre de commande et outils d'analyse financière</p>", unsafe_allow_html=True)
     with col_back:
         if st.button("← GLOBE 3D"):
+            st.query_params["page"] = "welcome"
             st.session_state.page = "welcome"
             st.rerun()
 
