@@ -256,6 +256,7 @@ elif st.session_state.page == "hub":
             border: 1px solid #30363d;
             border-left: 3px solid #f85149;
             padding: 4px 0;
+            margin-top: 4px;
             margin-bottom: 6px;
             flex-shrink: 0;
             border-radius: 2px;
@@ -312,13 +313,9 @@ elif st.session_state.page == "hub":
             box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
         }
         </style>
-        
-        <div class="ticker-wrap">
-            <span class="ticker-badge">URGENT</span>
-            <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
-        </div>
     """, unsafe_allow_html=True)
 
+    # 1. Top Bar (Titre + Horloges en direct) en premier tout en haut
     components.html("""
     <!DOCTYPE html>
     <html>
@@ -375,6 +372,15 @@ elif st.session_state.page == "hub":
     </html>
     """, height=45)
 
+    # 2. Le Ruban d'Annonce (Ticker) juste en dessous de la barre de titre
+    st.markdown("""
+        <div class="ticker-wrap">
+            <span class="ticker-badge">URGENT</span>
+            <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 3. Grille Principale (3 Colonnes)
     col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
     with col_left:
@@ -424,69 +430,3 @@ elif st.session_state.page == "hub":
                 <div class="panel-heading"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX CONTINU</span></div>
                 <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; flex-grow: 1; overflow-y: auto; font-size: 0.75rem; color: #8b949e;">
                     <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
-                        <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
-                    </div>
-                    <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
-                        <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
-                    </div>
-                    <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
-                        <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
-                    </div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col_right:
-        st.markdown("""
-        <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <div class="panel-heading"><span>🔥 TOP PERF & WATCHLIST</span><span>INSTRUMENTS</span></div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div style="margin-bottom: 4px;">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-                <div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-                    </script>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
-    with col_btn2:
-        st.markdown("""
-            <style>
-            div.stButton > button {
-                background-color: transparent !important;
-                color: #848e9c !important; 
-                border: 1px solid rgba(240, 185, 11, 0.3) !important; 
-                font-family: 'Courier New', Courier, monospace !important;
-                font-size: 0.75rem !important;
-                letter-spacing: 2px !important; 
-                padding: 2px 15px !important;
-                border-radius: 2px !important; 
-                width: 100% !important;
-            }
-            div.stButton > button:hover {
-                border: 1px solid #f0b90b !important; 
-                color: #f0b90b !important; 
-            }
-            </style>
-        """, unsafe_allow_html=True)
-        if st.button("← DÉCONNEXION"):
-            st.session_state.page = "welcome"
-            st.rerun()
