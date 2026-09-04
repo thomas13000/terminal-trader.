@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import yfinance as yf
 
 # ==========================================
 # CONFIGURATION DE LA PAGE
@@ -18,6 +19,51 @@ if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 # ==========================================
+# RÉCUPÉRATION DES VRAIS PRIX VIA PYTHON (YFINANCE)
+# ==========================================
+@st.cache_data(ttl=15) # Met en cache pour 15 secondes pour éviter de surcharger l'API
+def get_market_data():
+    data = {
+        "eur": {"price": 1.0850, "pct": 0.0, "up": True},
+        "nas": {"price": 19000.0, "pct": 0.0, "up": True},
+        "dxy": {"price": 104.0, "pct": 0.0, "up": True},
+        "gold": {"price": 2350.0, "pct": 0.0, "up": True}
+    }
+    try:
+        tickers = yf.Tickers("EURUSD=X NQ=F DX-Y.NYB GC=F")
+        
+        # EUR/USD
+        eur_info = tickers.tickers["EURUSD=X"].fast_info
+        data["eur"]["price"] = eur_info.last_price
+        data["eur"]["pct"] = ((eur_info.last_price - eur_info.previous_close) / eur_info.previous_close) * 100
+        data["eur"]["up"] = data["eur"]["pct'] >= 0
+
+        # NASDAQ
+        nas_info = tickers.tickers["NQ=F"].fast_info
+        data["nas"]["price"] = nas_info.last_price
+        data["nas"]["pct"] = ((nas_info.last_price - nas_info.previous_close) / nas_info.previous_close) * 100
+        data["nas"]["up"] = data["nas"]["pct"] >= 0
+
+        # DXY
+        dxy_info = tickers.tickers["DX-Y.NYB"].fast_info
+        data["dxy"]["price"] = dxy_info.last_price
+        data["dxy"]["pct"] = ((dxy_info.last_price - dxy_info.previous_close) / dxy_info.previous_close) * 100
+        data["dxy"]["up"] = data["dxy"]["pct"] >= 0
+
+        # GOLD
+        gold_info = tickers.tickers["GC=F"].fast_info
+        data["gold"]["price"] = gold_info.last_price
+        data["gold"]["pct"] = ((gold_info.last_price - gold_info.previous_close) / gold_info.previous_close) * 100
+        data["gold"]["up"] = data["gold"]["pct"] >= 0
+
+    except Exception as e:
+        print("Erreur yfinance:", e)
+    
+    return data
+
+market = get_market_data()
+
+# ==========================================
 # PAGE 1 : ACCUEIL SANS SCROLL & PRO
 # ==========================================
 if st.session_state.page == "welcome":
@@ -25,12 +71,10 @@ if st.session_state.page == "welcome":
     # --- 1. CSS GLOBAL : SUPPRESSION DU SCROLL ET DES MARGES ---
     st.markdown("""
         <style>
-        /* Cacher les éléments natifs de Streamlit (Menu, Header, Footer) */
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         
-        /* Forcer le plein écran sans marges */
         .block-container { 
             padding-top: 1rem !important; 
             padding-bottom: 0rem !important;
@@ -39,7 +83,6 @@ if st.session_state.page == "welcome":
             max-width: 100% !important;
         }
         
-        /* Barre supérieure repensée */
         .top-bar {
             background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             border: 1px solid #30363d;
@@ -95,15 +138,15 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 2. LE DASHBOARD (GLOBE ENTIER ET VRAIS PRIX TRADITIONNELS EN DIRECT) ---
-    html_dashboard = """
+    # --- 2. LE DASHBOARD AVEC DONNÉES INJECTÉES PAR PYTHON ---
+    html_dashboard = f"""
     <!DOCTYPE html>
     <html>
     <head>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
       
-      body { 
+      body {{ 
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
@@ -111,59 +154,46 @@ if st.session_state.page == "welcome":
           padding: 0 20px; 
           overflow: hidden;
           position: relative;
-      }
+      }}
       
-      /* GLOBE TERRESTRE */
-      .globe-container { 
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 1; 
-      }
-      .globe { 
-          width: 560px; 
-          height: 560px; 
-          border-radius: 50%; 
+      .globe-container {{ 
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%, -50%); z-index: 1; 
+      }}
+      .globe {{ 
+          width: 560px; height: 560px; border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
           box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
           animation: spin 45s linear infinite;
           opacity: 0.85;
-      }
-      @keyframes spin { from { background-position: 0 0; } to { background-position: 1500px 0; } }
+      }}
+      @keyframes spin {{ from {{ background-position: 0 0; }} to {{ background-position: 1500px 0; }} }}
 
-      /* PANNEAUX */
-      .panel { 
+      .panel {{ 
           background: rgba(13, 17, 23, 0.6); 
           border: 1px solid rgba(240, 185, 11, 0.2); 
-          border-radius: 4px; 
-          padding: 25px; 
+          border-radius: 4px; padding: 25px; 
           box-shadow: 0 0 20px rgba(0,0,0,0.8); 
-          backdrop-filter: blur(4px); 
-          width: 280px; 
-          z-index: 10;
-      }
+          backdrop-filter: blur(4px); width: 280px; z-index: 10;
+      }}
       
-      /* HORLOGES */
-      .clock-title { font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 1rem; margin-bottom: 2px; }
-      .clock-time { font-size: 2.8rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 20px; font-weight: bold;}
+      .clock-title {{ font-family: 'Orbitron', sans-serif; color: #848e9c; font-size: 1rem; margin-bottom: 2px; }}
+      .clock-time {{ font-size: 2.8rem; color: #f0b90b; text-shadow: 0 0 10px rgba(240,185,11,0.2); margin-bottom: 20px; font-weight: bold;}}
       
-      /* ACTIFS FINANCIERS */
-      .asset-row { 
+      .asset-row {{ 
           display: flex; justify-content: space-between; align-items: center; 
           padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); 
-      }
-      .asset-row:last-child { border-bottom: none; }
-      .asset-name { font-weight: bold; font-size: 1.2rem; color: #c9d1d9; }
-      .asset-price { font-size: 1.2rem; text-align: right; transition: color 0.2s ease; font-weight: bold; }
-      .asset-pct { font-size: 0.85rem; padding: 2px 6px; border-radius: 4px; text-align: right; margin-top: 2px; font-weight: bold;}
+      }}
+      .asset-row:last-child {{ border-bottom: none; }}
+      .asset-name {{ font-weight: bold; font-size: 1.2rem; color: #c9d1d9; }}
+      .asset-price {{ font-size: 1.2rem; text-align: right; font-weight: bold; }}
+      .asset-pct {{ font-size: 0.85rem; padding: 2px 6px; border-radius: 4px; text-align: right; margin-top: 2px; font-weight: bold;}}
       
-      .up { color: #0ecb81; }
-      .down { color: #f6465d; }
-      .bg-up { background: rgba(14, 203, 129, 0.1); color: #0ecb81; border: 1px solid rgba(14, 203, 129, 0.3); }
-      .bg-down { background: rgba(246, 70, 93, 0.1); color: #f6465d; border: 1px solid rgba(246, 70, 93, 0.3); }
-      .loading { color: #848e9c; font-size: 1rem; font-style: italic; }
+      .up {{ color: #0ecb81; }}
+      .down {{ color: #f6465d; }}
+      .bg-up {{ background: rgba(14, 203, 129, 0.1); color: #0ecb81; border: 1px solid rgba(14, 203, 129, 0.3); }}
+      .bg-down {{ background: rgba(246, 70, 93, 0.1); color: #f6465d; border: 1px solid rgba(246, 70, 93, 0.3); }}
     </style>
     </head>
     <body>
@@ -178,68 +208,19 @@ if st.session_state.page == "welcome":
     </div>
 
     <div class="panel">
-        <div class="asset-row"><span class="asset-name">EUR/USD</span><div><div class="asset-price loading" id="p-eur">Sync...</div><div class="asset-pct" id="pct-eur">--</div></div></div>
-        <div class="asset-row"><span class="asset-name">NASDAQ</span><div><div class="asset-price loading" id="p-nas">Sync...</div><div class="asset-pct" id="pct-nas">--</div></div></div>
-        <div class="asset-row"><span class="asset-name">DXY</span><div><div class="asset-price loading" id="p-dxy">Sync...</div><div class="asset-pct" id="pct-dxy">--</div></div></div>
-        <div class="asset-row"><span class="asset-name">GOLD</span><div><div class="asset-price loading" id="p-gold">Sync...</div><div class="asset-pct" id="pct-gold">--</div></div></div>
+        <div class="asset-row"><span class="asset-name">EUR/USD</span><div><div class="asset-price {'up' if market['eur']['up'] else 'down'}">{market['eur']['price']:.4f}</div><div class="asset-pct {'bg-up' if market['eur']['up'] else 'bg-down'}">{'+' if market['eur']['up'] else ''}{market['eur']['pct']:.2f}%</div></div></div>
+        <div class="asset-row"><span class="asset-name">NASDAQ</span><div><div class="asset-price {'up' if market['nas']['up'] else 'down'}">{market['nas']['price']:.2f}</div><div class="asset-pct {'bg-up' if market['nas']['up'] else 'bg-down'}">{'+' if market['nas']['up'] else ''}{market['nas']['pct']:.2f}%</div></div></div>
+        <div class="asset-row"><span class="asset-name">DXY</span><div><div class="asset-price {'up' if market['dxy']['up'] else 'down'}">{market['dxy']['price']:.3f}</div><div class="asset-pct {'bg-up' if market['dxy']['up'] else 'bg-down'}">{'+' if market['dxy']['up'] else ''}{market['dxy']['pct']:.2f}%</div></div></div>
+        <div class="asset-row"><span class="asset-name">GOLD</span><div><div class="asset-price {'up' if market['gold']['up'] else 'down'}">{market['gold']['price']:.1f}</div><div class="asset-pct {'bg-up' if market['gold']['up'] else 'bg-down'}">{'+' if market['gold']['up'] else ''}{market['gold']['pct']:.2f}%</div></div></div>
     </div>
 
     <script>
-    // 1. Horloges
-    function updateClocks() {
+    function updateClocks() {{
         const now = new Date();
-        document.getElementById('paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
-        document.getElementById('ny').innerText = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
-    }
+        document.getElementById('paris').innerText = now.toLocaleTimeString('fr-FR', {{timeZone: 'Europe/Paris'}});
+        document.getElementById('ny').innerText = now.toLocaleTimeString('en-US', {{timeZone: 'America/New_York', hour12: false}});
+    }}
     setInterval(updateClocks, 1000); updateClocks();
-
-    // 2. Fetch des vraies données via Yahoo Finance (avec proxy CORS)
-    const symbols = "EURUSD=X,NQ=F,DX-Y.NYB,GC=F";
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
-
-    const symbolMap = {
-        'EURUSD=X': { id: 'eur', decimals: 4 },
-        'NQ=F': { id: 'nas', decimals: 2 },
-        'DX-Y.NYB': { id: 'dxy', decimals: 3 },
-        'GC=F': { id: 'gold', decimals: 1 }
-    };
-
-    async function fetchRealMarketData() {
-        try {
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            const parsedData = JSON.parse(data.contents);
-            const results = parsedData.quoteResponse.result;
-
-            results.forEach(quote => {
-                const mapInfo = symbolMap[quote.symbol];
-                if (mapInfo) {
-                    const price = quote.regularMarketPrice;
-                    const changePct = quote.regularMarketChangePercent;
-                    
-                    const elPrice = document.getElementById('p-' + mapInfo.id);
-                    const elPct = document.getElementById('pct-' + mapInfo.id);
-                    
-                    elPrice.innerText = price.toFixed(mapInfo.decimals);
-                    elPct.innerText = (changePct >= 0 ? '+' : '') + changePct.toFixed(2) + '%';
-                    
-                    if (changePct >= 0) {
-                        elPrice.className = 'asset-price up'; 
-                        elPct.className = 'asset-pct bg-up';
-                    } else {
-                        elPrice.className = 'asset-price down'; 
-                        elPct.className = 'asset-pct bg-down';
-                    }
-                }
-            });
-        } catch (error) {
-            console.error("Erreur lors de la récupération des prix :", error);
-        }
-    }
-
-    fetchRealMarketData();
-    setInterval(fetchRealMarketData, 10000);
     </script>
     </body>
     </html>
