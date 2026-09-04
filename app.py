@@ -11,22 +11,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Gestion de la navigation
+# 2. Gestion de la navigation via Query Params
 if "page" in st.query_params:
     st.session_state.page = st.query_params["page"]
 
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
-def go_to_page(page_name):
-    st.session_state.page = page_name
-    st.query_params["page"] = page_name
-
 start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS GLOBAUX & CORRECTION HARMONISATION
+# STYLES CSS GLOBAUX DU TERMINAL
 # ==========================================
 st.markdown("""
     <style>
@@ -69,12 +65,12 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD global (Page d'accueil) */
+        /* BARRE UNIQUE HUD HEADER */
         .hud-header {
             background: rgba(13, 17, 23, 0.94);
             border: 1.5px solid rgba(240, 185, 11, 0.45);
             border-radius: 12px;
-            padding: 8px 20px;
+            padding: 8px 18px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
@@ -107,40 +103,51 @@ st.markdown("""
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Égalisation des colonnes Streamlit */
-        div[data-testid="stColumn"] {
-            display: flex !important;
-            align-items: center !important;
-        }
-
-        /* Boutons néon calibrés pour le HUD */
-        div.stButton {
-            width: 100% !important;
-        }
-
-        div.stButton > button {
-            width: 100% !important;
-            height: 52px !important;
-            min-height: 52px !important;
+        /* BOUTON DE NAVIGATION NÉON DANS LA BARRE */
+        .hud-nav-btn {
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 0.85rem !important;
+            font-size: 0.75rem !important;
             font-weight: 900 !important;
-            letter-spacing: 1.5px !important;
-            border-radius: 10px !important;
-            padding: 0px 12px !important;
-            border: 1.5px solid rgba(240, 185, 11, 0.6) !important;
-            box-shadow: 0 0 15px rgba(240, 185, 11, 0.3) !important;
-            cursor: pointer !important;
+            letter-spacing: 1.2px !important;
+            border-radius: 8px !important;
+            padding: 8px 16px !important;
+            text-decoration: none !important;
+            border: 1px solid rgba(240, 185, 11, 0.8) !important;
+            box-shadow: 0 0 12px rgba(240, 185, 11, 0.4) !important;
             transition: all 0.2s ease-in-out !important;
-            display: flex !important;
+            display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
+            cursor: pointer !important;
+        }
+
+        .hud-nav-btn:hover {
+            box-shadow: 0 0 22px rgba(240, 185, 11, 0.9), 0 0 10px #00f3ff !important;
+            color: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        /* BOUTON PRINCIPAL D'ACCÈS SUR L'ACCUEIL */
+        div.stButton > button {
+            width: 100% !important;
+            height: 50px !important;
+            background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
+            color: #080b10 !important;
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.9rem !important;
+            font-weight: 900 !important;
+            letter-spacing: 1.5px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            box-shadow: 0 0 20px rgba(240, 185, 11, 0.5) !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 25px rgba(240, 185, 11, 0.8), 0 0 10px #00f3ff !important;
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
             color: #000000 !important;
         }
 
@@ -344,8 +351,9 @@ if st.session_state.page == "welcome":
             </div>
         """, unsafe_allow_html=True)
 
-        if st.button("ENTRER DANS LE TERMINAL ➔", key="btn_enter"):
-            go_to_page("hub")
+        if st.button("ENTRER DANS LE TERMINAL ➔"):
+            st.session_state.page = "hub"
+            st.query_params["page"] = "hub"
             st.rerun()
 
     with col_right:
@@ -355,7 +363,6 @@ if st.session_state.page == "welcome":
         <head>
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap');
-                
                 * { box-sizing: border-box; }
                 body { margin: 0; padding: 0; background-color: transparent; font-family: 'Inter', sans-serif; }
 
@@ -492,86 +499,56 @@ if st.session_state.page == "welcome":
 
 
 # ==========================================
-# PAGE 2 : HUB / WORKSPACE (BARRE CORRIGÉE)
+# PAGE 2 : HUB / WORKSPACE (BARRE UNIQUE HUD)
 # ==========================================
 elif st.session_state.page == "hub":
 
-    col_hdr_left, col_hdr_mid, col_hdr_right = st.columns([1.2, 1.2, 1.0], gap="small")
-
-    with col_hdr_left:
-        st.markdown(f"""
-            <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:0 14px; display:flex; align-items:center; gap:10px; height:52px; box-sizing:border-box;">
-                <div style="width:30px; height:30px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.95rem; box-shadow:0 0 8px rgba(240,185,11,0.5);">⚡</div>
+    # BARRE UNIQUE IDENTIQUE À L'ACCUEIL
+    st.markdown(f"""
+        <div class="hud-header">
+            <!-- Bloc Gauche : Logo & Titre -->
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:34px; height:34px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.05rem; box-shadow:0 0 12px rgba(240,185,11,0.6);">⚡</div>
                 <div>
-                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; font-size:0.9rem; line-height:1.1;">TERMINAL TRADER <span style="color:#f0b90b;">PRO</span></div>
-                    <div style="font-family:'JetBrains Mono'; font-size:0.58rem; color:#848e9c; letter-spacing:0.8px;">QUANTITATIVE WORKSPACE</div>
+                    <div class="hud-title" style="font-size:1.05rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="mono-text" style="font-size:0.62rem; letter-spacing:0.8px; color:#848e9c;">QUANTITATIVE WORKSPACE</div>
                 </div>
             </div>
-        """, unsafe_allow_html=True)
 
-    with col_hdr_mid:
-        header_clocks_html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&display=swap');
-                * { box-sizing: border-box; }
-                body { margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }
-                .clocks-box {
-                    background: rgba(13, 17, 23, 0.94);
-                    border: 1.5px solid rgba(240, 185, 11, 0.45);
-                    border-radius: 10px;
-                    padding: 0 14px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-around;
-                    height: 52px;
-                }
-                .clock-item { display: flex; align-items: center; gap: 6px; }
-                .flag { font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: #f0b90b; }
-                .val { font-size: 0.85rem; font-weight: 800; color: #ffffff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
-                .divider { width: 1px; height: 18px; background: rgba(240, 185, 11, 0.3); }
-            </style>
-        </head>
-        <body>
-            <div class="clocks-box">
-                <div class="clock-item">
-                    <span class="flag">🇫🇷 PARIS</span>
-                    <span class="val" id="p2-paris">--:--:--</span>
+            <!-- Bloc Milieu : Horloges Paris & New York -->
+            <div style="display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); padding:5px 14px; border-radius:8px; border:1px solid rgba(240,185,11,0.2);">
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-family:'Orbitron'; font-size:0.65rem; font-weight:900; color:#f0b90b;">🇫🇷 PARIS</span>
+                    <span id="hdr-paris" style="font-family:'JetBrains Mono'; font-size:0.85rem; font-weight:800; color:#ffffff;">--:--:--</span>
                 </div>
-                <div class="divider"></div>
-                <div class="clock-item">
-                    <span class="flag">🇺🇸 NEW YORK</span>
-                    <span class="val" id="p2-ny">--:--:--</span>
+                <div style="width:1px; height:16px; background:rgba(240,185,11,0.3);"></div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-family:'Orbitron'; font-size:0.65rem; font-weight:900; color:#f0b90b;">🇺🇸 NEW YORK</span>
+                    <span id="hdr-ny" style="font-family:'JetBrains Mono'; font-size:0.85rem; font-weight:800; color:#ffffff;">--:--:--</span>
                 </div>
             </div>
-            <script>
-                function updateP2Clocks() {
-                    const now = new Date();
-                    document.getElementById('p2-paris').innerText = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    document.getElementById('p2-ny').innerText = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                }
-                setInterval(updateP2Clocks, 1000);
-                updateP2Clocks();
-            </script>
-        </body>
-        </html>
-        """
-        components.html(header_clocks_html, height=52, scrolling=False)
 
-    with col_hdr_right:
-        col_ms, col_back = st.columns([1, 1], gap="small")
-        with col_ms:
-            st.markdown(f"""
-                <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; height:52px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-size:0.75rem; color:#848e9c; box-sizing:border-box;">
-                    MS : <span style="color:#ffffff; font-weight:700; margin-left:5px;">{latency_ms} ms</span>
+            <!-- Bloc Droite : Latency + Bouton Retour Accueil -->
+            <div style="display:flex; gap:14px; align-items:center;">
+                <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+                    MS SERVEUR : <span style="color:#ffffff; font-weight:700;">{latency_ms} ms</span>
                 </div>
-            """, unsafe_allow_html=True)
-        with col_back:
-            if st.button("← ACCUEIL", key="btn_back_home"):
-                go_to_page("welcome")
-                st.rerun()
+                <a href="?page=welcome" target="_self" class="hud-nav-btn">← ACCUEIL</a>
+            </div>
+        </div>
+
+        <script>
+            function updateHdrClocks() {
+                const now = new Date();
+                const p = document.getElementById('hdr-paris');
+                const ny = document.getElementById('hdr-ny');
+                if (p) p.innerText = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                if (ny) ny.innerText = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+            setInterval(updateHdrClocks, 1000);
+            updateHdrClocks();
+        </script>
+    """, unsafe_allow_html=True)
 
     st.markdown("""
         <div class="hud-card" style="margin-top:12px;">
@@ -579,7 +556,7 @@ elif st.session_state.page == "hub":
                 🚀 WORKSPACE QUANTITATIF ACTIF
             </div>
             <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
-                La barre supérieure est alignée. Tu peux rajouter tes modules et widgets d'analyse ci-dessous.
+                La barre supérieure est désormais parfaitement unifiée. Tu peux cliquer sur <strong>← ACCUEIL</strong> dans la barre pour revenir à la page d'accueil à tout moment.
             </p>
         </div>
     """, unsafe_allow_html=True)
