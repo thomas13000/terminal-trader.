@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Gestion de la navigation via URL et session
+# Lecture des paramètres d'URL pour la navigation
 if "page" in st.query_params:
     st.session_state.page = st.query_params["page"]
 elif "page" not in st.session_state:
@@ -30,13 +30,11 @@ if "custom_sites" not in st.session_state:
 if st.session_state.page == "welcome":
     st.markdown("""
         <style>
-            /* Masquage des éléments Streamlit par défaut */
             header, footer, [data-testid="stHeader"] { 
                 display: none !important; 
                 visibility: hidden !important; 
             }
             
-            /* Verrouillage strict du scroll (plein écran immobile) */
             html, body, .stApp, [data-testid="stAppViewContainer"], .main, .block-container {
                 overflow: hidden !important;
                 height: 100vh !important;
@@ -183,24 +181,24 @@ if st.session_state.page == "welcome":
         .router-header { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.65rem; color: var(--gold-main); font-weight: 700; }
         .router-ticker { font-family: var(--font-mono); font-size: 0.78rem; color: #fff; display: flex; align-items: center; justify-content: space-between; }
 
-        button.btn-enter-terminal {
+        a.btn-enter-terminal {
             position: relative; background: linear-gradient(135deg, var(--gold-main) 0%, #d4a007 100%);
-            color: #080b10 !important; border: none; padding: 18px 24px; font-family: var(--font-display);
+            color: #080b10 !important; text-decoration: none !important; padding: 18px 24px; font-family: var(--font-display);
             font-size: 0.88rem; font-weight: 900; letter-spacing: 2px; border-radius: 12px;
             cursor: pointer; overflow: hidden; box-shadow: 0 0 25px var(--gold-glow);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
         }
-        button.btn-enter-terminal::after {
+        a.btn-enter-terminal::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             transform: rotate(30deg); transition: 0.8s; opacity: 0;
         }
-        button.btn-enter-terminal:hover {
+        a.btn-enter-terminal:hover {
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 0 40px rgba(240, 185, 11, 0.7), 0 0 12px var(--cyan-neon); color: #000 !important;
         }
-        button.btn-enter-terminal:hover::after { opacity: 1; left: 100%; }
+        a.btn-enter-terminal:hover::after { opacity: 1; left: 100%; }
 
         .hotkey-legend { font-family: var(--font-mono); font-size: 0.63rem; color: var(--text-muted); text-align: center; display: flex; justify-content: center; gap: 12px; }
         .hotkey-badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; color: var(--gold-main); font-weight: 700; }
@@ -295,9 +293,10 @@ if st.session_state.page == "welcome":
             </div>
         </div>
 
-        <button onclick="navigateToHub()" class="btn-enter-terminal" id="btn-enter-app">
+        <!-- Lien direct vers la fenêtre racine (target="_top") -->
+        <a href="?page=hub" target="_top" class="btn-enter-terminal" id="btn-enter-app">
             ENTRER DANS LE TERMINAL ➔
-        </button>
+        </a>
 
         <div class="hotkey-legend">
             <span><span class="hotkey-badge">ENTRÉE</span> Démarrer</span>
@@ -385,15 +384,9 @@ if st.session_state.page == "welcome":
     </nav>
 
     <script>
-        // Passage d'URL direct sans composant ni cadre intermédiaire Streamlit
+        // Redirection forcée au sommet du DOM
         function navigateToHub() {
-            try {
-                const url = new URL(window.parent.location.href);
-                url.searchParams.set('page', 'hub');
-                window.parent.location.href = url.href;
-            } catch(e) {
-                window.location.search = '?page=hub';
-            }
+            window.top.location.href = window.top.location.pathname + '?page=hub';
         }
 
         const marketData = {
@@ -702,6 +695,7 @@ if st.session_state.page == "welcome":
         setInterval(updateClocks, 1000);
         updateClocks();
 
+        // Capture de la touche Entrée pour redirection directe
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Enter') {
                 navigateToHub();
