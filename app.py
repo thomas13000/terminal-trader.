@@ -14,7 +14,7 @@ query_params = st.query_params
 current_page = query_params.get("page", "welcome")
 
 # ==========================================
-# PAGE 1 : WELCOME SCREEN (TON CODE HTML COMPLET)
+# PAGE 1 : WELCOME SCREEN
 # ==========================================
 if current_page == "welcome":
     st.markdown("""
@@ -24,6 +24,7 @@ if current_page == "welcome":
             footer { visibility: hidden !important; }
             .stApp { background-color: #080b10; overflow: hidden; }
             iframe { border: none !important; width: 100vw !important; height: 100vh !important; }
+            .block-container { padding: 0 !important; max-width: 100% !important; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -612,7 +613,7 @@ if current_page == "welcome":
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // REDIRECTION VERS LE HUB STREAMLIT
+        // REDIRECTION VIA WINDOW.OPEN (RÉSOUT LE BLOCAGE IFRAME)
         function launchTerminalWarp() {
             let warpProgress = 0;
             const warpInterval = setInterval(() => {
@@ -621,7 +622,7 @@ if current_page == "welcome":
                 starsGroup.rotation.z += 0.1;
                 if (warpProgress >= 1.0) {
                     clearInterval(warpInterval);
-                    window.parent.location.search = '?page=hub';
+                    window.open('./?page=hub', '_top');
                 }
             }, 20);
         }
@@ -678,11 +679,21 @@ if current_page == "welcome":
     st.components.v1.html(welcome_html_code, height=920)
 
 # ==========================================
-# PAGE 2 : MAIN FINANCIAL HUB (PYTHON / STREAMLIT)
+# PAGE 2 : MAIN FINANCIAL HUB (PLEIN ÉCRAN CORRIGÉ)
 # ==========================================
 elif current_page == "hub":
     st.markdown("""
         <style>
+            /* Force le conteneur principal Streamlit en plein écran */
+            .main .block-container {
+                max-width: 100% !important;
+                padding-left: 2.5rem !important;
+                padding-right: 2.5rem !important;
+                padding-top: 1.5rem !important;
+                padding-bottom: 2rem !important;
+            }
+            header[data-testid="stHeader"] { visibility: hidden !important; }
+            footer { visibility: hidden !important; }
             .stApp { background-color: #080b10; color: #eaecef; }
             .stButton>button {
                 background: linear-gradient(135deg, #f0b90b, #d4a007);
@@ -692,7 +703,7 @@ elif current_page == "hub":
         </style>
     """, unsafe_allow_html=True)
 
-    col_h1, col_h2 = st.columns([4, 1])
+    col_h1, col_h2 = st.columns([5, 1])
     with col_h1:
         st.title("⚡ TERMINAL TRADER PRO — MAIN HUB")
         st.caption("FINVIZ & BLOOMBERG QUANTITATIVE MATRIX")
