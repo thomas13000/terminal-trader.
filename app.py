@@ -19,7 +19,7 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS GLOBAL HUD (Positionnement Haut Max)
+# STYLES CSS (Zero Scroll Strict & Hud Compact)
 # ==========================================
 st.markdown("""
     <style>
@@ -39,16 +39,16 @@ st.markdown("""
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Remontée au sommet de la page */
         .main .block-container {
-            padding: 2px 20px 10px 20px !important;
+            padding: 4px 24px 0px 24px !important;
             max-width: 100vw !important;
             height: 100vh !important;
+            overflow: hidden !important;
         }
 
         /* Viseurs 4 coins */
         .corner-reticle {
-            position: fixed; width: 24px; height: 24px; z-index: 99; pointer-events: none;
+            position: fixed; width: 20px; height: 20px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.4);
         }
         .corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
@@ -56,14 +56,13 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD collé en haut */
+        /* Header HUD */
         .hud-header {
             background: rgba(13, 17, 23, 0.90);
             border: 1px solid rgba(240, 185, 11, 0.3);
             border-radius: 10px;
-            padding: 8px 18px;
-            margin-top: 0px;
-            margin-bottom: 10px;
+            padding: 8px 16px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -83,15 +82,15 @@ st.markdown("""
 
         .mono-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: #848e9c;
         }
 
         .hud-card {
             background: rgba(13, 17, 23, 0.85);
             border: 1px solid rgba(240, 185, 11, 0.22);
-            border-radius: 14px;
-            padding: 22px;
+            border-radius: 12px;
+            padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
@@ -101,18 +100,18 @@ st.markdown("""
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 1rem !important;
+            font-size: 0.95rem !important;
             font-weight: 900 !important;
             letter-spacing: 2px !important;
-            border-radius: 10px !important;
-            padding: 16px 20px !important;
+            border-radius: 8px !important;
+            padding: 14px 18px !important;
             border: none !important;
-            box-shadow: 0 0 20px rgba(240, 185, 11, 0.4) !important;
+            box-shadow: 0 0 18px rgba(240, 185, 11, 0.4) !important;
             cursor: pointer !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.8), 0 0 12px #00f3ff !important;
+            box-shadow: 0 0 25px rgba(240, 185, 11, 0.8), 0 0 10px #00f3ff !important;
             color: #000000 !important;
         }
     </style>
@@ -132,42 +131,42 @@ if st.session_state.page == "welcome":
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
 
-    # --- BARRE DU HAUT (Tout en haut) ---
+    # --- BARRE DU HAUT ---
     st.markdown(f"""
         <div class="hud-header">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:32px; height:32px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1rem;">⚡</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:30px; height:30px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.95rem;">⚡</div>
                 <div>
-                    <div class="hud-title" style="font-size:1.05rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                    <div class="mono-text" style="font-size:0.65rem;">QUANTITATIVE MARKET INTELLIGENCE</div>
+                    <div class="hud-title" style="font-size:1rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="mono-text" style="font-size:0.62rem;">QUANTITATIVE MARKET INTELLIGENCE</div>
                 </div>
             </div>
-            <div style="display:flex; gap:20px; align-items:center;">
+            <div style="display:flex; gap:18px; align-items:center;">
                 <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
                     MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
                 </div>
                 <div class="mono-text" style="color:#00f3ff; font-weight:700;">{time_utc} UTC</div>
-                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.1); padding:4px 10px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:6px;">
-                    <span style="width:7px; height:7px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 8px #0ecb81;"></span>
-                    SYSTEM ONLINE
+                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.1); padding:3px 8px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:5px;">
+                    <span style="width:6px; height:6px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 6px #0ecb81;"></span>
+                    ONLINE
                 </div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    # --- DISPOSITION EN 2 COLONNES ---
-    col_left, col_right = st.columns([1.6, 1.4], gap="medium")
+    # --- DISPOSITION EN 2 COLONNES (Largeur restreinte à droite) ---
+    col_left, col_right = st.columns([2.2, 1.0], gap="medium")
 
     with col_left:
         st.markdown("""
             <div class="hud-card">
-                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:3px 10px; border-radius:15px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:12px;">
+                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:3px 10px; border-radius:15px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:10px;">
                     ● NŒUD SYSTÈME : ACTIF
                 </div>
-                <div class="hud-title" style="font-size:1.4rem; margin-bottom:10px;">
+                <div class="hud-title" style="font-size:1.3rem; margin-bottom:8px;">
                     PORTAIL DE DÉCISION QUANTITATIVE
                 </div>
-                <div style="color:#848e9c; font-size:0.88rem; line-height:1.5; margin-bottom:24px;">
+                <div style="color:#848e9c; font-size:0.85rem; line-height:1.4; margin-bottom:20px;">
                     Initialisez le terminal pour accéder au moteur d'analyse, aux modèles de corrélation et aux outils d'exécution en temps réel.
                 </div>
             </div>
@@ -180,8 +179,8 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # Cadre Jaune verticallisé et agrandi avec les 4 actifs empilés
-        market_cards_html = """
+        # Cadre compact ultra-réduit sans courbes
+        market_quotes_html = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -196,43 +195,40 @@ if st.session_state.page == "welcome":
                     font-family: 'Inter', sans-serif;
                 }
 
-                .yellow-container {
+                .compact-container {
                     background: rgba(13, 17, 23, 0.95);
-                    border: 2px solid #f0b90b;
-                    border-radius: 14px;
-                    padding: 10px;
-                    box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
+                    border: 1.5px solid #f0b90b;
+                    border-radius: 10px;
+                    padding: 8px;
+                    box-shadow: 0 0 15px rgba(240, 185, 11, 0.2);
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 4px;
                 }
 
                 .container-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding-bottom: 6px;
-                    border-bottom: 1px solid rgba(240, 185, 11, 0.25);
+                    padding-bottom: 4px;
+                    margin-bottom: 2px;
+                    border-bottom: 1px solid rgba(240, 185, 11, 0.2);
                 }
 
                 .title-text {
                     font-family: 'Orbitron', sans-serif;
                     font-weight: 900;
-                    font-size: 0.82rem;
+                    font-size: 0.72rem;
                     color: #f0b90b;
-                    letter-spacing: 1.5px;
+                    letter-spacing: 1px;
                 }
 
                 .pulse-tag {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
-                    background: rgba(14,203,129,0.1);
-                    padding: 2px 7px;
-                    border-radius: 12px;
-                    border: 1px solid rgba(14,203,129,0.3);
+                    gap: 4px;
                     font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.6rem;
+                    font-size: 0.58rem;
                     font-weight: 700;
                     color: #0ecb81;
                 }
@@ -242,36 +238,22 @@ if st.session_state.page == "welcome":
                     height: 5px;
                     background-color: #0ecb81;
                     border-radius: 50%;
-                    box-shadow: 0 0 6px #0ecb81;
-                    animation: pulse-animation 1.2s infinite ease-in-out;
+                    box-shadow: 0 0 5px #0ecb81;
                 }
 
-                @keyframes pulse-animation {
-                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.7); }
-                    70% { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(14, 203, 129, 0); }
-                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
-                }
-
-                .asset-card {
-                    background: rgba(22, 27, 34, 0.85);
-                    border: 1px solid rgba(240, 185, 11, 0.2);
-                    border-radius: 8px;
-                    height: 115px;
+                .quote-row {
+                    background: rgba(22, 27, 34, 0.7);
+                    border: 1px solid rgba(240, 185, 11, 0.15);
+                    border-radius: 6px;
+                    height: 48px;
                     overflow: hidden;
-                }
-
-                .asset-card:hover {
-                    border-color: rgba(240, 185, 11, 0.6);
                 }
             </style>
         </head>
         <body>
-            <div class="yellow-container">
+            <div class="compact-container">
                 <div class="container-header">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="color:#f0b90b; font-size:0.9rem;">⚡</span>
-                        <span class="title-text">MARCHÉS EN DIRECT (1D INTRADAY)</span>
-                    </div>
+                    <span class="title-text">⚡ PRIX EN DIRECT</span>
                     <div class="pulse-tag">
                         <span class="pulse-dot"></span>
                         <span>LIVE</span>
@@ -279,80 +261,64 @@ if st.session_state.page == "welcome":
                 </div>
 
                 <!-- 1. NASDAQ -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container" style="height:100%; width:100%;">
-                        <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                <div class="quote-row">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
                           "symbol": "FOREXCOM:NSXUSD",
                           "width": "100%",
-                          "height": "100%",
-                          "locale": "fr",
-                          "dateRange": "1D",
                           "colorTheme": "dark",
                           "isTransparent": true,
-                          "autosize": true,
-                          "largeChartUrl": ""
+                          "locale": "fr"
                         }
                         </script>
                     </div>
                 </div>
 
                 <!-- 2. DXY -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container" style="height:100%; width:100%;">
-                        <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                <div class="quote-row">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
                           "symbol": "CAPITALCOM:DXY",
                           "width": "100%",
-                          "height": "100%",
-                          "locale": "fr",
-                          "dateRange": "1D",
                           "colorTheme": "dark",
                           "isTransparent": true,
-                          "autosize": true,
-                          "largeChartUrl": ""
+                          "locale": "fr"
                         }
                         </script>
                     </div>
                 </div>
 
                 <!-- 3. EUR / USD -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container" style="height:100%; width:100%;">
-                        <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                <div class="quote-row">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
                           "symbol": "FX:EURUSD",
                           "width": "100%",
-                          "height": "100%",
-                          "locale": "fr",
-                          "dateRange": "1D",
                           "colorTheme": "dark",
                           "isTransparent": true,
-                          "autosize": true,
-                          "largeChartUrl": ""
+                          "locale": "fr"
                         }
                         </script>
                     </div>
                 </div>
 
                 <!-- 4. GOLD -->
-                <div class="asset-card">
-                    <div class="tradingview-widget-container" style="height:100%; width:100%;">
-                        <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                <div class="quote-row">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                         {
                           "symbol": "OANDA:XAUUSD",
                           "width": "100%",
-                          "height": "100%",
-                          "locale": "fr",
-                          "dateRange": "1D",
                           "colorTheme": "dark",
                           "isTransparent": true,
-                          "autosize": true,
-                          "largeChartUrl": ""
+                          "locale": "fr"
                         }
                         </script>
                     </div>
@@ -362,7 +328,7 @@ if st.session_state.page == "welcome":
         </body>
         </html>
         """
-        components.html(market_cards_html, height=530, scrolling=False)
+        components.html(market_quotes_html, height=250, scrolling=False)
 
 
 # ==========================================
