@@ -19,7 +19,7 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS (HUD, Zero Scroll, Style Global)
+# STYLES CSS GLOBAL HUD
 # ==========================================
 st.markdown("""
     <style>
@@ -86,7 +86,6 @@ st.markdown("""
             color: #848e9c;
         }
 
-        /* Cadre principal gauche */
         .hud-card {
             background: rgba(13, 17, 23, 0.85);
             border: 1px solid rgba(240, 185, 11, 0.22);
@@ -180,14 +179,15 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # Intégration complète : le cadre jaune entoure le header ET la liste d'actifs avec leurs courbes
-        market_box_html = """
+        # Cadre Jaune englobant des mini-cartes individuelles pour chaque actif
+        market_cards_html = """
         <!DOCTYPE html>
         <html>
         <head>
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap');
                 
+                * { box-sizing: border-box; }
                 body {
                     margin: 0;
                     padding: 0;
@@ -195,112 +195,158 @@ if st.session_state.page == "welcome":
                     font-family: 'Inter', sans-serif;
                 }
 
-                .market-outer-box {
+                .yellow-container {
                     background: rgba(13, 17, 23, 0.95);
                     border: 2px solid #f0b90b;
                     border-radius: 14px;
-                    padding: 14px;
-                    box-shadow: 0 0 25px rgba(240, 185, 11, 0.22);
-                    box-sizing: border-box;
+                    padding: 12px;
+                    box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
                 }
 
-                .market-outer-header {
+                .container-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding-bottom: 10px;
-                    margin-bottom: 8px;
+                    padding-bottom: 8px;
                     border-bottom: 1px solid rgba(240, 185, 11, 0.25);
                 }
 
-                .hud-title-internal {
+                .title-text {
                     font-family: 'Orbitron', sans-serif;
                     font-weight: 900;
-                    font-size: 0.88rem;
+                    font-size: 0.85rem;
                     color: #f0b90b;
                     letter-spacing: 1.5px;
                 }
 
-                .mono-text-internal {
+                .pulse-tag {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: rgba(14,203,129,0.1);
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(14,203,129,0.3);
                     font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.65rem;
+                    font-size: 0.62rem;
                     font-weight: 700;
                     color: #0ecb81;
                 }
 
                 .pulse-dot {
-                    width: 7px;
-                    height: 7px;
+                    width: 6px;
+                    height: 6px;
                     background-color: #0ecb81;
                     border-radius: 50%;
-                    display: inline-block;
-                    box-shadow: 0 0 8px #0ecb81;
+                    box-shadow: 0 0 6px #0ecb81;
                     animation: pulse-animation 1.2s infinite ease-in-out;
                 }
 
                 @keyframes pulse-animation {
                     0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.7); }
-                    70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(14, 203, 129, 0); }
+                    70% { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(14, 203, 129, 0); }
                     100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
+                }
+
+                /* Carte individuelle d'actif */
+                .asset-card {
+                    background: rgba(22, 27, 34, 0.8);
+                    border: 1px solid rgba(240, 185, 11, 0.2);
+                    border-radius: 10px;
+                    overflow: hidden;
+                    height: 110px;
+                    transition: border-color 0.2s ease;
+                }
+
+                .asset-card:hover {
+                    border-color: rgba(240, 185, 11, 0.6);
                 }
             </style>
         </head>
         <body>
-            <div class="market-outer-box">
-                <div class="market-outer-header">
+            <div class="yellow-container">
+                <div class="container-header">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="color:#f0b90b; font-size:1rem;">⚡</span>
-                        <span class="hud-title-internal">FLUX DE MARCHÉ LIVE</span>
+                        <span class="title-text">MARCHÉS EN DIRECT</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px; background:rgba(14,203,129,0.1); padding:3px 8px; border-radius:12px; border:1px solid rgba(14,203,129,0.3);">
+                    <div class="pulse-tag">
                         <span class="pulse-dot"></span>
-                        <span class="mono-text-internal">WEBSOCKET</span>
+                        <span>LIVE</span>
                     </div>
                 </div>
 
-                <!-- Widget TradingView avec mini-courbe dédiée pour chaque actif -->
-                <div class="tradingview-widget-container" style="background: transparent;">
-                  <div class="tradingview-widget-container__widget"></div>
-                  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-                  {
-                    "colorTheme": "dark",
-                    "dateRange": "1D",
-                    "showChart": true,
-                    "locale": "fr",
-                    "largeChartUrl": "",
-                    "isTransparent": true,
-                    "showSymbolLogo": false,
-                    "showFloatingTooltip": false,
-                    "width": "100%",
-                    "height": "340",
-                    "plotLineColorGrowing": "rgba(14, 203, 129, 1)",
-                    "plotLineColorFalling": "rgba(246, 70, 93, 1)",
-                    "gridLineColor": "rgba(240, 185, 11, 0.05)",
-                    "scaleFontColor": "rgba(132, 142, 156, 1)",
-                    "belowLineFillColorGrowing": "rgba(14, 203, 129, 0.15)",
-                    "belowLineFillColorFalling": "rgba(246, 70, 93, 0.15)",
-                    "belowLineFillColorGrowingBottom": "rgba(14, 203, 129, 0)",
-                    "belowLineFillColorFallingBottom": "rgba(246, 70, 93, 0)",
-                    "symbolActiveColor": "rgba(240, 185, 11, 0.12)",
-                    "tabs": [
-                      {
-                        "title": "Actifs",
-                        "symbols": [
-                          { "s": "CAPITALCOM:DXY", "d": "USD INDEX (DXY)" },
-                          { "s": "FOREXCOM:NSXUSD", "d": "NASDAQ 100" },
-                          { "s": "OANDA:XAUUSD", "d": "OR (GOLD)" },
-                          { "s": "FX:EURUSD", "d": "EUR / USD" }
-                        ]
-                      }
-                    ]
-                  }
-                  </script>
+                <!-- CASE 1 : NASDAQ -->
+                <div class="asset-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                          "symbol": "FOREXCOM:NSXUSD",
+                          "width": "100%",
+                          "height": "110",
+                          "locale": "fr",
+                          "dateRange": "1D",
+                          "colorTheme": "dark",
+                          "isTransparent": true,
+                          "autosize": false,
+                          "largeChartUrl": "",
+                          "chartOnly": false
+                        }
+                        </script>
+                    </div>
                 </div>
+
+                <!-- CASE 2 : OR (GOLD) -->
+                <div class="asset-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                          "symbol": "OANDA:XAUUSD",
+                          "width": "100%",
+                          "height": "110",
+                          "locale": "fr",
+                          "dateRange": "1D",
+                          "colorTheme": "dark",
+                          "isTransparent": true,
+                          "autosize": false,
+                          "largeChartUrl": "",
+                          "chartOnly": false
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- CASE 3 : BITCOIN -->
+                <div class="asset-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                          "symbol": "BINANCE:BTCUSDT",
+                          "width": "100%",
+                          "height": "110",
+                          "locale": "fr",
+                          "dateRange": "1D",
+                          "colorTheme": "dark",
+                          "isTransparent": true,
+                          "autosize": false,
+                          "largeChartUrl": "",
+                          "chartOnly": false
+                        }
+                        </script>
+                    </div>
+                </div>
+
             </div>
         </body>
         </html>
         """
-        components.html(market_box_html, height=430, scrolling=False)
+        components.html(market_cards_html, height=450, scrolling=False)
 
 
 # ==========================================
