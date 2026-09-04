@@ -19,31 +19,34 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS + GLOBE 3D EN FOND DE PAGE
+# STYLES CSS (VERROUILLAGE SCROLL + GLOBE VIF)
 # ==========================================
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700;800&family=Orbitron:wght@600;800;900&display=swap');
-
+        /* Masquage des éléments Streamlit natifs */
         header[data-testid="stHeader"], footer, [data-testid="stToolbar"] {
             display: none !important;
             visibility: hidden !important;
         }
 
-        html, body, .stApp, [data-testid="stAppViewContainer"], .main {
+        /* VERROUILLAGE STRICT DU DÉFILEMENT SUR TOUTE LA PAGE */
+        html, body, .stApp, [data-testid="stAppViewContainer"], .main, [data-testid="stVerticalBlock"] {
             height: 100vh !important;
             max-height: 100vh !important;
             overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background-color: #080b10 !important;
             color: #eaecef !important;
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Conteneur principal collé en haut */
+        /* Conteneur principal fixe */
         .main .block-container {
-            padding: 8px 24px 0px 24px !important;
+            padding: 8px 20px 0px 20px !important;
             max-width: 100vw !important;
             height: 100vh !important;
+            max-height: 100vh !important;
             overflow: hidden !important;
             position: relative;
             z-index: 2;
@@ -52,26 +55,26 @@ st.markdown("""
         /* Viseurs aux 4 coins */
         .corner-reticle {
             position: fixed; width: 22px; height: 22px; z-index: 99; pointer-events: none;
-            border: 2px solid rgba(240, 185, 11, 0.5);
+            border: 2px solid rgba(240, 185, 11, 0.6);
         }
         .corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
         .corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD de la barre supérieure */
+        /* Header HUD */
         .hud-header {
-            background: rgba(13, 17, 23, 0.92);
-            border: 1.5px solid rgba(240, 185, 11, 0.4);
+            background: rgba(13, 17, 23, 0.94);
+            border: 1.5px solid rgba(240, 185, 11, 0.45);
             border-radius: 12px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             margin-top: 0px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             backdrop-filter: blur(20px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.15);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
         }
 
         .hud-title {
@@ -108,29 +111,29 @@ st.markdown("""
             font-weight: 900 !important;
             letter-spacing: 2px !important;
             border-radius: 8px !important;
-            padding: 16px 20px !important;
+            padding: 14px 20px !important;
             border: none !important;
-            box-shadow: 0 0 20px rgba(240, 185, 11, 0.4) !important;
+            box-shadow: 0 0 25px rgba(240, 185, 11, 0.5) !important;
             cursor: pointer !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 35px rgba(240, 185, 11, 0.8), 0 0 15px #00f3ff !important;
+            box-shadow: 0 0 35px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
             color: #000000 !important;
         }
 
-        /* GLOBE 3D ANIME EN FOND DE PAGE */
+        /* GLOBE 3D EN FOND DE PAGE (TEINTE PLUS VIVE & PRONONCÉE) */
         .bg-globe-wrapper {
             position: fixed;
             top: 50%;
             left: 50%;
-            width: 580px;
-            height: 580px;
-            margin-top: -290px;
-            margin-left: -290px;
+            width: 600px;
+            height: 600px;
+            margin-top: -300px;
+            margin-left: -300px;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.14;
+            opacity: 0.38; /* Opacité renforcée pour un rendu bien plus visible */
             perspective: 1000px;
         }
 
@@ -139,7 +142,7 @@ st.markdown("""
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            animation: spinGlobeBg 22s linear infinite;
+            animation: spinGlobeBg 20s linear infinite;
         }
 
         .bg-globe-ring {
@@ -148,8 +151,8 @@ st.markdown("""
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 1.5px solid #f0b90b;
-            box-shadow: 0 0 10px rgba(240, 185, 11, 0.3);
+            border: 2px solid #f0b90b; /* Trait plus épais et couleur or vive */
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.6); /* Lueur accrue */
         }
 
         @keyframes spinGlobeBg {
@@ -195,7 +198,7 @@ if st.session_state.page == "welcome":
     st.markdown(f"""
         <div class="hud-header">
             <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:36px; height:36px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.1rem; box-shadow:0 0 10px rgba(240,185,11,0.5);">⚡</div>
+                <div style="width:36px; height:36px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.1rem; box-shadow:0 0 12px rgba(240,185,11,0.6);">⚡</div>
                 <div>
                     <div class="hud-title" style="font-size:1.15rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
                     <div class="mono-text" style="font-size:0.68rem; letter-spacing:1px; color:#848e9c;">QUANTITATIVE MARKET INTELLIGENCE PLATFORM</div>
@@ -217,7 +220,7 @@ if st.session_state.page == "welcome":
     col_left, col_right = st.columns([1.4, 1.0], gap="medium")
 
     with col_left:
-        # Cadre Horloges RESSERRÉ EN LARGEUR (max-width: 320px)
+        # Cadre Horloges RESSERRÉ EN LARGEUR
         clock_html = """
         <!DOCTYPE html>
         <html>
@@ -234,7 +237,7 @@ if st.session_state.page == "welcome":
                     display: flex;
                     flex-direction: column;
                     gap: 10px;
-                    box-shadow: 0 0 20px rgba(240, 185, 11, 0.2);
+                    box-shadow: 0 0 20px rgba(240, 185, 11, 0.25);
                     max-width: 320px;
                 }
 
@@ -312,14 +315,15 @@ if st.session_state.page == "welcome":
         """
         components.html(clock_html, height=125, scrolling=False)
 
-        st.markdown("<div style='height: 230px;'></div>", unsafe_allow_html=True)
+        # Espacement ajusté pour éviter tout dépassement vertical
+        st.markdown("<div style='height: 190px;'></div>", unsafe_allow_html=True)
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
             st.session_state.page = "hub"
             st.rerun()
 
     with col_right:
-        # Cadre Marchés avec Tickers CFD Standardisés (Chargement à 100% garanti)
+        # Cadre Marchés CFD
         market_quotes_html = """
         <!DOCTYPE html>
         <html>
@@ -343,15 +347,15 @@ if st.session_state.page == "welcome":
                     box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
-                    height: 500px;
+                    gap: 10px;
+                    height: 480px;
                 }
 
                 .container-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding-bottom: 8px;
+                    padding-bottom: 6px;
                     border-bottom: 1px solid rgba(240, 185, 11, 0.3);
                 }
 
@@ -385,7 +389,7 @@ if st.session_state.page == "welcome":
                     background: rgba(22, 27, 34, 0.85);
                     border: 1px solid rgba(240, 185, 11, 0.22);
                     border-radius: 8px;
-                    height: 98px;
+                    height: 95px;
                     overflow: hidden;
                 }
             </style>
@@ -468,7 +472,7 @@ if st.session_state.page == "welcome":
         </body>
         </html>
         """
-        components.html(market_quotes_html, height=520, scrolling=False)
+        components.html(market_quotes_html, height=490, scrolling=False)
 
 
 # ==========================================
