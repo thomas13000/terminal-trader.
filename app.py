@@ -95,7 +95,7 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 2. LE DASHBOARD (GLOBE ENTIER SANS COUPURE) ---
+    # --- 2. LE DASHBOARD (GLOBE ENTIER ET VRAIS PRIX TRADITIONNELS EN DIRECT) ---
     html_dashboard = """
     <!DOCTYPE html>
     <html>
@@ -107,13 +107,13 @@ if st.session_state.page == "welcome":
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
-          height: 620px; /* Augmenté pour laisser respirer le globe */
+          height: 620px; 
           padding: 0 20px; 
           overflow: hidden;
           position: relative;
       }
       
-      /* GLOBE TERRESTRE (Ajusté pour être 100% visible) */
+      /* GLOBE TERRESTRE */
       .globe-container { 
           position: absolute;
           top: 50%;
@@ -122,12 +122,12 @@ if st.session_state.page == "welcome":
           z-index: 1; 
       }
       .globe { 
-          width: 560px; /* Légèrement réduit pour rentrer parfaitement dans la hauteur de 620px */
+          width: 560px; 
           height: 560px; 
           border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
-          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); /* Halo réduit pour ne pas déborder */
+          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); 
           animation: spin 45s linear infinite;
           opacity: 0.85;
       }
@@ -163,6 +163,7 @@ if st.session_state.page == "welcome":
       .down { color: #f6465d; }
       .bg-up { background: rgba(14, 203, 129, 0.1); color: #0ecb81; border: 1px solid rgba(14, 203, 129, 0.3); }
       .bg-down { background: rgba(246, 70, 93, 0.1); color: #f6465d; border: 1px solid rgba(246, 70, 93, 0.3); }
+      .loading { color: #848e9c; font-size: 1rem; font-style: italic; }
     </style>
     </head>
     <body>
@@ -177,13 +178,14 @@ if st.session_state.page == "welcome":
     </div>
 
     <div class="panel">
-        <div class="asset-row"><span class="asset-name">EUR/USD</span><div><div class="asset-price" id="p-eur">1.0945</div><div class="asset-pct" id="pct-eur">+0.00%</div></div></div>
-        <div class="asset-row"><span class="asset-name">NASDAQ</span><div><div class="asset-price" id="p-nas">19850.25</div><div class="asset-pct" id="pct-nas">+0.00%</div></div></div>
-        <div class="asset-row"><span class="asset-name">DXY</span><div><div class="asset-price" id="p-dxy">104.20</div><div class="asset-pct" id="pct-dxy">-0.00%</div></div></div>
-        <div class="asset-row"><span class="asset-name">GOLD</span><div><div class="asset-price" id="p-gold">2354.10</div><div class="asset-pct" id="pct-gold">+0.00%</div></div></div>
+        <div class="asset-row"><span class="asset-name">EUR/USD</span><div><div class="asset-price loading" id="p-eur">Sync...</div><div class="asset-pct" id="pct-eur">--</div></div></div>
+        <div class="asset-row"><span class="asset-name">NASDAQ</span><div><div class="asset-price loading" id="p-nas">Sync...</div><div class="asset-pct" id="pct-nas">--</div></div></div>
+        <div class="asset-row"><span class="asset-name">DXY</span><div><div class="asset-price loading" id="p-dxy">Sync...</div><div class="asset-pct" id="pct-dxy">--</div></div></div>
+        <div class="asset-row"><span class="asset-name">GOLD</span><div><div class="asset-price loading" id="p-gold">Sync...</div><div class="asset-pct" id="pct-gold">--</div></div></div>
     </div>
 
     <script>
+    // 1. Horloges
     function updateClocks() {
         const now = new Date();
         document.getElementById('paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
@@ -191,35 +193,58 @@ if st.session_state.page == "welcome":
     }
     setInterval(updateClocks, 1000); updateClocks();
 
-    const assets = { eur: { p: 1.0945, vol: 0.0003 }, nas: { p: 19850.25, vol: 6.0 }, dxy: { p: 104.20, vol: 0.05 }, gold: { p: 2354.10, vol: 1.5 } };
-    function updateAssets() {
-        for (let key in assets) {
-            let change = (Math.random() - 0.5) * assets[key].vol;
-            let oldP = assets[key].p;
-            let newP = oldP + change;
-            assets[key].p = newP;
-            let pct = (change / oldP) * 100;
-            
-            let elPrice = document.getElementById('p-' + key);
-            let elPct = document.getElementById('pct-' + key);
-            
-            elPrice.innerText = newP.toFixed(key === 'eur' ? 4 : 2);
-            elPct.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
-            
-            if (change >= 0) {
-                elPrice.className = 'asset-price up'; elPct.className = 'asset-pct bg-up';
-            } else {
-                elPrice.className = 'asset-price down'; elPct.className = 'asset-pct bg-down';
-            }
+    // 2. Fetch des vraies données via Yahoo Finance (avec proxy CORS)
+    const symbols = "EURUSD=X,NQ=F,DX-Y.NYB,GC=F";
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+
+    const symbolMap = {
+        'EURUSD=X': { id: 'eur', decimals: 4 },
+        'NQ=F': { id: 'nas', decimals: 2 },
+        'DX-Y.NYB': { id: 'dxy', decimals: 3 },
+        'GC=F': { id: 'gold', decimals: 1 }
+    };
+
+    async function fetchRealMarketData() {
+        try {
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            const parsedData = JSON.parse(data.contents);
+            const results = parsedData.quoteResponse.result;
+
+            results.forEach(quote => {
+                const mapInfo = symbolMap[quote.symbol];
+                if (mapInfo) {
+                    const price = quote.regularMarketPrice;
+                    const changePct = quote.regularMarketChangePercent;
+                    
+                    const elPrice = document.getElementById('p-' + mapInfo.id);
+                    const elPct = document.getElementById('pct-' + mapInfo.id);
+                    
+                    elPrice.innerText = price.toFixed(mapInfo.decimals);
+                    elPct.innerText = (changePct >= 0 ? '+' : '') + changePct.toFixed(2) + '%';
+                    
+                    if (changePct >= 0) {
+                        elPrice.className = 'asset-price up'; 
+                        elPct.className = 'asset-pct bg-up';
+                    } else {
+                        elPrice.className = 'asset-price down'; 
+                        elPct.className = 'asset-pct bg-down';
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la récupération des prix :", error);
         }
     }
-    setInterval(updateAssets, 1500); updateAssets();
+
+    fetchRealMarketData();
+    setInterval(fetchRealMarketData, 10000);
     </script>
     </body>
     </html>
     """
     
-    # La hauteur du iframe passe à 620px pour correspondre au CSS et afficher le globe en entier
     components.html(html_dashboard, height=620)
 
     # --- 3. BOUTON CONNECT SYSTEM ---
