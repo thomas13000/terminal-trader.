@@ -297,4 +297,199 @@ elif st.session_state.page == "hub":
         }
         .panel-heading {
             font-family: 'Orbitron', sans-serif;
-            font-size
+            font-size: 0.75rem;
+            color: #f0b90b;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .live-dot-green {
+            width: 6px; height: 6px; background-color: #3fb950; border-radius: 50%;
+            box-shadow: 0 0 6px #3fb950; display: inline-block; margin-right: 5px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    components.html("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+      body {
+          margin: 0;
+          background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+          border: 1px solid #30363d;
+          border-bottom: 1px solid rgba(240, 185, 11, 0.6);
+          padding: 6px 15px;
+          border-radius: 4px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-family: 'Share Tech Mono', monospace;
+          color: #ffffff;
+      }
+      .hub-title {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 1.2rem;
+          font-weight: bold;
+          margin: 0;
+          letter-spacing: 2px;
+      }
+      .hub-title span { color: #f0b90b; }
+      .clocks-container {
+          display: flex;
+          gap: 20px;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 0.9rem;
+          color: #c9d1d9;
+      }
+      .clock-item span { color: #f0b90b; font-weight: bold; }
+    </style>
+    </head>
+    <body>
+        <h1 class="hub-title">TERMINAL TRADER <span>PRO</span> // EXECUTIVE HUB</h1>
+        <div class="clocks-container">
+            <div class="clock-item">PARIS: <span id="clock-paris">--:--:--</span></div>
+            <div class="clock-item">NEW YORK: <span id="clock-ny">--:--:--</span></div>
+        </div>
+        <script>
+        function updateClocks() {
+            const now = new Date();
+            document.getElementById('clock-paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
+            document.getElementById('clock-ny').innerText = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+        </script>
+    </body>
+    </html>
+    """, height=45)
+
+    st.markdown("""
+        <div class="ticker-wrap">
+            <span class="ticker-badge">URGENT</span>
+            <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
+
+    with col_left:
+        st.markdown("""
+        <div class="terminal-panel">
+            <div class="panel-heading"><span>⚡ NASDAQ 100 HEATMAP</span><span><div class="live-dot-green"></div>LIVE</span></div>
+            <div style="flex-grow: 1; overflow: hidden; position: relative;">
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+                {
+                  "exchanges": [],
+                  "dataSource": "NASDAQ100",
+                  "grouping": "sector",
+                  "blockSize": "market_cap_basic",
+                  "blockColor": "change",
+                  "locale": "fr",
+                  "symbolUrl": "",
+                  "colorTheme": "dark",
+                  "hasTopBar": false,
+                  "isTransparent": true,
+                  "width": "100%",
+                  "height": "100%"
+                }
+                </script>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_center:
+        st.markdown("""
+        <div class="terminal-panel" style="gap: 6px;">
+            <div style="height: 49%; display: flex; flex-direction: column;">
+                <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE</span><span>FOREX FACTORY</span></div>
+                <div style="flex-grow: 1; overflow-y: auto;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                    {
+                      "colorTheme": "dark",
+                      "isTransparent": true,
+                      "width": "100%",
+                      "height": "100%",
+                      "locale": "fr",
+                      "importanceFilter": "-1,0,1"
+                    }
+                    </script>
+                </div>
+            </div>
+            <div style="height: 49%; display: flex; flex-direction: column;">
+                <div class="panel-heading"><span>🌐 ANALYSE MACRO & GÉOPOLITIQUE</span><span><div class="live-dot-green"></div>FLUX CONTINU</span></div>
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 3px; padding: 8px; flex-grow: 1; overflow-y: auto; font-size: 0.75rem; color: #8b949e;">
+                    <div style="margin-bottom: 6px; border-left: 2px solid #f0b90b; padding-left: 6px;">
+                        <span style="color: #f0b90b; font-weight: bold;">[11:02] GÉOPOLITIQUE</span> : Tensions accrues au Moyen-Orient : Impact direct sur les flux pétroliers et valeurs refuges (Or).
+                    </div>
+                    <div style="margin-bottom: 6px; border-left: 2px solid #58a6ff; padding-left: 6px;">
+                        <span style="color: #58a6ff; font-weight: bold;">[10:45] BANQUES CENTRALES</span> : BCE : Christine Lagarde insiste sur une stricte dépendance aux données macroéconomiques.
+                    </div>
+                    <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
+                        <span style="color: #3fb950; font-weight: bold;">[10:15] MARCHÉS US</span> : NASDAQ Futures : Forte pression acheteuse sur les semi-conducteurs avant l'ouverture de Wall Street.
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_right:
+        st.markdown("""
+        <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div class="panel-heading"><span>🔥 TOP PERF & WATCHLIST</span><span>INSTRUMENTS</span></div>
+                <div style="margin-bottom: 4px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div style="margin-bottom: 4px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div style="margin-bottom: 4px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
+    with col_btn2:
+        st.markdown("""
+            <style>
+            div.stButton > button {
+                background-color: transparent !important;
+                color: #848e9c !important; 
+                border: 1px solid rgba(240, 185, 11, 0.3) !important; 
+                font-family: 'Courier New', Courier, monospace !important;
+                font-size: 0.75rem !important;
+                letter-spacing: 2px !important; 
+                padding: 2px 15px !important;
+                border-radius: 2px !important; 
+                width: 100% !important;
+            }
+            div.stButton > button:hover {
+                border: 1px solid #f0b90b !important; 
+                color: #f0b90b !important; 
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("← DÉCONNEXION"):
+            st.session_state.page = "welcome"
+            st.rerun()
