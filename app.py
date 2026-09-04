@@ -13,19 +13,8 @@ if "page" in st.query_params:
 elif "page" not in st.session_state:
     st.session_state.page = "welcome"
 
-# Initialisation de la liste des sites financiers
-if "custom_sites" not in st.session_state:
-    st.session_state.custom_sites = [
-        {"name": "TradingView", "url": "https://fr.tradingview.com", "category": "Graphiques", "desc": "Analyse technique et graphiques interactifs en direct"},
-        {"name": "Investing.com", "url": "https://fr.investing.com", "category": "Actu & Macro", "desc": "Calendrier économique et cotations internationales"},
-        {"name": "Forex Factory", "url": "https://www.forexfactory.com", "category": "Calendrier", "desc": "Suivi des annonces de la FED, BCE et chiffres macro"},
-        {"name": "CoinMarketCap", "url": "https://coinmarketcap.com/fr/", "category": "Crypto", "desc": "Capitalisation, volumes et prix des crypto-actifs"},
-        {"name": "Yahoo Finance", "url": "https://fr.finance.yahoo.com", "category": "Marchés", "desc": "Suivi des actions, indices et actualités boursières"},
-        {"name": "Bloomberg", "url": "https://www.bloomberg.com", "category": "Actu & Macro", "desc": "Actualités économiques et financières internationales"}
-    ]
-
 # ==========================================
-# PAGE 1 : WELCOME SCREEN (PLEIN ÉCRAN FIXE)
+# PAGE 1 : WELCOME SCREEN (GLOBE 3D)
 # ==========================================
 if st.session_state.page == "welcome":
     st.markdown("""
@@ -293,7 +282,6 @@ if st.session_state.page == "welcome":
             </div>
         </div>
 
-        <!-- Lien direct vers la fenêtre racine (target="_top") -->
         <a href="?page=hub" target="_top" class="btn-enter-terminal" id="btn-enter-app">
             ENTRER DANS LE TERMINAL ➔
         </a>
@@ -384,7 +372,6 @@ if st.session_state.page == "welcome":
     </nav>
 
     <script>
-        // Redirection forcée au sommet du DOM
         function navigateToHub() {
             window.top.location.href = window.top.location.pathname + '?page=hub';
         }
@@ -695,7 +682,6 @@ if st.session_state.page == "welcome":
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Capture de la touche Entrée pour redirection directe
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Enter') {
                 navigateToHub();
@@ -746,9 +732,11 @@ if st.session_state.page == "welcome":
     st.components.v1.html(welcome_html_code, height=1000, scrolling=False)
 
 # ==========================================
-# PAGE 2 : HUB FINANCIER
+# PAGE 2 : HUB (PAGE VIERGE)
 # ==========================================
 elif st.session_state.page == "hub":
+    
+    # Styles sombres de base pour Streamlit
     st.markdown("""
         <style>
             header[data-testid="stHeader"] { visibility: hidden !important; }
@@ -757,134 +745,16 @@ elif st.session_state.page == "hub":
                 background-color: #080b10 !important;
                 color: #eaecef !important;
             }
-            .main .block-container {
-                max-width: 1400px !important;
-                padding-top: 2rem !important;
-            }
-            .stButton>button, .stFormSubmitButton>button {
-                background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
-                color: #000000 !important;
-                border: none !important;
-                font-weight: 700 !important;
-                border-radius: 8px !important;
-                padding: 0.5rem 1rem !important;
-            }
-            .stButton>button:hover, .stFormSubmitButton>button:hover {
-                box-shadow: 0 0 15px rgba(240, 185, 11, 0.5) !important;
-            }
-            .site-card {
-                background: rgba(13, 17, 23, 0.85);
-                border: 1px solid rgba(240, 185, 11, 0.2);
-                border-radius: 12px;
-                padding: 18px;
-                margin-bottom: 15px;
-                transition: all 0.3s ease;
-            }
-            .site-card:hover {
-                border-color: #f0b90b;
-                transform: translateY(-2px);
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            }
-            .site-badge {
-                font-size: 0.7rem;
-                background: rgba(0, 243, 255, 0.1);
-                color: #00f3ff;
-                border: 1px solid rgba(0, 243, 255, 0.3);
-                padding: 2px 8px;
-                border-radius: 10px;
-                display: inline-block;
-                margin-bottom: 8px;
-            }
         </style>
     """, unsafe_allow_html=True)
 
-    col_title, col_back = st.columns([5, 1])
-    with col_title:
-        st.markdown("<h1 style='color: #f0b90b; font-family: monospace; font-size: 1.8rem; margin: 0;'>⚡ FINANCIAL TERMINAL HUB</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #848e9c; font-size: 0.9rem;'>Centre de commande et outils d'analyse financière</p>", unsafe_allow_html=True)
-    with col_back:
-        if st.button("← GLOBE 3D"):
-            st.query_params["page"] = "welcome"
-            st.session_state.page = "welcome"
-            st.rerun()
+    # Bouton de retour vers le globe 3D
+    if st.button("← Globe 3D"):
+        st.query_params["page"] = "welcome"
+        st.session_state.page = "welcome"
+        st.rerun()
 
-    st.markdown("---")
+    st.title("🚀 Hub d'Accueil")
+    st.write("Espace vierge prêt à accueillir tes nouveaux modules.")
 
-    st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 600;'>📈 Graphique en direct (TradingView)</h3>", unsafe_allow_html=True)
-    
-    tv_widget_html = """
-    <div class="tradingview-widget-container" style="height:500px;width:100%;">
-      <div id="tradingview_chart" style="height:500px;width:100%;"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-      <script type="text/javascript">
-      new TradingView.widget({
-        "autosize": true,
-        "symbol": "BINANCE:BTCUSDT",
-        "interval": "60",
-        "timezone": "Europe/Paris",
-        "theme": "dark",
-        "style": "1",
-        "locale": "fr",
-        "toolbar_bg": "#f1f3f6",
-        "enable_publishing": false,
-        "backgroundColor": "rgba(8, 11, 16, 1)",
-        "hide_top_toolbar": false,
-        "save_image": false,
-        "container_id": "tradingview_chart"
-      });
-      </script>
-    </div>
-    """
-    st.components.v1.html(tv_widget_html, height=520)
-
-    st.markdown("---")
-
-    col_left, col_right = st.columns([2, 1])
-
-    with col_left:
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 600;'>🌐 Mes Raccourcis & Sites Financiers</h3>", unsafe_allow_html=True)
-        
-        cards_cols = st.columns(2)
-        for idx, site in enumerate(st.session_state.custom_sites):
-            col_target = cards_cols[idx % 2]
-            with col_target:
-                st.markdown(f"""
-                    <div class="site-card">
-                        <span class="site-badge">{site['category']}</span>
-                        <h4 style="color: #ffffff; margin: 0 0 6px 0; font-size: 1rem;">{site['name']}</h4>
-                        <p style="color: #848e9c; font-size: 0.8rem; margin-bottom: 12px; height: 36px; overflow: hidden;">{site['desc']}</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                c_btn1, c_btn2 = st.columns([3, 1])
-                with c_btn1:
-                    st.link_button("Ouvrir le site ↗", site['url'], use_container_width=True)
-                with c_btn2:
-                    if st.button("🗑️", key=f"del_{idx}"):
-                        st.session_state.custom_sites.pop(idx)
-                        st.rerun()
-
-    with col_right:
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 600;'>➕ Ajouter un Site / Outil</h3>", unsafe_allow_html=True)
-        
-        with st.form("add_site_form"):
-            new_name = st.text_input("Nom du site", placeholder="Ex: ForexLive")
-            new_url = st.text_input("URL complète", placeholder="https://www.forexlive.com")
-            new_cat = st.selectbox("Catégorie", ["Graphiques", "Actu & Macro", "Calendrier", "Crypto", "Marchés", "Outil Perso"])
-            new_desc = st.text_area("Courte description", placeholder="Ex: Flux d'actualités rapide pour le scalping Forex", height=80)
-            
-            submit_btn = st.form_submit_button("Ajouter au Terminal")
-            
-            if submit_btn:
-                if new_name and new_url:
-                    formatted_url = new_url if new_url.startswith("http") else f"https://{new_url}"
-                    st.session_state.custom_sites.append({
-                        "name": new_name,
-                        "url": formatted_url,
-                        "category": new_cat,
-                        "desc": new_desc if new_desc else "Aucune description"
-                    })
-                    st.success(f"Site '{new_name}' ajouté !")
-                    st.rerun()
-                else:
-                    st.error("Renseigne au moins un nom et une URL.")
+    # Ton code personnalisé va ici...
