@@ -136,7 +136,7 @@ if st.session_state.page == "welcome":
         <div class="clock-time" id="ny" style="margin-bottom: 0;">--:--:--</div>
     </div>
 
-    <!-- Panneau Droit : Widgets TradingView CFD Officiels -->
+    <!-- Panneau Droit : Widgets TradingView CFD Officiels (avec CAPITALCOM:DXY) -->
     <div class="panel" style="padding: 10px 15px;">
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
@@ -150,7 +150,7 @@ if st.session_state.page == "welcome":
         </div>
         <div class="tradingview-widget-container" style="margin-bottom: 2px;">
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-          {"symbol": "TVC:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+          {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
           </script>
         </div>
         <div class="tradingview-widget-container">
