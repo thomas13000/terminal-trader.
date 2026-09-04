@@ -336,118 +336,42 @@ elif st.session_state.page == "hub":
     </html>
     """, height=45)
 
-    red_news = [
-        {"time": "14:30", "text": "USD — Indice des prix à la consommation (CPI) m/m"},
-        {"time": "16:00", "text": "USD — Indice de confiance des consommateurs CB"},
-        {"time": "18:00", "text": "EUR — Discours de la Présidente de la BCE Christine Lagarde"},
-        {"time": "20:00", "text": "USD — Publications des Minutes du FOMC"},
-        {"time": "22:30", "text": "USD — Stocks de pétrole brut API"}
-    ]
-
-    news_html_items = "".join([
-        f'<span class="news-item"><span class="news-time">[{item["time"]}]</span> <span class="news-badge">ROUGE</span> {item["text"]}</span><span class="news-separator">&bull;&bull;&bull;</span>' 
-        for item in red_news
-    ])
-
-    infinite_news_html = f"""
+    # Widget Ticker Tape TradingView (Top actions NASDAQ)
+    ticker_tape_html = """
     <!DOCTYPE html>
     <html>
     <head>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-      
-      body {{
-          margin: 0;
-          background: #161b22;
-          overflow: hidden;
-          font-family: 'Share Tech Mono', monospace;
-          display: flex;
-          align-items: center;
-          height: 32px;
-          border: 1px solid #30363d;
-          border-left: 3px solid #f85149;
-          border-radius: 2px;
-      }}
-      
-      .ticker-wrap {{
-          width: 100%;
-          overflow: hidden;
-          white-space: nowrap;
-          box-sizing: border-box;
-          display: flex;
-          align-items: center;
-      }}
-      
-      .ticker-label {{
-          background: #f85149;
-          color: white;
-          font-weight: bold;
-          padding: 3px 8px;
-          font-size: 0.7rem;
-          margin-right: 12px;
-          border-radius: 2px;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          z-index: 10;
-          flex-shrink: 0;
-      }}
-
-      .ticker-move {{
-          display: inline-block;
-          white-space: nowrap;
-          animation: marquee 35s linear infinite;
-      }}
-
-      .ticker-move:hover {{
-          animation-play-state: paused;
-      }}
-
-      .news-item {{
-          color: #f0f6fc;
-          font-size: 0.8rem;
-          letter-spacing: 0.5px;
-          margin-right: 30px;
-      }}
-
-      .news-time {{
-          color: #58a6ff;
-          font-weight: bold;
-      }}
-
-      .news-badge {{
-          color: #f85149;
-          font-weight: bold;
-          font-size: 0.7rem;
-          border: 1px solid #f85149;
-          padding: 1px 3px;
-          border-radius: 2px;
-          margin-right: 5px;
-      }}
-
-      .news-separator {{
-          color: #30363d;
-          margin-right: 30px;
-      }}
-
-      @keyframes marquee {{
-          0% {{ transform: translateX(0%); }}
-          100% {{ transform: translateX(-50%); }}
-      }}
+      body { margin: 0; background: transparent; overflow: hidden; }
     </style>
     </head>
     <body>
-        <div class="ticker-wrap">
-            <div class="ticker-label">ACTUS ROUGES</div>
-            <div class="ticker-move">
-                {news_html_items}
-                {news_html_items}
-            </div>
-        </div>
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {"proName": "NASDAQ:NVDA", "title": "NVIDIA"},
+          {"proName": "NASDAQ:AAPL", "title": "Apple"},
+          {"proName": "NASDAQ:MSFT", "title": "Microsoft"},
+          {"proName": "NASDAQ:TSLA", "title": "Tesla"},
+          {"proName": "NASDAQ:AMZN", "title": "Amazon"},
+          {"proName": "NASDAQ:META", "title": "Meta"},
+          {"proName": "NASDAQ:GOOGL", "title": "Alphabet"},
+          {"proName": "CAPITALCOM:US100", "title": "Nasdaq 100"}
+        ],
+        "showSymbolLogo": true,
+        "isTransparent": true,
+        "displayMode": "adaptive",
+        "colorTheme": "dark",
+        "locale": "fr"
+      }
+      </script>
+    </div>
     </body>
     </html>
     """
-
-    components.html(infinite_news_html, height=38)
+    components.html(ticker_tape_html, height=48)
 
     col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
