@@ -35,21 +35,23 @@ if st.session_state.page == "welcome":
             iframe { border: none !important; width: 100vw !important; height: 100vh !important; }
             .block-container { padding: 0 !important; max-width: 100% !important; }
             
-            /* Bouton d'action Streamlit invisible utilisé pour le déclenchement JS */
-            div[data-testid="stButton"] button[aria-label="NAVIGATE_TO_HUB"] {
+            /* Conteneur hors écran pour le bouton relais */
+            .hidden-relay-btn {
                 position: absolute !important;
+                left: -9999px !important;
+                top: -9999px !important;
                 opacity: 0 !important;
-                width: 1px !important;
-                height: 1px !important;
                 pointer-events: none !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # Bouton relais Streamlit déclenché par le JavaScript de l'iframe
-    if st.button("NAVIGATE_TO_HUB", key="nav_relays_btn"):
+    # Bouton relais masqué qui bascule vers le hub
+    st.markdown('<div class="hidden-relay-btn">', unsafe_allow_html=True)
+    if st.button("NAVIGATE_TO_HUB", key="btn_relay_hub"):
         st.session_state.page = "hub"
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     welcome_html_code = """
 <!DOCTYPE html>
@@ -377,13 +379,16 @@ if st.session_state.page == "welcome":
     </nav>
 
     <script>
-        // Clic JS sécurisé sur le bouton masqué de la fenêtre parente Streamlit
+        // Déclenchement garanti de la navigation vers la page Hub
         function navigateToHub() {
             try {
                 const parentDoc = window.parent.document;
-                const btn = parentDoc.querySelector('button[aria-label="NAVIGATE_TO_HUB"]');
-                if (btn) {
-                    btn.click();
+                const buttons = Array.from(parentDoc.querySelectorAll('button'));
+                const targetBtn = buttons.find(b => b.innerText && b.innerText.includes('NAVIGATE_TO_HUB'));
+                if (targetBtn) {
+                    targetBtn.click();
+                } else {
+                    console.warn('Bouton Streamlit non trouvé');
                 }
             } catch(e) {
                 console.error('Erreur navigation:', e);
@@ -412,7 +417,7 @@ if st.session_state.page == "welcome":
                     changeEl.className = 'ticker-change ' + (change >= 0 ? 'change-up' : 'change-down');
                 }
             } catch (err) {
-                console.warn('Live API BTC non disponible:', err);
+                console.warn('API Binance non disponible:', err);
             }
         }
 
@@ -746,7 +751,7 @@ if st.session_state.page == "welcome":
     st.components.v1.html(welcome_html_code, height=920)
 
 # ==========================================
-# PAGE 2 : HUB FINANCIER (PAGE NOIRE PERSONNALISABLE)
+# PAGE 2 : HUB FINANCIER
 # ==========================================
 elif st.session_state.page == "hub":
     st.markdown("""
@@ -761,7 +766,6 @@ elif st.session_state.page == "hub":
                 max-width: 1400px !important;
                 padding-top: 2rem !important;
             }
-            /* Boutons Streamlit dorés */
             .stButton>button, .stFormSubmitButton>button {
                 background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
                 color: #000000 !important;
@@ -773,7 +777,6 @@ elif st.session_state.page == "hub":
             .stButton>button:hover, .stFormSubmitButton>button:hover {
                 box-shadow: 0 0 15px rgba(240, 185, 11, 0.5) !important;
             }
-            /* Carte de site */
             .site-card {
                 background: rgba(13, 17, 23, 0.85);
                 border: 1px solid rgba(240, 185, 11, 0.2);
@@ -800,7 +803,6 @@ elif st.session_state.page == "hub":
         </style>
     """, unsafe_allow_html=True)
 
-    # Entête
     col_title, col_back = st.columns([5, 1])
     with col_title:
         st.markdown("<h1 style='color: #f0b90b; font-family: monospace; font-size: 1.8rem; margin: 0;'>⚡ FINANCIAL TERMINAL HUB</h1>", unsafe_allow_html=True)
@@ -812,11 +814,9 @@ elif st.session_state.page == "hub":
 
     st.markdown("---")
 
-    # Widget TradingView Graphique Intégré
     st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 600;'>📈 Graphique en direct (TradingView)</h3>", unsafe_allow_html=True)
     
     tv_widget_html = """
-    <!-- TradingView Widget BEGIN -->
     <div class="tradingview-widget-container" style="height:500px;width:100%;">
       <div id="tradingview_chart" style="height:500px;width:100%;"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -838,19 +838,16 @@ elif st.session_state.page == "hub":
       });
       </script>
     </div>
-    <!-- TradingView Widget END -->
     """
     st.components.v1.html(tv_widget_html, height=520)
 
     st.markdown("---")
 
-    # Section : Mes Sites & Outils Financiers
     col_left, col_right = st.columns([2, 1])
 
     with col_left:
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 600;'>🌐 Mes Raccourcis & Sites Financiers</h3>", unsafe_allow_html=True)
         
-        # Affichage des sites sous forme de cartes dans une grille à 2 colonnes
         cards_cols = st.columns(2)
         for idx, site in enumerate(st.session_state.custom_sites):
             col_target = cards_cols[idx % 2]
