@@ -3,392 +3,1203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J.A.R.V.I.S. — AC/DC HOME TRANSITION</title>
-
+    <title>TERMINAL TRADER PRO — 3D Globe Welcome Screen</title>
+    
+    <!-- Google Fonts & External Libraries -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         :root {
-            --cyan-core: #00f3ff;
-            --cyan-glow: rgba(0, 243, 255, 0.5);
-            --red-rock: #ff003c;
-            --gold-glow: #ffaa00;
-            --bg-dark: #010308;
-            --bg-glass: rgba(2, 10, 22, 0.88);
-            --border-hud: rgba(0, 243, 255, 0.35);
-            --text-main: #e0f8ff;
-            --text-muted: #4e7a94;
-            --green-up: #00ffaa;
-            --font-display: 'Orbitron', sans-serif;
+            --bg-dark: #080b10;
+            --bg-card: rgba(13, 17, 23, 0.82);
+            --gold-main: #f0b90b;
+            --gold-glow: rgba(240, 185, 11, 0.45);
+            --cyan-neon: #00f3ff;
+            --cyan-glow: rgba(0, 243, 255, 0.35);
+            --green-up: #0ecb81;
+            --red-down: #f6465d;
+            --text-main: #eaecef;
+            --text-muted: #848e9c;
+            --border-glass: rgba(240, 185, 11, 0.25);
+            --font-sans: 'Inter', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Orbitron', sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
         body, html {
-            width: 100%; height: 100%; overflow: hidden;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: var(--font-mono);
+            font-family: var(--font-sans);
         }
 
-        /* WEBGL CANVAS */
-        #webgl-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; transition: opacity 1s ease; }
+        /* Fullscreen WebGL Canvas */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            cursor: grab;
+        }
 
-        /* HUD OVERLAY */
-        .jarvis-grid {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none;
+        #webgl-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Tactical HUD Grid Overlay */
+        .hud-grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
             background: 
-                radial-gradient(circle at 50% 50%, transparent 15%, rgba(1, 3, 8, 0.93) 85%),
-                linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 35px 35px, 35px 35px;
-            transition: opacity 0.8s ease;
+                radial-gradient(circle at 50% 50%, transparent 35%, rgba(8, 11, 16, 0.88) 90%),
+                linear-gradient(to right, rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
         }
 
-        /* INTRO HUD PANELS */
-        .jarvis-header {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            width: calc(100vw - 80px); max-width: 1500px; z-index: 20;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 24px; background: var(--bg-glass);
-            border: 1px solid var(--border-hud); border-radius: 8px;
-            backdrop-filter: blur(12px); box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
-            transition: all 0.6s ease;
+        /* Reticle Frames */
+        .corner-reticle {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            z-index: 10;
+            pointer-events: none;
+            border: 2px solid rgba(240, 185, 11, 0.4);
+        }
+        .corner-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .corner-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* Top Header Bar */
+        .hud-header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100vw - 80px);
+            max-width: 1600px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        .header-title { font-family: var(--font-display); font-size: 1rem; color: #fff; letter-spacing: 3px; display: flex; align-items: center; gap: 10px; }
-        .header-title span { color: var(--cyan-core); text-shadow: 0 0 10px var(--cyan-glow); }
-
-        .control-panel {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            width: 420px; z-index: 20; background: var(--bg-glass);
-            border: 1px solid var(--border-hud); border-radius: 12px; padding: 24px;
-            backdrop-filter: blur(12px); display: flex; flex-direction: column; gap: 16px;
-            text-align: center; box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-            transition: all 0.6s ease;
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        .btn-jarvis-launch {
-            background: linear-gradient(135deg, rgba(255, 0, 60, 0.3), rgba(0, 243, 255, 0.3));
-            border: 2px solid var(--red-rock);
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--gold-main), #d4a007);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 900;
+            color: #000;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .brand-text h1 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            letter-spacing: 2.5px;
             color: #fff;
-            padding: 18px 24px; font-family: var(--font-display);
-            font-size: 0.95rem; font-weight: 900; letter-spacing: 2px;
-            border-radius: 8px; cursor: pointer;
-            box-shadow: 0 0 25px rgba(ff, 0, 60, 0.4);
-            transition: all 0.3s ease;
             text-transform: uppercase;
         }
 
-        .btn-jarvis-launch:hover {
-            background: var(--red-rock);
-            box-shadow: 0 0 45px var(--red-rock);
-            transform: scale(1.03);
+        .brand-text span {
+            color: var(--gold-main);
         }
 
-        /* TRANSITION STATES */
-        .warping .jarvis-header { transform: translate(-50%, -150%); opacity: 0; }
-        .warping .control-panel { transform: translate(-50%, 150%); opacity: 0; }
-
-        #flash-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #fff; opacity: 0; pointer-events: none; z-index: 999;
-            transition: opacity 0.4s ease;
+        .brand-sub {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
         }
 
-        /* PAGE D'ACCUEIL (HOME PAGE POST-TRANSITION) */
-        #home-page {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 100; opacity: 0; pointer-events: none;
-            background: radial-gradient(circle at 50% 30%, #0d1b2a 0%, #020813 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 1.2s ease;
-            padding: 40px;
+        .system-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 22px;
         }
 
-        #home-page.active {
-            opacity: 1; pointer-events: auto;
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
         }
 
-        .home-nav {
-            position: absolute; top: 30px; width: 80%; max-width: 1200px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 20px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--green-up);
+            box-shadow: 0 0 10px var(--green-up);
+            animation: pulse-dot 1.8s infinite;
         }
 
-        .home-logo { font-family: var(--font-display); font-size: 1.4rem; color: #fff; font-weight: 900; letter-spacing: 4px; }
-        .home-menu { display: flex; gap: 30px; list-style: none; font-size: 0.85rem; }
-        .home-menu a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
-        .home-menu a:hover { color: var(--cyan-core); }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
 
-        .home-hero { text-align: center; max-width: 900px; }
-        .home-hero h1 { font-family: var(--font-display); font-size: 3.5rem; color: #fff; margin-bottom: 20px; text-shadow: 0 0 20px var(--cyan-glow); }
-        .home-hero p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 35px; }
+        /* Left Hero HUD Card */
+        .left-hero-panel {
+            position: fixed;
+            top: 105px;
+            left: 40px;
+            width: 380px;
+            z-index: 20;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 26px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-        .home-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; max-width: 1100px; margin-top: 40px; }
-        .card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 12px; padding: 25px; backdrop-filter: blur(10px); transition: transform 0.3s, border-color 0.3s; }
-        .card:hover { transform: translateY(-8px); border-color: var(--cyan-core); }
-        .card h3 { font-family: var(--font-display); font-size: 1.1rem; color: #fff; margin-bottom: 10px; }
-        .card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+        .panel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--gold-main);
+            background: rgba(240, 185, 11, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(240, 185, 11, 0.3);
+            width: fit-content;
+        }
+
+        .clock-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: rgba(8, 11, 16, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .clock-block {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .clock-label {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .clock-time {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Active Capital Flow Router Box */
+        .router-box {
+            background: rgba(8, 11, 16, 0.6);
+            border: 1px dashed rgba(240, 185, 11, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .router-header {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--gold-main);
+            font-weight: 700;
+        }
+
+        .router-ticker {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Pulsing Enter Terminal Button */
+        .btn-enter-terminal {
+            position: relative;
+            background: linear-gradient(135deg, var(--gold-main) 0%, #d4a007 100%);
+            color: #080b10;
+            border: none;
+            padding: 18px 24px;
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            border-radius: 12px;
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 0 25px var(--gold-glow);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-enter-terminal::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: rotate(30deg);
+            transition: 0.8s;
+            opacity: 0;
+        }
+
+        .btn-enter-terminal:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 40px rgba(240, 185, 11, 0.7), 0 0 12px var(--cyan-neon);
+            color: #000;
+        }
+
+        .btn-enter-terminal:hover::after {
+            opacity: 1;
+            left: 100%;
+        }
+
+        .hotkey-legend {
+            font-family: var(--font-mono);
+            font-size: 0.63rem;
+            color: var(--text-muted);
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .hotkey-badge {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--gold-main);
+            font-weight: 700;
+        }
+
+        /* Right Market Sidebar */
+        .right-sidebar {
+            position: fixed;
+            top: 105px;
+            right: 40px;
+            width: 340px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-title {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--gold-main);
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            padding: 10px 16px;
+            border-radius: 10px;
+            backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ticker-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 3px solid var(--gold-main);
+            border-radius: 12px;
+            padding: 10px 14px;
+            backdrop-filter: blur(16px);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ticker-card:hover {
+            border-color: rgba(240, 185, 11, 0.5);
+            background: rgba(18, 24, 34, 0.88);
+            transform: translateX(-4px);
+        }
+
+        .ticker-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ticker-symbol {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .ticker-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .ticker-price-block {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ticker-price {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .ticker-change {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .change-up { color: var(--green-up); }
+        .change-down { color: var(--red-down); }
+
+        .sparkline-canvas {
+            width: 65px;
+            height: 26px;
+        }
+
+        /* Bottom Deck Control Navigation */
+        .bottom-deck {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 30px;
+            padding: 8px 18px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .hub-chip {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .hub-chip:hover, .hub-chip.active {
+            color: #000;
+            background: var(--gold-main);
+            box-shadow: 0 0 15px var(--gold-glow);
+            border-color: var(--gold-main);
+        }
+
+        .deck-divider {
+            width: 1px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Full Interactive Terminal Overlay Workspace */
+        #terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(8, 11, 16, 0.97);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(30px);
+            flex-direction: column;
+            padding: 20px 28px;
+            box-sizing: border-box;
+        }
+
+        #terminal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(240, 185, 11, 0.3);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn-exit-terminal {
+            background: rgba(246, 70, 93, 0.15);
+            border: 1px solid var(--red-down);
+            color: var(--red-down);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-exit-terminal:hover {
+            background: var(--red-down);
+            color: #fff;
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 3.2fr 1fr;
+            gap: 16px;
+            flex-grow: 1;
+        }
+
+        .chart-placeholder-box {
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Responsive Mobile Adjustments */
+        @media (max-width: 1024px) {
+            .left-hero-panel { width: 320px; left: 20px; top: 90px; }
+            .right-sidebar { width: 270px; right: 20px; top: 90px; }
+            .hud-header { width: calc(100vw - 40px); }
+        }
+
+        @media (max-width: 768px) {
+            .right-sidebar { display: none; }
+            .left-hero-panel { width: calc(100vw - 40px); left: 20px; }
+            .system-status-bar { display: none; }
+            .bottom-deck { width: 92vw; overflow-x: auto; justify-content: flex-start; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- AUDIO AC/DC (Fichier principal + fallback synthétisé) -->
-    <audio id="acdc-audio" preload="auto">
-        <!-- Remplace ce lien par ton fichier local acdc-back-in-black.mp3 si besoin -->
-        <source src="https://ia801309.us.archive.org/5/items/ACDCBackInBlack_201403/AC_DC%20-%20Back%20In%20Black.mp3" type="audio/mpeg">
-    </audio>
-
-    <div id="flash-overlay"></div>
+    <!-- 3D Three.js Render Viewport -->
     <canvas id="webgl-canvas"></canvas>
-    <div class="jarvis-grid"></div>
 
-    <!-- INTRO HUD PANEL -->
-    <header class="jarvis-header" id="hud-header">
-        <div class="header-title">
-            <span>❖ J.A.R.V.I.S.</span> GLOBAL COMMAND CENTER
+    <!-- Tactical Grid & Corner Reticles -->
+    <div class="hud-grid-overlay"></div>
+    <div class="corner-reticle corner-tl"></div>
+    <div class="corner-reticle corner-tr"></div>
+    <div class="corner-reticle corner-bl"></div>
+    <div class="corner-reticle corner-br"></div>
+
+    <!-- Top HUD Header Bar -->
+    <header class="hud-header">
+        <div class="brand-container">
+            <div class="brand-logo">⚡</div>
+            <div class="brand-text">
+                <h1>TERMINAL TRADER <span>PRO</span></h1>
+                <div class="brand-sub">QUANTITATIVE MARKET INTELLIGENCE — v5.5</div>
+            </div>
         </div>
-        <div style="font-size: 0.8rem; color: var(--green-up);">
-            ● AUDIO STREAM : READY (AC/DC MODE)
+
+        <div class="system-status-bar">
+            <div class="status-item">
+                <span class="status-dot"></span>
+                <span>FEED: DIRECT NYSE / NASDAQ</span>
+            </div>
+            <div class="status-item" style="color: var(--cyan-neon);">
+                <span>LATENCY: <span id="ping-val">14</span>ms</span>
+            </div>
         </div>
     </header>
 
-    <div class="control-panel" id="hud-panel">
-        <div style="font-family: var(--font-display); font-size: 1rem; color: #fff; letter-spacing: 2px;">
-            PRÊT POUR LE BASCELEMENT
+    <!-- Left Main Hero HUD Card -->
+    <div class="left-hero-panel">
+        <div class="panel-badge">
+            <span class="status-dot"></span> SESSION EN DIRECT
         </div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">
-            Lancement de la séquence 3D spéculaire et transition audio synchronisée vers la page d'accueil.
+
+        <div class="clock-section">
+            <div class="clock-block">
+                <span class="clock-label">PARIS</span>
+                <span class="clock-time" id="clock-paris">00:00:00</span>
+            </div>
+            <div class="clock-block">
+                <span class="clock-label">NEW YORK</span>
+                <span class="clock-time" id="clock-ny">00:00:00</span>
+            </div>
         </div>
-        <button class="btn-jarvis-launch" id="btn-launch">⚡ ACCÉDER À L'ACCUEIL (AC/DC)</button>
+
+        <div class="router-box">
+            <div class="router-header">
+                <span>FLUX DE CAPITAUX ACTIFS</span>
+                <span style="color: var(--cyan-neon);" id="flow-val">$5.24B / s</span>
+            </div>
+            <div class="router-ticker">
+                <span id="flow-route">LONDON ➔ NEW YORK</span>
+                <span style="color: var(--green-up); font-size:0.72rem;">● OPTIMISÉ</span>
+            </div>
+        </div>
+
+        <button class="btn-enter-terminal" id="btn-enter-app">
+            ENTRER DANS LE TERMINAL ➔
+        </button>
+
+        <div class="hotkey-legend">
+            <span><span class="hotkey-badge">ENTRÉE</span> Démarrer</span>
+            <span><span class="hotkey-badge">R</span> Reset Globe</span>
+        </div>
     </div>
 
-    <!-- PAGE D'ACCUEIL (REVEAL POST TRANSITION) -->
-    <section id="home-page">
-        <nav class="home-nav">
-            <div class="home-logo">J.A.R.V.I.S. HQ</div>
-            <ul class="home-menu">
-                <li><a href="#">TABLEAU DE BORD</a></li>
-                <li><a href="#">ANALYTIQUES</a></li>
-                <li><a href="#">SATELLITES</a></li>
-                <li><a href="#">RÉSEAU</a></li>
-            </ul>
-        </nav>
+    <!-- Right Live Market Sidebar -->
+    <aside class="right-sidebar">
+        <div class="sidebar-title">
+            <span>⚡ SURVEILLANCE MARCHÉS</span>
+            <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">LIVE TICKERS</span>
+        </div>
 
-        <div class="home-hero">
-            <h1>BIENVENUE À BORD</h1>
-            <p>La transition globale est terminée. Votre système est pleinement opérationnel avec les flux de données en temps réel et le moteur audio actif.</p>
-            
-            <div class="home-cards">
-                <div class="card">
-                    <h3>01. GLOBE 3D</h3>
-                    <p>Modélisation océanique spéculaire avec coordonnées spatiales précises pour la Tour Eiffel, NY et Tokyo.</p>
+        <!-- Ticker 1: US100 (Nasdaq) -->
+        <div class="ticker-card" id="card-us100">
+            <div class="ticker-info">
+                <div class="ticker-symbol">US100</div>
+                <div class="ticker-sub">Nasdaq 100 Index</div>
+            </div>
+            <canvas class="sparkline-canvas" id="spark-us100"></canvas>
+            <div class="ticker-price-block">
+                <div class="ticker-price" id="price-us100">21,240.10</div>
+                <div class="ticker-change change-up" id="change-us100">+1.12%</div>
+            </div>
+        </div>
+
+        <!-- Ticker 2: S&P 500 (US500) -->
+        <div class="ticker-card" id="card-us500">
+            <div class="ticker-info">
+                <div class="ticker-symbol">US500</div>
+                <div class="ticker-sub">S&P 500 Index</div>
+            </div>
+            <canvas class="sparkline-canvas" id="spark-us500"></canvas>
+            <div class="ticker-price-block">
+                <div class="ticker-price" id="price-us500">5,992.40</div>
+                <div class="ticker-change change-up" id="change-us500">+0.58%</div>
+            </div>
+        </div>
+
+        <!-- Ticker 3: DXY -->
+        <div class="ticker-card" id="card-dxy">
+            <div class="ticker-info">
+                <div class="ticker-symbol">DXY</div>
+                <div class="ticker-sub">US Dollar Index</div>
+            </div>
+            <canvas class="sparkline-canvas" id="spark-dxy"></canvas>
+            <div class="ticker-price-block">
+                <div class="ticker-price" id="price-dxy">106.45</div>
+                <div class="ticker-change change-down" id="change-dxy">-0.24%</div>
+            </div>
+        </div>
+
+        <!-- Ticker 4: BTC / USDT -->
+        <div class="ticker-card" id="card-btc">
+            <div class="ticker-info">
+                <div class="ticker-symbol">BTC / USDT</div>
+                <div class="ticker-sub">Bitcoin Core</div>
+            </div>
+            <canvas class="sparkline-canvas" id="spark-btc"></canvas>
+            <div class="ticker-price-block">
+                <div class="ticker-price" id="price-btc">$96,840.50</div>
+                <div class="ticker-change change-up" id="change-btc">+3.64%</div>
+            </div>
+        </div>
+
+        <!-- Ticker 5: GOLD (XAU/USD) -->
+        <div class="ticker-card" id="card-gold">
+            <div class="ticker-info">
+                <div class="ticker-symbol">XAU / USD</div>
+                <div class="ticker-sub">Gold Spot</div>
+            </div>
+            <canvas class="sparkline-canvas" id="spark-gold"></canvas>
+            <div class="ticker-price-block">
+                <div class="ticker-price" id="price-gold">$2,688.30</div>
+                <div class="ticker-change change-up" id="change-gold">+0.84%</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Bottom Hub Focus Navigation Deck -->
+    <nav class="bottom-deck">
+        <div class="hub-chip active" onclick="focusHub('ALL', this)">GLOBAL VIEW</div>
+        <div class="deck-divider"></div>
+        <div class="hub-chip" onclick="focusHub('NYC', this)">NEW YORK</div>
+        <div class="hub-chip" onclick="focusHub('LON', this)">LONDON</div>
+        <div class="hub-chip" onclick="focusHub('PAR', this)">PARIS</div>
+        <div class="hub-chip" onclick="focusHub('DXB', this)">DUBAI</div>
+        <div class="hub-chip" onclick="focusHub('SIN', this)">SINGAPORE</div>
+        <div class="hub-chip" onclick="focusHub('HKG', this)">HONG KONG</div>
+        <div class="hub-chip" onclick="focusHub('TYO', this)">TOKYO</div>
+    </nav>
+
+    <!-- Full Terminal Mode Workspace Modal -->
+    <div id="terminal-overlay">
+        <div class="terminal-header">
+            <div class="brand-container">
+                <div class="brand-logo">⚡</div>
+                <div class="brand-text">
+                    <h1>TERMINAL TRADER PRO — <span>WORKSPACE</span></h1>
+                    <div class="brand-sub">DIRECT INSTITUTIONAL EXECUTION DESK</div>
                 </div>
-                <div class="card">
-                    <h3>02. AUDIO ROCK</h3>
-                    <p>Déclenchement instantané synchronisé au clic sur le riff de Back in Black d'AC/DC.</p>
+            </div>
+            <button class="btn-exit-terminal" onclick="toggleTerminalOverlay(false)">
+                ✕ RETOUR GLOBE 3D
+            </button>
+        </div>
+
+        <div class="terminal-grid">
+            <div class="chart-placeholder-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="font-family:var(--font-display); font-size:1rem; color:var(--gold-main);">
+                        📈 BTCUSDT — 15m QUANT CANDLESTICK CHART
+                    </h2>
+                    <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--green-up);">● DIRECT WEBSOCKET FEED</span>
                 </div>
-                <div class="card">
-                    <h3>03. SYNC QUANTIQUE</h3>
-                    <p>Interconnexion complète entre la scène WebGL Three.js et l'interface utilisateur responsive.</p>
+                
+                <!-- Terminal Candlestick Workspace Renderer -->
+                <div style="flex-grow:1; background:#0b0e14; border-radius:10px; border:1px solid rgba(255,255,255,0.08); padding:15px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="display:flex; gap:20px; font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);">
+                        <span>O: <b style="color:#fff;">96,410.0</b></span>
+                        <span>H: <b style="color:var(--green-up);">97,120.0</b></span>
+                        <span>L: <b style="color:var(--red-down);">96,200.0</b></span>
+                        <span>C: <b style="color:var(--green-up);">96,840.5</b></span>
+                        <span>VOL: <b style="color:var(--gold-main);">14,280.4 BTC</b></span>
+                    </div>
+
+                    <div style="text-align:center; margin: auto 0;">
+                        <div style="font-family:var(--font-display); font-size:3rem; font-weight:900; color:var(--gold-main); text-shadow:0 0 25px var(--gold-glow);">
+                            $96,840.50
+                        </div>
+                        <div style="font-family:var(--font-mono); color:var(--green-up); font-size:0.9rem; margin-top:5px;">
+                            ▲ +$3,410.20 (+3.64%) TODAY
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+                        <button style="background:rgba(14,203,129,0.15); border:1px solid var(--green-up); color:var(--green-up); padding:10px; border-radius:6px; font-family:var(--font-mono); font-weight:700; cursor:pointer;">BUY / LONG</button>
+                        <button style="background:rgba(246,70,93,0.15); border:1px solid var(--red-down); color:var(--red-down); padding:10px; border-radius:6px; font-family:var(--font-mono); font-weight:700; cursor:pointer;">SELL / SHORT</button>
+                        <button style="background:rgba(240,185,11,0.15); border:1px solid var(--gold-main); color:var(--gold-main); padding:10px; border-radius:6px; font-family:var(--font-mono); font-weight:700; cursor:pointer;">SET LIMIT</button>
+                        <button style="background:rgba(0,243,255,0.15); border:1px solid var(--cyan-neon); color:var(--cyan-neon); padding:10px; border-radius:6px; font-family:var(--font-mono); font-weight:700; cursor:pointer;">RISK CALCULATOR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-placeholder-box">
+                <h3 style="font-family:var(--font-display); font-size:0.85rem; color:var(--gold-main);">⚡ ACCOUNT METRICS</h3>
+                <div style="font-family:var(--font-mono); font-size:0.8rem; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Net Liquidity:</span><span style="color:#fff; font-weight:700;">$25,420.00</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Margin Available:</span><span style="color:#fff; font-weight:700;">$22,000.00</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Unrealized PnL:</span><span style="color:var(--green-up); font-weight:800;">+$842.50</span></div>
+                    <hr style="border-color:rgba(255,255,255,0.1);">
+                    <div style="font-size:0.75rem; color:var(--text-muted);">ACTIVE ALERTS (2)</div>
+                    <div style="background:rgba(8,11,16,0.5); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); font-size:0.7rem;">
+                        🟢 BTC > $98,500.00 (BREAKOUT)
+                    </div>
+                    <div style="background:rgba(8,11,16,0.5); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); font-size:0.7rem;">
+                        🔴 US100 < 21,200.00 (SUPPORT)
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <script>
-        // MOTEUR AUDIO AUDIO BACKUP SYNTHÉTISÉ (Si le flux MP3 distant échoue)
-        class RockAudioFallback {
-            constructor() { this.ctx = null; }
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            playRiff() {
-                this.init();
-                const now = this.ctx.currentTime;
-                const notes = [164.81, 164.81, 196.00, 220.00]; // E3, G3, A3
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.25);
-                    gain.gain.setValueAtTime(0.4, now + idx * 0.25);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.25 + 0.22);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(now + idx * 0.25);
-                    osc.stop(now + idx * 0.25 + 0.25);
-                });
-            }
-        }
-        const audioFallback = new RockAudioFallback();
-
-        // SCÈNE THREE.JS 3D
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 26);
+        scene.fog = new THREE.FogExp2(0x080b10, 0.012);
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 4, 28);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const ambientLight = new THREE.AmbientLight(0x003344, 2.5);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.DirectionalLight(0x00f3ff, 3.0);
-        sunLight.position.set(20, 10, 15);
-        scene.add(sunLight);
-
-        // TEXTURES DU GLOBE
-        function createEarthTexture() {
-            const width = 2048, height = 1024;
-            const cvs = document.createElement('canvas');
-            cvs.width = width; cvs.height = height;
-            const ctx = cvs.getContext('2d');
-
-            ctx.fillStyle = '#020b1a';
-            ctx.fillRect(0, 0, width, height);
-
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
-            for(let x=0; x<width; x+=64) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,height); ctx.stroke(); }
-            for(let y=0; y<height; y+=64) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(width,y); ctx.stroke(); }
-
-            ctx.fillStyle = '#0a2538';
-            ctx.strokeStyle = '#00f3ff';
-            ctx.lineWidth = 2;
-
-            function drawLand(pts) {
-                ctx.beginPath();
-                pts.forEach((pt, i) => {
-                    const x = (pt[0] + 180) * (width / 360);
-                    const y = (90 - pt[1]) * (height / 180);
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                });
-                ctx.closePath(); ctx.fill(); ctx.stroke();
-            }
-
-            drawLand([[-130,50],[-125,65],[-70,62],[-60,45],[-80,25],[-105,20]]);
-            drawLand([[-80,10],[-35,-5],[-40,-15],[-60,-55],[-75,-20]]);
-            drawLand([[-10,35],[30,35],[35,65],[15,70],[-10,60]]);
-            drawLand([[-20,35],[45,32],[50,0],[40,-35],[-15,0]]);
-            drawLand([[40,35],[145,35],[140,70],[80,70],[55,50]]);
-
-            return new THREE.CanvasTexture(cvs);
-        }
-
+        // Group Hierarchy
         const globeGroup = new THREE.Group();
+        const arcsGroup = new THREE.Group();
+        const ringsGroup = new THREE.Group();
+        const hubsGroup = new THREE.Group();
+        const starsGroup = new THREE.Group();
+
+        scene.add(starsGroup);
         scene.add(globeGroup);
+        globeGroup.add(arcsGroup);
+        globeGroup.add(ringsGroup);
+        globeGroup.add(hubsGroup);
 
-        const earthGeo = new THREE.SphereGeometry(8.5, 64, 64);
-        const earthMat = new THREE.MeshPhongMaterial({
-            map: createEarthTexture(),
-            shininess: 50,
-            specular: new THREE.Color(0x00f3ff)
+        const GLOBE_RADIUS = 8.5;
+
+        // Background Cyberpunk Starfield Particles
+        (function createSpacefield() {
+            const starGeo = new THREE.BufferGeometry();
+            const count = 2000;
+            const pos = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i += 3) {
+                pos[i] = (Math.random() - 0.5) * 160;
+                pos[i + 1] = (Math.random() - 0.5) * 160;
+                pos[i + 2] = (Math.random() - 0.5) * 160;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const starMat = new THREE.PointsMaterial({
+                size: 0.15,
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.4
+            });
+            starsGroup.add(new THREE.Points(starGeo, starMat));
+        })();
+
+        // Core Dark Globe Mesh
+        const coreGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 0.98, 64, 64);
+        const coreMat = new THREE.MeshBasicMaterial({
+            color: 0x0a101d,
+            transparent: true,
+            opacity: 0.94
         });
-        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
-        globeGroup.add(earthMesh);
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        globeGroup.add(coreMesh);
 
-        // TOUR EIFFEL ET PROJECTEUR
-        function latLonToVector3(lat, lon, radius) {
+        // Custom Rim Atmosphere Shader
+        const auraGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.18, 64, 64);
+        const auraMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 2.5);
+                    gl_FragColor = vec4(0.0, 0.95, 1.0, 1.0) * intensity * 0.5;
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true
+        });
+        scene.add(new THREE.Mesh(auraGeo, auraMat));
+
+        const FINANCIAL_HUBS = [
+            { id: 'NYC', name: 'New York', lat: 40.7128, lon: -74.0060, color: 0xf0b90b },
+            { id: 'LON', name: 'London', lat: 51.5074, lon: -0.1278, color: 0x00f3ff },
+            { id: 'PAR', name: 'Paris', lat: 48.8566, lon: 2.3522, color: 0x0ecb81 },
+            { id: 'DXB', name: 'Dubai', lat: 25.2048, lon: 55.2708, color: 0xf0b90b },
+            { id: 'SIN', name: 'Singapore', lat: 1.3521, lon: 103.8198, color: 0x00f3ff },
+            { id: 'HKG', name: 'Hong Kong', lat: 22.3193, lon: 114.1694, color: 0x00f3ff },
+            { id: 'TYO', name: 'Tokyo', lat: 35.6762, lon: 139.6503, color: 0xf0b90b }
+        ];
+
+        function latLonToVector3(lat, lon, radius = GLOBE_RADIUS) {
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
-            return new THREE.Vector3(
-                -(radius * Math.sin(phi) * Math.cos(theta)),
-                radius * Math.cos(phi),
-                radius * Math.sin(phi) * Math.sin(theta)
-            );
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            const y = radius * Math.cos(phi);
+            return new THREE.Vector3(x, y, z);
         }
 
-        const eiffelGroup = new THREE.Group();
-        const towerMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true });
-        const towerBase = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.8, 1.2, 4), towerMat);
-        eiffelGroup.add(towerBase);
+        function createDottedGlobe() {
+            const particleCount = 15000;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
 
-        const beamGeo = new THREE.CylinderGeometry(0.02, 0.9, 7, 8);
-        beamGeo.translate(0, 3.5, 0); beamGeo.rotateX(Math.PI / 2);
-        const beamMat = new THREE.MeshBasicMaterial({ color: 0xff003c, transparent: true, opacity: 0.7 });
-        const eiffelBeam = new THREE.Mesh(beamGeo, beamMat);
-        eiffelGroup.add(eiffelBeam);
+            const colorGold = new THREE.Color(0xf0b90b);
+            const colorCyan = new THREE.Color(0x00f3ff);
+            const colorDark = new THREE.Color(0x1a2638);
 
-        const eiffelPos = latLonToVector3(48.85, 2.35, 8.5);
-        eiffelGroup.position.copy(eiffelPos);
-        eiffelGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), eiffelPos.clone().normalize());
-        globeGroup.add(eiffelGroup);
+            function isLand(lat, lon) {
+                if (lat > 15 && lat < 72 && lon > -168 && lon < -52) return true; // North America
+                if (lat > -56 && lat < 12 && lon > -82 && lon < -34) return true; // South America
+                if (lat > 35 && lat < 70 && lon > -10 && lon < 45) return true;  // Europe
+                if (lat > -35 && lat < 37 && lon > -18 && lon < 51) return true; // Africa
+                if (lat > 5 && lat < 75 && lon > 45 && lon < 180) return true;  // Asia
+                if (lat > -44 && lat < -10 && lon > 112 && lon < 154) return true;// Australia
+                return false;
+            }
 
-        // ANIMATION
-        let isWarping = false;
+            for (let i = 0; i < particleCount; i++) {
+                const u = Math.random();
+                const v = Math.random();
+                const lat = (Math.asin(2 * u - 1) * (180 / Math.PI));
+                const lon = (v * 360 - 180);
+
+                const vec = latLonToVector3(lat, lon, GLOBE_RADIUS);
+                positions[i * 3] = vec.x;
+                positions[i * 3 + 1] = vec.y;
+                positions[i * 3 + 2] = vec.z;
+
+                const land = isLand(lat, lon);
+                let col = colorDark;
+                if (land) {
+                    col = Math.random() > 0.3 ? colorCyan : colorGold;
+                }
+
+                colors[i * 3] = col.r;
+                colors[i * 3 + 1] = col.g;
+                colors[i * 3 + 2] = col.b;
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const mat = new THREE.PointsMaterial({
+                size: 0.11,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85
+            });
+
+            const points = new THREE.Points(geo, mat);
+            globeGroup.add(points);
+        }
+        createDottedGlobe();
+
+        const hubObjects = [];
+        const activeArcs = [];
+
+        FINANCIAL_HUBS.forEach(hub => {
+            const pos = latLonToVector3(hub.lat, hub.lon, GLOBE_RADIUS);
+
+            // Glowing Pin Sphere
+            const pinGeo = new THREE.SphereGeometry(0.18, 16, 16);
+            const pinMat = new THREE.MeshBasicMaterial({ color: hub.color });
+            const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+            pinMesh.position.copy(pos);
+            hubsGroup.add(pinMesh);
+
+            // Pulsing Ring Beacon
+            const ringBeaconGeo = new THREE.RingGeometry(0.2, 0.4, 32);
+            const ringBeaconMat = new THREE.MeshBasicMaterial({
+                color: hub.color,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.8
+            });
+            const ringBeacon = new THREE.Mesh(ringBeaconGeo, ringBeaconMat);
+            ringBeacon.position.copy(pos);
+            ringBeacon.lookAt(0, 0, 0);
+            hubsGroup.add(ringBeacon);
+
+            hubObjects.push({ ...hub, vec: pos, mesh: pinMesh, ring: ringBeacon });
+        });
+
+        function createFinancialArc(hubA, hubB) {
+            const p1 = hubA.vec;
+            const p2 = hubB.vec;
+
+            const distance = p1.distanceTo(p2);
+            const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+
+            const midLength = mid.length();
+            mid.normalize().multiplyScalar(midLength + distance * 0.35);
+
+            const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
+            const points = curve.getPoints(64);
+
+            const curveGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const curveMat = new THREE.LineBasicMaterial({
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.35
+            });
+
+            const line = new THREE.Line(curveGeo, curveMat);
+            arcsGroup.add(line);
+
+            // Flowing Photon Particle
+            const photonGeo = new THREE.SphereGeometry(0.12, 12, 12);
+            const photonMat = new THREE.MeshBasicMaterial({ color: 0xf0b90b });
+            const photon = new THREE.Mesh(photonGeo, photonMat);
+            arcsGroup.add(photon);
+
+            activeArcs.push({
+                curve: curve,
+                photon: photon,
+                speed: 0.15 + Math.random() * 0.2,
+                progress: Math.random()
+            });
+        }
+
+        const ROUTES = [
+            ['LON', 'NYC'], ['NYC', 'TYO'], ['LON', 'PAR'],
+            ['PAR', 'DXB'], ['DXB', 'SIN'], ['SIN', 'HKG'],
+            ['HKG', 'TYO'], ['LON', 'DXB']
+        ];
+
+        ROUTES.forEach(([id1, id2]) => {
+            const h1 = hubObjects.find(h => h.id === id1);
+            const h2 = hubObjects.find(h => h.id === id2);
+            if (h1 && h2) createFinancialArc(h1, h2);
+        });
+
+        let isDragging = false;
+        let prevMousePos = { x: 0, y: 0 };
+        let targetRotation = { x: 0.2, y: 0 };
+        let currentRotation = { x: 0.2, y: 0 };
+
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'CANVAS') {
+                isDragging = true;
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - prevMousePos.x;
+                const deltaY = e.clientY - prevMousePos.y;
+
+                targetRotation.y += deltaX * 0.005;
+                targetRotation.x += deltaY * 0.005;
+
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        window.addEventListener('wheel', (e) => {
+            camera.position.z = Math.max(14, Math.min(45, camera.position.z + e.deltaY * 0.02));
+        });
+
+        window.focusHub = function(hubId, element) {
+            document.querySelectorAll('.hub-chip').forEach(chip => chip.classList.remove('active'));
+            element.classList.add('active');
+
+            if (hubId === 'ALL') {
+                targetRotation.x = 0.2;
+                targetRotation.y = 0;
+            } else {
+                const hub = hubObjects.find(h => h.id === hubId);
+                if (hub) {
+                    targetRotation.x = (hub.lat * (Math.PI / 180));
+                    targetRotation.y = - (hub.lon * (Math.PI / 180)) - Math.PI / 2;
+                }
+            }
+        };
+
+        function initSparklines() {
+            const sparkCanvases = [
+                { id: 'spark-us100', color: '#0ecb81' },
+                { id: 'spark-us500', color: '#0ecb81' },
+                { id: 'spark-dxy', color: '#f6465d' },
+                { id: 'spark-btc', color: '#0ecb81' },
+                { id: 'spark-gold', color: '#0ecb81' }
+            ];
+
+            sparkCanvases.forEach(cfg => {
+                const cvs = document.getElementById(cfg.id);
+                if (!cvs) return;
+                const ctx = cvs.getContext('2d');
+                cvs.width = 65;
+                cvs.height = 26;
+
+                const points = Array.from({ length: 10 }, () => 4 + Math.random() * 18);
+
+                ctx.beginPath();
+                ctx.strokeStyle = cfg.color;
+                ctx.lineWidth = 2;
+
+                points.forEach((val, idx) => {
+                    const x = (idx / (points.length - 1)) * cvs.width;
+                    const y = cvs.height - val;
+                    if (idx === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            });
+        }
+        initSparklines();
+
+        // Clocks Refresh (Paris & New York)
+        function updateClocks() {
+            const now = new Date();
+            
+            const parisTime = new Intl.DateTimeFormat('fr-FR', {
+                timeZone: 'Europe/Paris',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            }).format(now);
+
+            const nyTime = new Intl.DateTimeFormat('fr-FR', {
+                timeZone: 'America/New_York',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            }).format(now);
+
+            document.getElementById('clock-paris').textContent = parisTime;
+            document.getElementById('clock-ny').textContent = nyTime;
+            
+            // Random Ping Generator
+            document.getElementById('ping-val').textContent = Math.floor(12 + Math.random() * 6);
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+
+        window.toggleTerminalOverlay = function(show) {
+            const overlay = document.getElementById('terminal-overlay');
+            if (show) {
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.classList.add('active'), 10);
+            } else {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.style.display = 'none', 600);
+            }
+        };
+
+        function launchTerminalWarp() {
+            let warpProgress = 0;
+            const warpInterval = setInterval(() => {
+                warpProgress += 0.05;
+                camera.position.z -= 0.9;
+                starsGroup.rotation.z += 0.1;
+                if (warpProgress >= 1.0) {
+                    clearInterval(warpInterval);
+                    toggleTerminalOverlay(true);
+                    camera.position.z = 28; // Reset back
+                }
+            }, 20);
+        }
+
+        document.getElementById('btn-enter-app').addEventListener('click', launchTerminalWarp);
+
+        // Global Keyboard Shortcuts (ENTER: Launch, R: Reset View)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Enter') {
+                launchTerminalWarp();
+            } else if (e.code === 'KeyR') {
+                targetRotation.x = 0.2;
+                targetRotation.y = 0;
+                camera.position.z = 28;
+            }
+        });
+
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
             const time = clock.getElapsedTime();
-            if (!isWarping) {
-                globeGroup.rotation.y = time * 0.1;
-                eiffelBeam.rotation.y = time * 2.5;
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
 
-        // DÉCLENCHEMENT SÉQUENCE & TRANSITION AC/DC
-        const btnLaunch = document.getElementById('btn-launch');
-        const acdcAudio = document.getElementById('acdc-audio');
-        const homePage = document.getElementById('home-page');
-        const flashOverlay = document.getElementById('flash-overlay');
+            currentRotation.x += (targetRotation.x - currentRotation.x) * 0.05;
+            currentRotation.y += (targetRotation.y - currentRotation.y) * 0.05;
 
-        btnLaunch.addEventListener('click', () => {
-            if (isWarping) return;
-            isWarping = true;
-            document.body.classList.add('warping');
+            globeGroup.rotation.x = currentRotation.x;
+            globeGroup.rotation.y = currentRotation.y + time * 0.03;
 
-            // 1. TENTATIVE LECTURE AUDIO AC/DC
-            acdcAudio.currentTime = 0;
-            acdcAudio.play().catch(err => {
-                console.log("Fallback audio activé :", err);
-                audioFallback.playRiff();
+            ringsGroup.rotation.z = time * 0.05;
+            starsGroup.rotation.y = time * 0.01;
+
+            activeArcs.forEach(arc => {
+                arc.progress = (arc.progress + delta * arc.speed) % 1.0;
+                const pos = arc.curve.getPoint(arc.progress);
+                arc.photon.position.copy(pos);
             });
 
-            // 2. SÉQUENCE ZOOM 3D WARP (TRANSITION)
-            let startTime = performance.now();
+            hubObjects.forEach(hub => {
+                const scale = 1 + Math.sin(time * 3 + hub.lat) * 0.25;
+                hub.ring.scale.set(scale, scale, scale);
+            });
 
-            function warpStep(now) {
-                let progress = (now - startTime) / 2800; // 2.8 secondes de transition
-
-                if (progress < 1.0) {
-                    camera.position.z = 26 - Math.pow(progress, 3) * 20;
-                    camera.fov = 45 + progress * 50;
-                    camera.updateProjectionMatrix();
-                    globeGroup.rotation.y += progress * 0.3;
-
-                    if (progress > 0.75) {
-                        flashOverlay.style.opacity = (progress - 0.75) / 0.25;
-                    }
-                    requestAnimationFrame(warpStep);
-                } else {
-                    // 3. AFFICHAGE DE LA PAGE D'ACCUEIL
-                    flashOverlay.style.opacity = '1';
-                    
-                    setTimeout(() => {
-                        document.getElementById('webgl-canvas').style.opacity = '0';
-                        document.querySelector('.jarvis-grid').style.opacity = '0';
-                        homePage.classList.add('active');
-                        flashOverlay.style.opacity = '0';
-                    }, 200);
-                }
-            }
-            requestAnimationFrame(warpStep);
-        });
+            renderer.render(scene, camera);
+        }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        window.onload = function() {
+            animate();
+        };
     </script>
 </body>
 </html>
