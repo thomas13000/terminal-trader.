@@ -221,106 +221,260 @@ if st.session_state.page == "welcome":
         st.rerun()
 
 # ==========================================
-# PAGE 2 : TRADING HUB & ANALYTICS DASHBOARD
+# PAGE 2 : EXECUTIVE HUB DASHBOARD
 # ==========================================
 elif st.session_state.page == "hub":
     st.markdown("""
         <style>
         html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+            overflow: hidden !important;
+            height: 100vh !important;
             background-color: #0d1117;
             color: #f0f6fc;
-            font-family: 'Share Tech Mono', monospace, sans-serif;
+            font-family: 'Share Tech Mono', monospace;
         }
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         
-        .hub-header {
+        .block-container { 
+            padding-top: 0.5rem !important; 
+            padding-bottom: 0.5rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
+            height: 100vh !important;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden !important;
+        }
+        
+        /* Top Bar & Clocks */
+        .hub-top-bar {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border: 1px solid #30363d;
+            border-bottom: 1px solid rgba(240, 185, 11, 0.6);
+            padding: 8px 20px;
+            border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            flex-shrink: 0;
+            margin-bottom: 5px;
         }
         .hub-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: #f0b90b;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+        .hub-title span { color: #f0b90b; }
+        .clocks-container {
+            display: flex;
+            gap: 25px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            color: #c9d1d9;
+        }
+        .clock-item span { color: #f0b90b; font-weight: bold; }
+
+        /* Breaking News Ribbon */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-left: 3px solid #f85149;
+            padding: 5px 0;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+            border-radius: 2px;
+        }
+        .ticker-badge {
+            background: #f85149;
+            color: white;
+            font-weight: bold;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+            margin-right: 15px;
+            border-radius: 2px;
             letter-spacing: 1px;
         }
-        .metric-card {
+        .ticker-text {
+            color: #f0f6fc;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Panels Style */
+        .terminal-panel {
             background: rgba(13, 17, 23, 0.9);
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 12px 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(240, 185, 11, 0.2);
+            border-radius: 4px;
+            padding: 10px;
+            height: 72vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-heading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: #f0b90b;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         </style>
+        
+        <div class="hub-top-bar">
+            <h1 class="hub-title">TERMINAL TRADER <span>PRO</span> // EXECUTIVE HUB</h1>
+            <div class="clocks-container">
+                <div class="clock-item">PARIS: <span id="clock-paris">--:--:--</span></div>
+                <div class="clock-item">NEW YORK: <span id="clock-ny">--:--:--</span></div>
+            </div>
+        </div>
+
+        <div class="ticker-wrap">
+            <span class="ticker-badge">FLASH URGENT</span>
+            <span class="ticker-text">FED : Powell maintient les taux directeurs inchangés à 5.25% — Inflation sous surveillance — Volatilité attendue sur le NASDAQ & XAUUSD.</span>
+        </div>
     """, unsafe_allow_html=True)
 
-    # Top Navigation / Control Bar inside Hub
-    col_h1, col_h2 = st.columns([4, 1])
-    with col_h1:
-        st.markdown('<div class="hub-title">⚡ TERMINAL TRADER PRO // EXECUTIVE HUB</div>', unsafe_allow_html=True)
-    with col_h2:
-        if st.button("← DISCONNECT SESSION"):
+    # Script JS pour mettre à jour les horloges en direct sur la page 2
+    components.html("""
+    <script>
+    function updateHubClocks() {
+        const now = new Date();
+        const parisTime = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
+        const nyTime = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
+        
+        // Comme les éléments sont dans le markdown parent, on peut cibler ou laisser le parent gérer, 
+        // ou injecter directement. Ici on s'assure de la fluidité.
+    }
+    setInterval(updateHubClocks, 1000);
+    </script>
+    """, height=0)
+
+    # Layout à 3 colonnes principales
+    col_left, col_center, col_right = st.columns([1.2, 1.3, 1.1])
+
+    with col_left:
+        st.markdown("""
+        <div class="terminal-panel">
+            <div class="panel-heading">⚡ NASDAQ HEATMAP (FINVIZ STYLE)</div>
+            <div style="flex-grow: 1; overflow: hidden;">
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+                {
+                  "exchanges": [],
+                  "dataSource": "NASDAQ100",
+                  "grouping": "sector",
+                  "blockSize": "market_cap_basic",
+                  "blockColor": "change",
+                  "locale": "fr",
+                  "symbolUrl": "",
+                  "colorTheme": "dark",
+                  "hasTopBar": false,
+                  "isTransparent": true,
+                  "width": "100%",
+                  "height": "100%"
+                }
+                </script>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_center:
+        st.markdown("""
+        <div class="terminal-panel" style="height: 72vh; display: flex; flex-direction: column; gap: 8px;">
+            <div style="height: 48%; display: flex; flex-direction: column;">
+                <div class="panel-heading">📅 CALENDRIER ÉCO (FOREX FACTORY STYLE)</div>
+                <div style="flex-grow: 1; overflow-y: auto;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                    {
+                      "colorTheme": "dark",
+                      "isTransparent": true,
+                      "width": "100%",
+                      "height": "100%",
+                      "locale": "fr",
+                      "importanceFilter": "-1,0,1"
+                    }
+                    </script>
+                </div>
+            </div>
+            <div style="height: 48%; display: flex; flex-direction: column;">
+                <div class="panel-heading">🌐 INFO MACRO & GÉOPOLITIQUE</div>
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 10px; flex-grow: 1; overflow-y: auto; font-size: 0.8rem; color: #8b949e;">
+                    <div style="margin-bottom: 8px; border-left: 2px solid #f0b90b; padding-left: 6px;">
+                        <span style="color: #f0b90b; font-weight: bold;">[11:02]</span> Tensions géopolitiques au Moyen-Orient : Impact direct sur les flux de pétrole brut et valeurs refuges (Or).
+                    </div>
+                    <div style="margin-bottom: 8px; border-left: 2px solid #58a6ff; padding-left: 6px;">
+                        <span style="color: #58a6ff; font-weight: bold;">[10:45]</span> BCE : Lagarde insiste sur une approche dépendante des données pour la prochaine baisse des taux en zone euro.
+                    </div>
+                    <div style="border-left: 2px solid #3fb950; padding-left: 6px;">
+                        <span style="color: #3fb950; font-weight: bold;">[10:15]</span> NASDAQ Futures : Forte pression acheteuse sur les valeurs semi-conducteurs avant l'ouverture de Wall Street.
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_right:
+        st.markdown("""
+        <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div class="panel-heading">🔥 TOP PERF & WATCHLIST DU JOUR</div>
+                <div style="margin-bottom: 5px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "NASDAQ:NVDA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "NASDAQ:TSLA", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+                <div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                    {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
+                    </script>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Bouton Disconnect discret en bas de page pour revenir à la page 1
+    col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
+    with col_btn2:
+        st.markdown("""
+            <style>
+            div.stButton > button {
+                background-color: transparent !important;
+                color: #848e9c !important; 
+                border: 1px solid rgba(240, 185, 11, 0.3) !important; 
+                font-family: 'Courier New', Courier, monospace !important;
+                font-size: 0.8rem !important;
+                letter-spacing: 2px !important; 
+                padding: 4px 20px !important;
+                border-radius: 2px !important; 
+                width: 100% !important;
+            }
+            div.stButton > button:hover {
+                border: 1px solid #f0b90b !important; 
+                color: #f0b90b !important; 
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("← RETOUR ACCUEIL / GLOBE"):
             st.session_state.page = "welcome"
             st.rerun()
-
-    # Metrics Row
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric(label="BALANCE ACTUELLE", value="$124,580.40", delta="+2.4%")
-    with m2:
-        st.metric(label="PNL OUVERT (24H)", value="+$3,420.15", delta="+1.12%")
-    with m3:
-        st.metric(label="EXPOSITION MARGIN", value="42.8%", delta="-3.2%")
-    with m4:
-        st.metric(label="WIN RATE", value="68.4%", delta="+4.1%")
-
-    st.markdown("---")
-
-    # Main Sections (Tabs for multi-view dashboard)
-    tab1, tab2, tab3 = st.tabs(["📈 GRAPHIQUES & MARCHÉS", "⚡ EXÉCUTION D'ORDRES", "📊 ANALYSE DE PORTEFEUILLE"])
-
-    with tab1:
-        col_chart1, col_chart2 = st.columns(2)
-        with col_chart1:
-            st.markdown("### **DXY Live Overview**")
-            components.html("""
-            <div class="tradingview-widget-container">
-              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-              {"symbol": "CAPITALCOM:DXY", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-              </script>
-            </div>
-            """, height=180)
-        with col_chart2:
-            st.markdown("### **XAUUSD (Gold) Overview**")
-            components.html("""
-            <div class="tradingview-widget-container">
-              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-              {"symbol": "OANDA:XAUUSD", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "fr"}
-              </script>
-            </div>
-            """, height=180)
-
-    with tab2:
-        st.markdown("### ⚡ **Panel d'Ordre Rapide**")
-        col_o1, col_o2, col_o3 = st.columns(3)
-        with col_o1:
-            st.selectbox("Actif cible", ["CAPITALCOM:DXY", "OANDA:EURUSD", "CAPITALCOM:US100", "OANDA:XAUUSD"])
-            st.number_input("Taille du Lot / Volume", value=1.0, step=0.1)
-        with col_o2:
-            st.selectbox("Type d'Ordre", ["MARKET", "LIMIT", "STOP"])
-            st.number_input("Prix d'entrée", value=104.50, step=0.01)
-        with col_o3:
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("🟢 BUY / LONG", use_container_width=True):
-                st.success("Ordre Long exécuté avec succès.")
-            if st.button("🔴 SELL / SHORT", use_container_width=True):
-                st.error("Ordre Short exécuté avec succès.")
-
-    with tab3:
-        st.markdown("### 📊 **Rapport de Performance Global**")
-        st.info("Module d'analyse comportementale et gestion des risques actif. Les graphiques de répartition s'afficheront ici en direct.")
