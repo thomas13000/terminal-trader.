@@ -2,8 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import time
 from datetime import datetime
-import urllib.request
-import json
 
 # 1. Configuration de la page
 st.set_page_config(
@@ -13,69 +11,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Auto-rafraîchissement automatique de la page toutes les 5 secondes (Flux en direct)
-components.html(
-    """
-    <script>
-        setTimeout(function(){
-            window.parent.postMessage({type: 'streamlit:render'}, '*');
-            window.parent.location.reload();
-        }, 5000);
-    </script>
-    """,
-    height=0,
-)
-
-# 2. Gestion de l'état de la navigation
+# 2. État de la navigation
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 start_time = time.time()
-
-# 3. Récupération des prix en temps réel
-@st.cache_data(ttl=4) # Cache court (4s) pour coller au flux direct
-def get_live_market_data():
-    symbols = {
-        "DXY": "DX-Y.NYB",
-        "NASDAQ": "^IXIC",
-        "GOLD": "GC=F",
-        "EUR/USD": "EURUSD=X"
-    }
-    data = {}
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-    
-    for name, ticker in symbols.items():
-        try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?interval=1m&range=1d"
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=2.0) as response:
-                res = json.loads(response.read().decode())
-                meta = res['chart']['result'][0]['meta']
-                price = meta.get('regularMarketPrice')
-                prev_close = meta.get('chartPreviousClose') or meta.get('previousClose', price)
-                
-                if price and prev_close:
-                    change_pct = ((price - prev_close) / prev_close) * 100
-                    data[name] = {"price": price, "change": change_pct}
-                else:
-                    raise ValueError()
-        except Exception:
-            defaults = {
-                "DXY": (104.25, 0.15),
-                "NASDAQ": (21240.50, -0.32),
-                "GOLD": (2688.40, 0.84),
-                "EUR/USD": (1.0845, -0.12)
-            }
-            p, c = defaults.get(name, (100.0, 0.0))
-            data[name] = {"price": p, "change": c}
-            
-    return data
-
-market_data = get_live_market_data()
-latency_ms = round((time.time() - start_time) * 1000 + 10, 1)
+latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS (HUD, Cadre Englobant, Pulse)
+# STYLES CSS (HUD, Zero Scroll, Cadre Jaune)
 # ==========================================
 st.markdown("""
     <style>
@@ -101,7 +45,7 @@ st.markdown("""
             height: 100vh !important;
         }
 
-        /* Overlay Reticles */
+        /* Overlay Reticles (Viseurs 4 coins) */
         .corner-reticle {
             position: fixed; width: 24px; height: 24px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.4);
@@ -135,7 +79,6 @@ st.markdown("""
 
         .hud-gold { color: #f0b90b; }
         .hud-green { color: #0ecb81; }
-        .hud-red { color: #f6465d; }
 
         .mono-text {
             font-family: 'JetBrains Mono', monospace;
@@ -152,44 +95,25 @@ st.markdown("""
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Grand Cadre Jaune Englobant (Marché en direct) */
-        .market-box-wrapper {
+        /* Conteneur Jaune pour les Marchés */
+        .market-outer-box {
             background: rgba(13, 17, 23, 0.95);
             border: 2px solid #f0b90b;
             border-radius: 14px;
-            padding: 16px;
+            padding: 12px;
             box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
         }
 
-        .market-box-header {
+        .market-outer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 12px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
             border-bottom: 1px solid rgba(240, 185, 11, 0.25);
-            margin-bottom: 12px;
         }
 
-        /* Tickers Dynamiques */
-        .ticker-card {
-            background: rgba(18, 24, 38, 0.85);
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .ticker-green {
-            border-left: 4px solid #0ecb81 !important;
-            background: linear-gradient(90deg, rgba(14,203,129,0.08) 0%, rgba(18, 24, 38, 0.85) 100%);
-        }
-
-        .ticker-red {
-            border-left: 4px solid #f6465d !important;
-            background: linear-gradient(90deg, rgba(246,70,93,0.08) 0%, rgba(18, 24, 38, 0.85) 100%);
-        }
-
-        /* Animation Point Pulsant (Flux direct) */
+        /* Animation Point Pulsant */
         .pulse-dot {
             width: 8px;
             height: 8px;
@@ -267,7 +191,7 @@ if st.session_state.page == "welcome":
     """, unsafe_allow_html=True)
 
     # --- DISPOSITION EN 2 COLONNES ---
-    col_left, col_right = st.columns([2, 1.1], gap="medium")
+    col_left, col_right = st.columns([2, 1.2], gap="medium")
 
     with col_left:
         st.markdown("""
@@ -291,58 +215,63 @@ if st.session_state.page == "welcome":
             st.rerun()
 
     with col_right:
-        # --- CADRE JAUNE ENGLOBANT : MARCHÉ EN DIRECT ---
-        
-        # Construction des lignes de prix
-        tickers_html = ""
-        for symbol, info in market_data.items():
-            price_val = info["price"]
-            change_val = info["change"]
-            
-            if symbol in ["EUR/USD", "DXY"]:
-                fmt_price = f"{price_val:.4f}"
-            else:
-                fmt_price = f"{price_val:,.2f}".replace(",", " ")
-
-            is_positive = change_val >= 0
-            color_class = "ticker-green" if is_positive else "ticker-red"
-            text_color = "hud-green" if is_positive else "hud-red"
-            sign = "+" if is_positive else ""
-
-            tickers_html += f"""
-                <div class="ticker-card {color_class}">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:#fff; font-size:0.88rem;">{symbol}</span>
-                        <span class="{text_color}" style="font-family:'JetBrains Mono'; font-weight:800; font-size:0.82rem;">
-                            {sign}{change_val:.2f} %
-                        </span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text {text_color}" style="font-size:0.92rem; font-weight:700;">{fmt_price}</span>
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <span class="pulse-dot"></span>
-                            <span class="mono-text" style="font-size:0.65rem; color:#848e9c;">STREAM</span>
-                        </div>
-                    </div>
-                </div>
-            """
-
-        # Enclosure complète dans le cadre jaune
-        st.markdown(f"""
-            <div class="market-box-wrapper">
-                <div class="market-box-header">
+        # Cadre jaune encadrant le widget temps réel avec mini-courbes
+        st.markdown("""
+            <div class="market-outer-box">
+                <div class="market-outer-header">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="color:#f0b90b; font-size:1rem;">⚡</span>
                         <span class="hud-title" style="font-size:0.92rem; color:#f0b90b;">MARCHÉ EN DIRECT</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px; background:rgba(14,203,129,0.1); padding:3px 8px; border-radius:12px; border:1px solid rgba(14,203,129,0.3);">
                         <span class="pulse-dot"></span>
-                        <span class="mono-text hud-green" style="font-size:0.65rem; font-weight:700;">FLUX DIRECT</span>
+                        <span class="mono-text hud-green" style="font-size:0.65rem; font-weight:700;">WEBSOCKET LIVE</span>
                     </div>
                 </div>
-                {tickers_html}
             </div>
         """, unsafe_allow_html=True)
+
+        # Widget TradingView intégré (prix instantanés, mini-courbe intraday, % hausse/baisse, zéro reload)
+        tradingview_html = """
+        <div class="tradingview-widget-container" style="background: transparent;">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+          {
+            "colorTheme": "dark",
+            "dateRange": "1D",
+            "showChart": true,
+            "locale": "fr",
+            "largeChartUrl": "",
+            "isTransparent": true,
+            "showSymbolLogo": false,
+            "showFloatingTooltip": false,
+            "width": "100%",
+            "height": "380",
+            "plotLineColorGrowing": "rgba(14, 203, 129, 1)",
+            "plotLineColorFalling": "rgba(246, 70, 93, 1)",
+            "gridLineColor": "rgba(240, 185, 11, 0.05)",
+            "scaleFontColor": "rgba(132, 142, 156, 1)",
+            "belowLineFillColorGrowing": "rgba(14, 203, 129, 0.12)",
+            "belowLineFillColorFalling": "rgba(246, 70, 93, 0.12)",
+            "belowLineFillColorGrowingBottom": "rgba(14, 203, 129, 0)",
+            "belowLineFillColorFallingBottom": "rgba(246, 70, 93, 0)",
+            "symbolActiveColor": "rgba(240, 185, 11, 0.15)",
+            "tabs": [
+              {
+                "title": "Flux Direct",
+                "symbols": [
+                  { "s": "CAPITALCOM:DXY", "d": "DXY" },
+                  { "s": "FOREXCOM:NSXUSD", "d": "NASDAQ" },
+                  { "s": "OANDA:XAUUSD", "d": "GOLD" },
+                  { "s": "FX:EURUSD", "d": "EUR/USD" }
+                ]
+              }
+            ]
+          }
+          </script>
+        </div>
+        """
+        components.html(tradingview_html, height=390, scrolling=False)
 
 
 # ==========================================
