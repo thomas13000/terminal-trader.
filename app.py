@@ -470,18 +470,18 @@ if st.session_state.page == "welcome":
 # ==========================================
 elif st.session_state.page == "hub":
 
-    # BARRE SUPÉRIEURE PAGE 2 AVEC LOGO, MS, PARIS, NEW YORK & BOUTON RETOUR
-    page2_header_html = f"""
+    # BARRE SUPÉRIEURE PAGE 2 (SANS DANGERS F-STRING)
+    page2_header_html = """
     <!DOCTYPE html>
     <html>
     <head>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&family=Inter:wght@600;700&display=swap');
             
-            * {{ box-sizing: border-box; }}
-            body {{ margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }}
+            * { box-sizing: border-box; }
+            body { margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }
 
-            .hud-header-p2 {{
+            .hud-header-p2 {
                 background: rgba(13, 17, 23, 0.94);
                 border: 1.5px solid rgba(240, 185, 11, 0.45);
                 border-radius: 12px;
@@ -490,15 +490,15 @@ elif st.session_state.page == "hub":
                 justify-content: space-between;
                 align-items: center;
                 box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
-            }}
+            }
 
-            .left-brand {{
+            .left-brand {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-            }}
+            }
 
-            .logo-icon {{
+            .logo-icon {
                 width: 36px;
                 height: 36px;
                 background: linear-gradient(135deg, #f0b90b, #d4a007);
@@ -511,27 +511,26 @@ elif st.session_state.page == "hub":
                 color: #000;
                 font-size: 1.1rem;
                 box-shadow: 0 0 12px rgba(240,185,11,0.6);
-            }}
+            }
 
-            .title-p2 {{
+            .title-p2 {
                 font-family: 'Orbitron', sans-serif;
                 font-weight: 900;
                 color: #ffffff;
                 font-size: 1.1rem;
                 letter-spacing: 2px;
                 line-height: 1.1;
-            }}
+            }
 
-            .hud-gold {{ color: #f0b90b; }}
+            .hud-gold { color: #f0b90b; }
 
-            .subtitle-p2 {{
+            .subtitle-p2 {
                 font-size: 0.65rem;
                 color: #848e9c;
                 letter-spacing: 1px;
-            }}
+            }
 
-            /* BLOC HORLOGES PARALLELES DANS LA BARRE */
-            .header-clocks-container {{
+            .header-clocks-container {
                 display: flex;
                 align-items: center;
                 gap: 20px;
@@ -539,52 +538,51 @@ elif st.session_state.page == "hub":
                 border: 1px solid rgba(240, 185, 11, 0.25);
                 padding: 6px 18px;
                 border-radius: 8px;
-            }}
+            }
 
-            .clock-item {{
+            .clock-item {
                 display: flex;
                 align-items: center;
                 gap: 8px;
-            }}
+            }
 
-            .clock-flag {{
+            .clock-flag {
                 font-family: 'Orbitron', sans-serif;
                 font-size: 0.7rem;
                 font-weight: 900;
                 color: #f0b90b;
-            }}
+            }
 
-            .clock-time {{
+            .clock-time {
                 font-size: 1.15rem;
                 font-weight: 800;
                 color: #ffffff;
                 letter-spacing: 1px;
                 text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-            }}
+            }
 
-            .clock-divider {{
+            .clock-divider {
                 width: 1px;
                 height: 22px;
                 background: rgba(240, 185, 11, 0.3);
-            }}
+            }
 
-            /* BLOC STATUT ET SERVEUR */
-            .right-status {{
+            .right-status {
                 display: flex;
                 align-items: center;
                 gap: 16px;
-            }}
+            }
 
-            .status-badge {{
+            .status-badge {
                 background: rgba(255,255,255,0.05);
                 padding: 5px 12px;
                 border-radius: 6px;
                 border: 1px solid rgba(255,255,255,0.1);
                 font-size: 0.78rem;
                 color: #848e9c;
-            }}
+            }
 
-            .online-badge {{
+            .online-badge {
                 background: rgba(14,203,129,0.12);
                 padding: 5px 12px;
                 border-radius: 20px;
@@ -595,9 +593,9 @@ elif st.session_state.page == "hub":
                 font-weight: 700;
                 color: #0ecb81;
                 font-size: 0.78rem;
-            }}
+            }
 
-            .online-dot {{
+            .online-dot {
                 width: 7px;
                 height: 7px;
                 background: #0ecb81;
@@ -608,7 +606,6 @@ elif st.session_state.page == "hub":
     </head>
     <body>
         <div class="hud-header-p2">
-            <!-- TITRE ET BRANDING -->
             <div class="left-brand">
                 <div class="logo-icon">⚡</div>
                 <div>
@@ -617,7 +614,6 @@ elif st.session_state.page == "hub":
                 </div>
             </div>
 
-            <!-- HORLOGES PARIS & NEW YORK EN TEMPS RÉEL DANS LA BARRE -->
             <div class="header-clocks-container">
                 <div class="clock-item">
                     <span class="clock-flag">🇫🇷 PARIS</span>
@@ -632,10 +628,9 @@ elif st.session_state.page == "hub":
                 </div>
             </div>
 
-            <!-- SERVEUR MS & STATUT ONLINE -->
             <div class="right-status">
                 <div class="status-badge">
-                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
+                    MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">__LATENCY__ ms</span>
                 </div>
                 <div class="online-badge">
                     <span class="online-dot"></span>
@@ -645,20 +640,21 @@ elif st.session_state.page == "hub":
         </div>
 
         <script>
-            function updateP2Clocks() {{
+            function updateP2Clocks() {
                 const now = new Date();
-                const parisStr = now.toLocaleTimeString('fr-FR', {{ timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' }});
-                const nyStr = now.toLocaleTimeString('en-US', {{ timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+                const parisStr = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const nyStr = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
                 document.getElementById('p2-paris').innerText = parisStr;
                 document.getElementById('p2-ny').innerText = nyStr;
-            }}
+            }
             setInterval(updateP2Clocks, 1000);
             updateP2Clocks();
         </script>
     </body>
     </html>
-    """
+    """.replace("__LATENCY__", str(latency_ms))
+
     components.html(page2_header_html, height=65, scrolling=False)
 
     col_btn, _ = st.columns([1.5, 8.5])
