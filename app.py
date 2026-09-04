@@ -336,7 +336,6 @@ elif st.session_state.page == "hub":
     </html>
     """, height=45)
 
-    # Widget Ticker Tape TradingView (Top actions NASDAQ)
     ticker_tape_html = """
     <!DOCTYPE html>
     <html>
@@ -404,7 +403,7 @@ elif st.session_state.page == "hub":
         st.markdown("""
         <div class="terminal-panel" style="gap: 6px;">
             <div style="height: 49%; display: flex; flex-direction: column;">
-                <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE</span><span>FOREX FACTORY</span></div>
+                <div class="panel-heading"><span>📅 CALENDRIER ÉCONOMIQUE (ACTUS ROUGES)</span><span>TRADINGVIEW</span></div>
                 <div style="flex-grow: 1; overflow-y: auto;">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
                     {
@@ -413,7 +412,7 @@ elif st.session_state.page == "hub":
                       "width": "100%",
                       "height": "100%",
                       "locale": "fr",
-                      "importanceFilter": "-1,0,1"
+                      "importanceFilter": "1"
                     }
                     </script>
                 </div>
