@@ -7,14 +7,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Lecture des paramètres d'URL pour la navigation Streamlit
+# Navigation via les paramètres d'URL
 if "page" in st.query_params:
     st.session_state.page = st.query_params["page"]
 elif "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 # ==========================================
-# PAGE 1 : WELCOME SCREEN (DESIGN COMPLET)
+# PAGE 1 : WELCOME SCREEN
 # ==========================================
 if st.session_state.page == "welcome":
     st.markdown("""
@@ -170,6 +170,7 @@ if st.session_state.page == "welcome":
         .router-header { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.65rem; color: var(--gold-main); font-weight: 700; }
         .router-ticker { font-family: var(--font-mono); font-size: 0.78rem; color: #fff; display: flex; align-items: center; justify-content: space-between; }
 
+        /* Lien stylisé en bouton natif */
         .btn-enter-terminal {
             position: relative; background: linear-gradient(135deg, var(--gold-main) 0%, #d4a007 100%);
             color: #080b10 !important; text-decoration: none !important; padding: 18px 24px; font-family: var(--font-display);
@@ -177,6 +178,7 @@ if st.session_state.page == "welcome":
             cursor: pointer; overflow: hidden; box-shadow: 0 0 25px var(--gold-glow);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; border: none;
+            box-sizing: border-box;
         }
         .btn-enter-terminal::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -211,18 +213,6 @@ if st.session_state.page == "welcome":
         .hub-chip { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; color: var(--text-muted); padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.25s ease; border: 1px solid transparent; }
         .hub-chip:hover, .hub-chip.active { color: #000; background: var(--gold-main); box-shadow: 0 0 15px var(--gold-glow); border-color: var(--gold-main); }
         .deck-divider { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.15); }
-
-        @media (max-width: 1024px) {
-            .left-hero-panel { width: 320px; left: 20px; top: 90px; }
-            .right-sidebar { width: 270px; right: 20px; top: 90px; }
-            .hud-header { width: calc(100vw - 40px); }
-        }
-        @media (max-width: 768px) {
-            .right-sidebar { display: none; }
-            .left-hero-panel { width: calc(100vw - 40px); left: 20px; }
-            .system-status-bar { display: none; }
-            .bottom-deck { width: 92vw; overflow-x: auto; justify-content: flex-start; }
-        }
     </style>
 </head>
 <body>
@@ -282,9 +272,10 @@ if st.session_state.page == "welcome":
             </div>
         </div>
 
-        <button onclick="navigateToHub()" class="btn-enter-terminal" id="btn-enter-app">
+        <!-- Lien direct autorisé avec target="_top" -->
+        <a href="./?page=hub" target="_top" class="btn-enter-terminal" id="nav-btn">
             ENTRER DANS LE TERMINAL ➔
-        </button>
+        </a>
 
         <div class="hotkey-legend">
             <span><span class="hotkey-badge">ENTRÉE</span> Démarrer</span>
@@ -298,7 +289,7 @@ if st.session_state.page == "welcome":
             <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">LIVE TICKERS</span>
         </div>
 
-        <div class="ticker-card" id="card-us100">
+        <div class="ticker-card">
             <div class="ticker-info">
                 <div class="ticker-symbol">US100</div>
                 <div class="ticker-sub">Nasdaq 100 Index</div>
@@ -306,11 +297,11 @@ if st.session_state.page == "welcome":
             <canvas class="sparkline-canvas" id="spark-us100"></canvas>
             <div class="ticker-price-block">
                 <div class="ticker-price" id="price-us100">21,240.10</div>
-                <div class="ticker-change change-up" id="change-us100">+1.12%</div>
+                <div class="ticker-change change-up">+1.12%</div>
             </div>
         </div>
 
-        <div class="ticker-card" id="card-us500">
+        <div class="ticker-card">
             <div class="ticker-info">
                 <div class="ticker-symbol">US500</div>
                 <div class="ticker-sub">S&P 500 Index</div>
@@ -318,11 +309,11 @@ if st.session_state.page == "welcome":
             <canvas class="sparkline-canvas" id="spark-us500"></canvas>
             <div class="ticker-price-block">
                 <div class="ticker-price" id="price-us500">5,992.40</div>
-                <div class="ticker-change change-up" id="change-us500">+0.58%</div>
+                <div class="ticker-change change-up">+0.58%</div>
             </div>
         </div>
 
-        <div class="ticker-card" id="card-dxy">
+        <div class="ticker-card">
             <div class="ticker-info">
                 <div class="ticker-symbol">DXY</div>
                 <div class="ticker-sub">US Dollar Index</div>
@@ -330,11 +321,11 @@ if st.session_state.page == "welcome":
             <canvas class="sparkline-canvas" id="spark-dxy"></canvas>
             <div class="ticker-price-block">
                 <div class="ticker-price" id="price-dxy">106.45</div>
-                <div class="ticker-change change-down" id="change-dxy">-0.24%</div>
+                <div class="ticker-change change-down">-0.24%</div>
             </div>
         </div>
 
-        <div class="ticker-card" id="card-btc">
+        <div class="ticker-card">
             <div class="ticker-info">
                 <div class="ticker-symbol">BTC / USDT</div>
                 <div class="ticker-sub">Binance Direct Feed</div>
@@ -346,7 +337,7 @@ if st.session_state.page == "welcome":
             </div>
         </div>
 
-        <div class="ticker-card" id="card-gold">
+        <div class="ticker-card">
             <div class="ticker-info">
                 <div class="ticker-symbol">XAU / USD</div>
                 <div class="ticker-sub">Gold Spot</div>
@@ -354,7 +345,7 @@ if st.session_state.page == "welcome":
             <canvas class="sparkline-canvas" id="spark-gold"></canvas>
             <div class="ticker-price-block">
                 <div class="ticker-price" id="price-gold">$2,688.30</div>
-                <div class="ticker-change change-up" id="change-gold">+0.84%</div>
+                <div class="ticker-change change-up">+0.84%</div>
             </div>
         </div>
     </aside>
@@ -372,20 +363,15 @@ if st.session_state.page == "welcome":
     </nav>
 
     <script>
-        // Force le focus dans l'iframe dès l'ouverture pour capturer immédiatement la touche Entrée
+        // Donner le focus à l'iframe
         window.focus();
         document.addEventListener('click', () => { window.focus(); });
 
-        // Redirection universelle vers la page Hub de Streamlit
-        function navigateToHub() {
-            window.top.location.search = '?page=hub';
-        }
-
         const marketData = {
-            us100: { price: 21240.10, change: 1.12 },
-            us500: { price: 5992.40, change: 0.58 },
-            dxy: { price: 106.45, change: -0.24 },
-            gold: { price: 2688.30, change: 0.84 }
+            us100: { price: 21240.10 },
+            us500: { price: 5992.40 },
+            dxy: { price: 106.45 },
+            gold: { price: 2688.30 }
         };
 
         async function updateRealtimeBTC() {
@@ -398,34 +384,14 @@ if st.session_state.page == "welcome":
                 const priceEl = document.getElementById('price-btc');
                 const changeEl = document.getElementById('change-btc');
                 if (priceEl && changeEl) {
-                    priceEl.textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    priceEl.textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2 });
                     changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
                     changeEl.className = 'ticker-change ' + (change >= 0 ? 'change-up' : 'change-down');
                 }
-            } catch (err) {
-                console.warn('API Binance non disponible:', err);
-            }
-        }
-
-        function simulateLiveMarketTicks() {
-            Object.keys(marketData).forEach(key => {
-                const item = marketData[key];
-                const delta = (Math.random() - 0.49) * (item.price * 0.0004);
-                item.price += delta;
-
-                const priceEl = document.getElementById('price-' + key);
-                if (priceEl) {
-                    const prefix = (key === 'dxy') ? '' : ((key === 'gold') ? '$' : '');
-                    priceEl.textContent = prefix + item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    
-                    priceEl.style.color = delta >= 0 ? '#0ecb81' : '#f6465d';
-                    setTimeout(() => { priceEl.style.color = '#ffffff'; }, 350);
-                }
-            });
+            } catch (err) {}
         }
 
         setInterval(updateRealtimeBTC, 2500);
-        setInterval(simulateLiveMarketTicks, 1200);
         updateRealtimeBTC();
 
         const canvas = document.getElementById('webgl-canvas');
@@ -440,296 +406,76 @@ if st.session_state.page == "welcome":
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
         const globeGroup = new THREE.Group();
-        const arcsGroup = new THREE.Group();
-        const ringsGroup = new THREE.Group();
-        const hubsGroup = new THREE.Group();
-        const starsGroup = new THREE.Group();
-
-        scene.add(starsGroup);
         scene.add(globeGroup);
-        globeGroup.add(arcsGroup);
-        globeGroup.add(ringsGroup);
-        globeGroup.add(hubsGroup);
 
         const GLOBE_RADIUS = 8.5;
-
-        (function createSpacefield() {
-            const starGeo = new THREE.BufferGeometry();
-            const count = 2000;
-            const pos = new Float32Array(count * 3);
-            for (let i = 0; i < count * 3; i += 3) {
-                pos[i] = (Math.random() - 0.5) * 160;
-                pos[i + 1] = (Math.random() - 0.5) * 160;
-                pos[i + 2] = (Math.random() - 0.5) * 160;
-            }
-            starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-            const starMat = new THREE.PointsMaterial({
-                size: 0.15, color: 0x00f3ff, transparent: true, opacity: 0.4
-            });
-            starsGroup.add(new THREE.Points(starGeo, starMat));
-        })();
 
         const coreGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 0.98, 64, 64);
         const coreMat = new THREE.MeshBasicMaterial({ color: 0x0a101d, transparent: true, opacity: 0.94 });
         globeGroup.add(new THREE.Mesh(coreGeo, coreMat));
 
-        const auraGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.18, 64, 64);
-        const auraMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                void main() {
-                    float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 2.5);
-                    gl_FragColor = vec4(0.0, 0.95, 1.0, 1.0) * intensity * 0.5;
-                }
-            `,
-            blending: THREE.AdditiveBlending, side: THREE.BackSide, transparent: true
-        });
-        scene.add(new THREE.Mesh(auraGeo, auraMat));
-
-        const FINANCIAL_HUBS = [
-            { id: 'NYC', name: 'New York', lat: 40.7128, lon: -74.0060, color: 0xf0b90b },
-            { id: 'LON', name: 'London', lat: 51.5074, lon: -0.1278, color: 0x00f3ff },
-            { id: 'PAR', name: 'Paris', lat: 48.8566, lon: 2.3522, color: 0x0ecb81 },
-            { id: 'DXB', name: 'Dubai', lat: 25.2048, lon: 55.2708, color: 0xf0b90b },
-            { id: 'SIN', name: 'Singapore', lat: 1.3521, lon: 103.8198, color: 0x00f3ff },
-            { id: 'HKG', name: 'Hong Kong', lat: 22.3193, lon: 114.1694, color: 0x00f3ff },
-            { id: 'TYO', name: 'Tokyo', lat: 35.6762, lon: 139.6503, color: 0xf0b90b }
-        ];
-
         function latLonToVector3(lat, lon, radius = GLOBE_RADIUS) {
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
-            const x = -(radius * Math.sin(phi) * Math.cos(theta));
-            const z = radius * Math.sin(phi) * Math.sin(theta);
-            const y = radius * Math.cos(phi);
-            return new THREE.Vector3(x, y, z);
+            return new THREE.Vector3(
+                -(radius * Math.sin(phi) * Math.cos(theta)),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
         }
 
         function createDottedGlobe() {
-            const particleCount = 15000;
+            const particleCount = 12000;
             const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-
-            const colorGold = new THREE.Color(0xf0b90b);
-            const colorCyan = new THREE.Color(0x00f3ff);
-            const colorDark = new THREE.Color(0x1a2638);
-
-            function isLand(lat, lon) {
-                if (lat > 15 && lat < 72 && lon > -168 && lon < -52) return true;
-                if (lat > -56 && lat < 12 && lon > -82 && lon < -34) return true;
-                if (lat > 35 && lat < 70 && lon > -10 && lon < 45) return true;
-                if (lat > -35 && lat < 37 && lon > -18 && lon < 51) return true;
-                if (lat > 5 && lat < 75 && lon > 45 && lon < 180) return true;
-                if (lat > -44 && lat < -10 && lon > 112 && lon < 154) return true;
-                return false;
-            }
-
             for (let i = 0; i < particleCount; i++) {
                 const u = Math.random();
                 const v = Math.random();
                 const lat = (Math.asin(2 * u - 1) * (180 / Math.PI));
                 const lon = (v * 360 - 180);
-
                 const vec = latLonToVector3(lat, lon, GLOBE_RADIUS);
                 positions[i * 3] = vec.x;
                 positions[i * 3 + 1] = vec.y;
                 positions[i * 3 + 2] = vec.z;
-
-                const land = isLand(lat, lon);
-                let col = colorDark;
-                if (land) col = Math.random() > 0.3 ? colorCyan : colorGold;
-
-                colors[i * 3] = col.r;
-                colors[i * 3 + 1] = col.g;
-                colors[i * 3 + 2] = col.b;
             }
-
             const geo = new THREE.BufferGeometry();
             geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const mat = new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, opacity: 0.85 });
+            const mat = new THREE.PointsMaterial({ size: 0.1, color: 0x00f3ff, transparent: true, opacity: 0.7 });
             globeGroup.add(new THREE.Points(geo, mat));
         }
         createDottedGlobe();
 
-        const hubObjects = [];
-        const activeArcs = [];
-
-        FINANCIAL_HUBS.forEach(hub => {
-            const pos = latLonToVector3(hub.lat, hub.lon, GLOBE_RADIUS);
-            const pinGeo = new THREE.SphereGeometry(0.18, 16, 16);
-            const pinMat = new THREE.MeshBasicMaterial({ color: hub.color });
-            const pinMesh = new THREE.Mesh(pinGeo, pinMat);
-            pinMesh.position.copy(pos);
-            hubsGroup.add(pinMesh);
-
-            const ringBeaconGeo = new THREE.RingGeometry(0.2, 0.4, 32);
-            const ringBeaconMat = new THREE.MeshBasicMaterial({ color: hub.color, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
-            const ringBeacon = new THREE.Mesh(ringBeaconGeo, ringBeaconMat);
-            ringBeacon.position.copy(pos);
-            ringBeacon.lookAt(0, 0, 0);
-            hubsGroup.add(ringBeacon);
-
-            hubObjects.push({ ...hub, vec: pos, mesh: pinMesh, ring: ringBeacon });
-        });
-
-        function createFinancialArc(hubA, hubB) {
-            const p1 = hubA.vec;
-            const p2 = hubB.vec;
-            const distance = p1.distanceTo(p2);
-            const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-            mid.normalize().multiplyScalar(mid.length() + distance * 0.35);
-
-            const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
-            const points = curve.getPoints(64);
-            const curveGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const curveMat = new THREE.LineBasicMaterial({ color: 0x00f3ff, transparent: true, opacity: 0.35 });
-            arcsGroup.add(new THREE.Line(curveGeo, curveMat));
-
-            const photonGeo = new THREE.SphereGeometry(0.12, 12, 12);
-            const photonMat = new THREE.MeshBasicMaterial({ color: 0xf0b90b });
-            const photon = new THREE.Mesh(photonGeo, photonMat);
-            arcsGroup.add(photon);
-
-            activeArcs.push({ curve, photon, speed: 0.15 + Math.random() * 0.2, progress: Math.random() });
-        }
-
-        const ROUTES = [['LON', 'NYC'], ['NYC', 'TYO'], ['LON', 'PAR'], ['PAR', 'DXB'], ['DXB', 'SIN'], ['SIN', 'HKG'], ['HKG', 'TYO'], ['LON', 'DXB']];
-        ROUTES.forEach(([id1, id2]) => {
-            const h1 = hubObjects.find(h => h.id === id1);
-            const h2 = hubObjects.find(h => h.id === id2);
-            if (h1 && h2) createFinancialArc(h1, h2);
-        });
-
-        let isDragging = false;
-        let prevMousePos = { x: 0, y: 0 };
         let targetRotation = { x: 0.2, y: 0 };
         let currentRotation = { x: 0.2, y: 0 };
 
-        window.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'CANVAS') {
-                isDragging = true;
-                prevMousePos = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                targetRotation.y += (e.clientX - prevMousePos.x) * 0.005;
-                targetRotation.x += (e.clientY - prevMousePos.y) * 0.005;
-                prevMousePos = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        window.addEventListener('mouseup', () => { isDragging = false; });
-        window.addEventListener('wheel', (e) => {
-            camera.position.z = Math.max(14, Math.min(45, camera.position.z + e.deltaY * 0.02));
-        });
-
-        window.focusHub = function(hubId, element) {
-            document.querySelectorAll('.hub-chip').forEach(chip => chip.classList.remove('active'));
-            element.classList.add('active');
-
-            if (hubId === 'ALL') {
-                targetRotation.x = 0.2; targetRotation.y = 0;
-            } else {
-                const hub = hubObjects.find(h => h.id === hubId);
-                if (hub) {
-                    targetRotation.x = (hub.lat * (Math.PI / 180));
-                    targetRotation.y = - (hub.lon * (Math.PI / 180)) - Math.PI / 2;
-                }
-            }
-        };
-
-        function initSparklines() {
-            const sparkCanvases = [
-                { id: 'spark-us100', color: '#0ecb81' },
-                { id: 'spark-us500', color: '#0ecb81' },
-                { id: 'spark-dxy', color: '#f6465d' },
-                { id: 'spark-btc', color: '#0ecb81' },
-                { id: 'spark-gold', color: '#0ecb81' }
-            ];
-
-            sparkCanvases.forEach(cfg => {
-                const cvs = document.getElementById(cfg.id);
-                if (!cvs) return;
-                const ctx = cvs.getContext('2d');
-                cvs.width = 65; cvs.height = 26;
-                const points = Array.from({ length: 10 }, () => 4 + Math.random() * 18);
-
-                ctx.beginPath();
-                ctx.strokeStyle = cfg.color;
-                ctx.lineWidth = 2;
-                points.forEach((val, idx) => {
-                    const x = (idx / (points.length - 1)) * cvs.width;
-                    const y = cvs.height - val;
-                    if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                });
-                ctx.stroke();
-            });
-        }
-        initSparklines();
-
         function updateClocks() {
             const now = new Date();
-            document.getElementById('clock-paris').textContent = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
-            document.getElementById('clock-ny').textContent = new Intl.DateTimeFormat('fr-FR', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
-            document.getElementById('ping-val').textContent = Math.floor(12 + Math.random() * 6);
+            document.getElementById('clock-paris').textContent = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(now);
+            document.getElementById('clock-ny').textContent = new Intl.DateTimeFormat('fr-FR', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(now);
         }
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // Écouteur pour la touche ENTRÉE
+        // Gestion de la touche ENTRÉE via simulation du clic sur le lien
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.code === 'Enter') {
-                navigateToHub();
-            } else if (e.code === 'KeyR') {
-                targetRotation.x = 0.2; targetRotation.y = 0; camera.position.z = 28;
+                document.getElementById('nav-btn').click();
             }
         });
 
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
             const time = clock.getElapsedTime();
-
-            currentRotation.x += (targetRotation.x - currentRotation.x) * 0.05;
-            currentRotation.y += (targetRotation.y - currentRotation.y) * 0.05;
-
-            globeGroup.rotation.x = currentRotation.x;
-            globeGroup.rotation.y = currentRotation.y + time * 0.03;
-            ringsGroup.rotation.z = time * 0.05;
-            starsGroup.rotation.y = time * 0.01;
-
-            activeArcs.forEach(arc => {
-                arc.progress = (arc.progress + delta * arc.speed) % 1.0;
-                arc.photon.position.copy(arc.curve.getPoint(arc.progress));
-            });
-
-            hubObjects.forEach(hub => {
-                const scale = 1 + Math.sin(time * 3 + hub.lat) * 0.25;
-                hub.ring.scale.set(scale, scale, scale);
-            });
-
+            globeGroup.rotation.y = time * 0.05;
             renderer.render(scene, camera);
         }
+        animate();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        window.onload = function() { animate(); };
     </script>
 </body>
 </html>
@@ -738,7 +484,7 @@ if st.session_state.page == "welcome":
     st.components.v1.html(welcome_html_code, height=1000, scrolling=False)
 
 # ==========================================
-# PAGE 2 : PAGE VIERGE (HUB)
+# PAGE 2 : PAGE VIERGE
 # ==========================================
 elif st.session_state.page == "hub":
     
@@ -759,4 +505,4 @@ elif st.session_state.page == "hub":
         st.rerun()
 
     st.title("🚀 Page Vierge (Hub)")
-    st.write("Tu es sur la page 2. Ton bouton et ta touche Entrée fonctionnent désormais correctement !")
+    st.write("Bienvenue sur la page 2 !")
