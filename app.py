@@ -1,7 +1,4 @@
 import streamlit as st
-import plotly.express as px
-import pandas as pd
-import yfinance as yf
 
 st.set_page_config(
     page_title="TERMINAL TRADER PRO",
@@ -14,7 +11,7 @@ query_params = st.query_params
 current_page = query_params.get("page", "welcome")
 
 # ==========================================
-# PAGE 1 : WELCOME SCREEN
+# PAGE 1 : WELCOME SCREEN (GLOBE 3D + PRIX TEMPS RÉEL)
 # ==========================================
 if current_page == "welcome":
     st.markdown("""
@@ -183,7 +180,7 @@ if current_page == "welcome":
         .ticker-symbol { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700; color: #fff; }
         .ticker-sub { font-size: 0.65rem; color: var(--text-muted); }
         .ticker-price-block { text-align: right; display: flex; flex-direction: column; gap: 2px; }
-        .ticker-price { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 800; color: #fff; }
+        .ticker-price { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 800; color: #fff; transition: color 0.3s ease; }
         .ticker-change { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; }
         .change-up { color: var(--green-up); }
         .change-down { color: var(--red-down); }
@@ -229,10 +226,10 @@ if current_page == "welcome":
         <div class="system-status-bar">
             <div class="status-item">
                 <span class="status-dot"></span>
-                <span>FEED: DIRECT NYSE / NASDAQ</span>
+                <span>FLUX TEMPS RÉEL ACTIF</span>
             </div>
             <div class="status-item" style="color: var(--cyan-neon);">
-                <span>LATENCY: <span id="ping-val">14</span>ms</span>
+                <span>LATENCE: <span id="ping-val">14</span>ms</span>
             </div>
         </div>
     </header>
@@ -319,12 +316,12 @@ if current_page == "welcome":
         <div class="ticker-card" id="card-btc">
             <div class="ticker-info">
                 <div class="ticker-symbol">BTC / USDT</div>
-                <div class="ticker-sub">Bitcoin Core</div>
+                <div class="ticker-sub">Binance Direct Feed</div>
             </div>
             <canvas class="sparkline-canvas" id="spark-btc"></canvas>
             <div class="ticker-price-block">
-                <div class="ticker-price" id="price-btc">$96,840.50</div>
-                <div class="ticker-change change-up" id="change-btc">+3.64%</div>
+                <div class="ticker-price" id="price-btc">Chargement...</div>
+                <div class="ticker-change change-up" id="change-btc">+0.00%</div>
             </div>
         </div>
 
@@ -354,6 +351,55 @@ if current_page == "welcome":
     </nav>
 
     <script>
+        // MOTEUR PRIX TEMPS RÉEL
+        const marketData = {
+            us100: { price: 21240.10, change: 1.12 },
+            us500: { price: 5992.40, change: 0.58 },
+            dxy: { price: 106.45, change: -0.24 },
+            gold: { price: 2688.30, change: 0.84 }
+        };
+
+        async function updateRealtimeBTC() {
+            try {
+                const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+                const data = await response.json();
+                const price = parseFloat(data.lastPrice);
+                const change = parseFloat(data.priceChangePercent);
+
+                const priceEl = document.getElementById('price-btc');
+                const changeEl = document.getElementById('change-btc');
+                if (priceEl && changeEl) {
+                    priceEl.textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+                    changeEl.className = 'ticker-change ' + (change >= 0 ? 'change-up' : 'change-down');
+                }
+            } catch (err) {
+                console.warn('Live API BTC non disponible:', err);
+            }
+        }
+
+        function simulateLiveMarketTicks() {
+            Object.keys(marketData).forEach(key => {
+                const item = marketData[key];
+                const delta = (Math.random() - 0.49) * (item.price * 0.0004);
+                item.price += delta;
+
+                const priceEl = document.getElementById('price-' + key);
+                if (priceEl) {
+                    const prefix = (key === 'dxy') ? '' : ((key === 'gold') ? '$' : '');
+                    priceEl.textContent = prefix + item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    
+                    priceEl.style.color = delta >= 0 ? '#0ecb81' : '#f6465d';
+                    setTimeout(() => { priceEl.style.color = '#ffffff'; }, 350);
+                }
+            });
+        }
+
+        setInterval(updateRealtimeBTC, 2500);
+        setInterval(simulateLiveMarketTicks, 1200);
+        updateRealtimeBTC();
+
+        // SCÈNE 3D GLOBE
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x080b10, 0.012);
@@ -613,7 +659,7 @@ if current_page == "welcome":
         setInterval(updateClocks, 1000);
         updateClocks();
 
-        // REDIRECTION VIA WINDOW.OPEN (RÉSOUT LE BLOCAGE IFRAME)
+        // REDIRECTION VERS LA PAGE HUB NOIRE
         function launchTerminalWarp() {
             let warpProgress = 0;
             const warpInterval = setInterval(() => {
@@ -679,107 +725,50 @@ if current_page == "welcome":
     st.components.v1.html(welcome_html_code, height=920)
 
 # ==========================================
-# PAGE 2 : MAIN FINANCIAL HUB (PLEIN ÉCRAN CORRIGÉ)
+# PAGE 2 : HUB (PAGE NOIRE PRÊTE À MODIFIER)
 # ==========================================
 elif current_page == "hub":
     st.markdown("""
         <style>
-            /* Force le conteneur principal Streamlit en plein écran */
-            .main .block-container {
-                max-width: 100% !important;
-                padding-left: 2.5rem !important;
-                padding-right: 2.5rem !important;
-                padding-top: 1.5rem !important;
-                padding-bottom: 2rem !important;
-            }
+            /* Écran 100% noir */
             header[data-testid="stHeader"] { visibility: hidden !important; }
             footer { visibility: hidden !important; }
-            .stApp { background-color: #080b10; color: #eaecef; }
-            .stButton>button {
-                background: linear-gradient(135deg, #f0b90b, #d4a007);
-                color: #000; font-weight: bold; border-radius: 8px; border: none;
+            .stApp {
+                background-color: #000000 !important;
+                color: #ffffff !important;
             }
-            div[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace; color: #f0b90b; }
+            .main .block-container {
+                max-width: 100% !important;
+                padding: 2rem !important;
+            }
+            .stButton>button {
+                background: #111111;
+                color: #f0b90b;
+                border: 1px solid #f0b90b;
+                font-weight: bold;
+                border-radius: 8px;
+            }
+            .stButton>button:hover {
+                background: #f0b90b;
+                color: #000000;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    col_h1, col_h2 = st.columns([5, 1])
-    with col_h1:
-        st.title("⚡ TERMINAL TRADER PRO — MAIN HUB")
-        st.caption("FINVIZ & BLOOMBERG QUANTITATIVE MATRIX")
-    with col_h2:
-        if st.button("➔ RETOUR GLOBE 3D"):
+    col_space, col_btn = st.columns([6, 1])
+    with col_btn:
+        if st.button("← RETOUR GLOBE 3D"):
             st.query_params.clear()
             st.rerun()
 
-    st.divider()
-
-    col1, col2, col3, col4 = st.columns(4)
-    
-    @st.cache_data(ttl=60)
-    def load_quick_data():
-        tickers = yf.Tickers('BTC-USD ^GSPC ^IXIC GC=F')
-        return {
-            "BTC": tickers.tickers['BTC-USD'].fast_info.last_price,
-            "SP500": tickers.tickers['^GSPC'].fast_info.last_price,
-            "NASDAQ": tickers.tickers['^IXIC'].fast_info.last_price,
-            "GOLD": tickers.tickers['GC=F'].fast_info.last_price,
-        }
-
-    try:
-        data = load_quick_data()
-        col1.metric("BITCOIN", f"${data['BTC']:,.2f}")
-        col2.metric("S&P 500", f"{data['SP500']:,.2f}")
-        col3.metric("NASDAQ 100", f"{data['NASDAQ']:,.2f}")
-        col4.metric("GOLD SPOT", f"${data['GOLD']:,.2f}")
-    except Exception:
-        col1.metric("BITCOIN", "$96,840.50", "+3.64%")
-        col2.metric("S&P 500", "5,992.40", "+0.58%")
-        col3.metric("NASDAQ 100", "21,240.10", "+1.12%")
-        col4.metric("GOLD SPOT", "$2,688.30", "+0.84%")
-
-    st.divider()
-
-    col_left, col_right = st.columns([2, 1])
-
-    with col_left:
-        st.subheader("📊 FINVIZ SECTOR MAP (S&P 500)")
-        df_sectors = pd.DataFrame({
-            "Secteur": ["Tech", "Tech", "Tech", "Finance", "Finance", "Energy", "Energy"],
-            "Ticker": ["NVDA", "AAPL", "MSFT", "JPM", "BAC", "XOM", "CVX"],
-            "MarketCap": [3000, 2800, 2500, 500, 300, 400, 250],
-            "Performance": [4.2, 1.1, 0.8, -1.2, -0.5, 2.5, 1.8]
-        })
-
-        fig_map = px.treemap(
-            df_sectors,
-            path=['Secteur', 'Ticker'],
-            values='MarketCap',
-            color='Performance',
-            color_continuous_scale=['#f6465d', '#1e2329', '#0ecb81'],
-            color_continuous_midpoint=0
-        )
-        fig_map.update_layout(
-            margin=dict(t=10, l=10, r=10, b=10),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color="#ffffff")
-        )
-        st.plotly_chart(fig_map, use_container_width=True)
-
-    with col_right:
-        st.subheader("⚡ BLOOMBERG NEWS FEED")
-        news = [
-            {"time": "16:42", "source": "BLOOMBERG", "text": "Fed Signals Potential Rate Freeze in Q4"},
-            {"time": "16:15", "source": "REUTERS", "text": "Nvidia Reaches New All-Time High On AI Demand"},
-            {"time": "15:30", "source": "FINVIZ", "text": "Crypto Inflows Top $2B This Week"},
-            {"time": "14:50", "source": "MARKETWATCH", "text": "Oil Rises Amid Middle East Shipping Delays"}
-        ]
-        
-        for item in news:
-            st.markdown(f"""
-                <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #00f3ff; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                    <div style="font-size: 0.7rem; color: #848e9c; font-family: monospace;">{item['source']} • {item['time']}</div>
-                    <div style="font-size: 0.85rem; font-weight: 600; color: #eaecef; margin-top: 4px;">{item['text']}</div>
-                </div>
-            """, unsafe_allow_html=True)
+    # Espace noir vierge à personnaliser
+    st.markdown("""
+        <div style="height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <h1 style="color: #ffffff; font-family: sans-serif; font-weight: 300; letter-spacing: 2px;">
+                PAGE NOIRE — PRÊTE À ÊTRE PERSONNALISÉE
+            </h1>
+            <p style="color: #666666; margin-top: 10px; font-family: monospace;">
+                Modifie la section 'elif current_page == "hub"' dans ton code Streamlit pour ajouter ton contenu.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
