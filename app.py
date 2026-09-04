@@ -221,7 +221,7 @@ if st.session_state.page == "welcome":
         st.rerun()
 
 # ==========================================
-# PAGE 2 : EXECUTIVE HUB DASHBOARD (Elite UI)
+# PAGE 2 : EXECUTIVE HUB DASHBOARD (Fixed Clocks)
 # ==========================================
 elif st.session_state.page == "hub":
     st.markdown("""
@@ -248,37 +248,6 @@ elif st.session_state.page == "hub":
             flex-direction: column;
             overflow: hidden !important;
         }
-        
-        /* Top Bar & Clocks */
-        .hub-top-bar {
-            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-            border: 1px solid #30363d;
-            border-bottom: 1px solid rgba(240, 185, 11, 0.6);
-            padding: 6px 15px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            margin-bottom: 4px;
-        }
-        .hub-title {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin: 0;
-            letter-spacing: 2px;
-        }
-        .hub-title span { color: #f0b90b; }
-        .clocks-container {
-            display: flex;
-            gap: 20px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            color: #c9d1d9;
-        }
-        .clock-item span { color: #f0b90b; font-weight: bold; }
 
         /* Breaking News Ribbon */
         .ticker-wrap {
@@ -346,24 +315,72 @@ elif st.session_state.page == "hub":
         }
         </style>
         
-        <div class="hub-top-bar">
-            <h1 class="hub-title">TERMINAL TRADER <span>PRO</span> // EXECUTIVE HUB</h1>
-            <div class="clocks-container">
-                <div class="clock-item">PARIS: <span id="clock-paris">--:--:--</span></div>
-                <div class="clock-item">NEW YORK: <span id="clock-ny">--:--:--</span></div>
-            </div>
-        </div>
-
         <div class="ticker-wrap">
             <span class="ticker-badge">URGENT</span>
             <span class="ticker-text">⚡ FED : Powell maintient les taux directeurs inchangés à 5.25% — Volatilité forte anticipée sur les actifs US & XAUUSD.</span>
         </div>
     """, unsafe_allow_html=True)
 
+    # Top Bar avec horloges en direct (rendues via component natif autonome pour exécuter le JS)
+    components.html("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+      body {
+          margin: 0;
+          background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+          border: 1px solid #30363d;
+          border-bottom: 1px solid rgba(240, 185, 11, 0.6);
+          padding: 6px 15px;
+          border-radius: 4px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-family: 'Share Tech Mono', monospace;
+          color: #ffffff;
+      }
+      .hub-title {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 1.2rem;
+          font-weight: bold;
+          margin: 0;
+          letter-spacing: 2px;
+      }
+      .hub-title span { color: #f0b90b; }
+      .clocks-container {
+          display: flex;
+          gap: 20px;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 0.9rem;
+          color: #c9d1d9;
+      }
+      .clock-item span { color: #f0b90b; font-weight: bold; }
+    </style>
+    </head>
+    <body>
+        <h1 class="hub-title">TERMINAL TRADER <span>PRO</span> // EXECUTIVE HUB</h1>
+        <div class="clocks-container">
+            <div class="clock-item">PARIS: <span id="clock-paris">--:--:--</span></div>
+            <div class="clock-item">NEW YORK: <span id="clock-ny">--:--:--</span></div>
+        </div>
+        <script>
+        function updateClocks() {
+            const now = new Date();
+            document.getElementById('clock-paris').innerText = now.toLocaleTimeString('fr-FR', {timeZone: 'Europe/Paris'});
+            document.getElementById('clock-ny').innerText = now.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour12: false});
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+        </script>
+    </body>
+    </html>
+    """, height=45)
+
     # 3 Column Strict Layout - 4 Core Elite Panels
     col_left, col_center, col_right = st.columns([1.25, 1.3, 1.05])
 
-    # Module 1 : Heatmap Nasdaq (Gauche)
     with col_left:
         st.markdown("""
         <div class="terminal-panel">
@@ -389,7 +406,6 @@ elif st.session_state.page == "hub":
         </div>
         """, unsafe_allow_html=True)
 
-    # Modules 2 & 3 : Calendrier Éco & Macro/Géo (Centre)
     with col_center:
         st.markdown("""
         <div class="terminal-panel" style="gap: 6px;">
@@ -425,7 +441,6 @@ elif st.session_state.page == "hub":
         </div>
         """, unsafe_allow_html=True)
 
-    # Module 4 : Top Performances & Watchlist (Droite)
     with col_right:
         st.markdown("""
         <div class="terminal-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -455,7 +470,6 @@ elif st.session_state.page == "hub":
         </div>
         """, unsafe_allow_html=True)
 
-    # Disconnect button footer section
     col_btn1, col_btn2, col_btn3 = st.columns([3, 1, 3])
     with col_btn2:
         st.markdown("""
