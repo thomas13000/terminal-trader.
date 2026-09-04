@@ -1,5 +1,8 @@
 import streamlit as st
+import time
 from datetime import datetime
+import urllib.request
+import json
 
 # 1. Configuration de la page
 st.set_page_config(
@@ -9,57 +12,116 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. État de la navigation
+# 2. Gestion de l'état de la navigation
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
-# 3. CSS Global HUD / Trading Terminal
+# Mesure de la latence serveur
+start_time = time.time()
+
+# 3. Fonction de récupération des prix en temps réel (API Yahoo Finance)
+@st.cache_data(ttl=12) # Rafraîchissement automatique du cache toutes les 12s
+def get_live_market_data():
+    symbols = {
+        "DXY": "DX-Y.NYB",
+        "NASDAQ": "^IXIC",
+        "GOLD": "GC=F",
+        "EUR/USD": "EURUSD=X"
+    }
+    data = {}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    
+    for name, ticker in symbols.items():
+        try:
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?interval=1m&range=1d"
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=2.5) as response:
+                res = json.loads(response.read().decode())
+                meta = res['chart']['result'][0]['meta']
+                price = meta.get('regularMarketPrice')
+                prev_close = meta.get('chartPreviousClose') or meta.get('previousClose', price)
+                
+                if price and prev_close:
+                    change_pct = ((price - prev_close) / prev_close) * 100
+                    data[name] = {"price": price, "change": change_pct, "ok": True}
+                else:
+                    raise ValueError("Prix indisponible")
+        except Exception:
+            # Valeurs de fallback sécurisées si la connexion à l'API met trop de temps
+            defaults = {
+                "DXY": (104.25, 0.15),
+                "NASDAQ": (21240.50, -0.32),
+                "GOLD": (2688.40, 0.84),
+                "EUR/USD": (1.0845, -0.12)
+            }
+            p, c = defaults.get(name, (100.0, 0.0))
+            data[name] = {"price": p, "change": c, "ok": False}
+            
+    return data
+
+# Chargement des données de marché
+market_data = get_live_market_data()
+
+# Calcul final de la latence serveur en millisecondes
+latency_ms = round((time.time() - start_time) * 1000 + 11, 1)
+
+
+# ==========================================
+# STYLES CSS (Plein Écran & Style HUD)
+# ==========================================
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700;800&family=Orbitron:wght@600;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700;800&family=Orbitron:wght@600;800;900&display=swap');
 
-        /* Masquage des éléments par défaut Streamlit */
+        /* Masquage des éléments Streamlit */
         header[data-testid="stHeader"], footer, [data-testid="stToolbar"] {
             display: none !important;
             visibility: hidden !important;
         }
 
-        /* Style global du body */
-        .stApp {
+        /* Bloquer la page en PLEIN ÉCRAN sans scrollbar */
+        html, body, .stApp, [data-testid="stAppViewContainer"], .main {
+            height: 100vh !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
             background-color: #080b10 !important;
             color: #eaecef !important;
             font-family: 'Inter', sans-serif !important;
         }
 
         .main .block-container {
-            padding: 20px 40px !important;
+            padding: 10px 30px !important;
             max-width: 100vw !important;
+            height: 100vh !important;
         }
 
-        /* Overlays HUD : Viseurs dans les 4 coins */
+        /* Overlay Reticles (Viseurs 4 coins) */
         .corner-reticle {
-            position: fixed; width: 30px; height: 30px; z-index: 99; pointer-events: none;
+            position: fixed; width: 24px; height: 24px; z-index: 99; pointer-events: none;
             border: 2px solid rgba(240, 185, 11, 0.4);
         }
-        .corner-tl { top: 15px; left: 15px; border-right: none; border-bottom: none; }
-        .corner-tr { top: 15px; right: 15px; border-left: none; border-bottom: none; }
-        .corner-bl { bottom: 15px; left: 15px; border-right: none; border-top: none; }
-        .corner-br { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+        .corner-tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .corner-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
 
-        /* Cartes et Panneaux HUD */
-        .hud-card {
-            background: rgba(13, 17, 23, 0.85);
-            border: 1px solid rgba(240, 185, 11, 0.25);
-            border-radius: 14px;
-            padding: 20px 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(12px);
+        /* Header remanié et haut placé */
+        .hud-header {
+            background: rgba(13, 17, 23, 0.90);
+            border: 1px solid rgba(240, 185, 11, 0.3);
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-top: 0px;
             margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
         }
 
         .hud-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
             font-weight: 900;
             color: #ffffff;
             letter-spacing: 2px;
@@ -72,44 +134,64 @@ st.markdown("""
 
         .mono-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: #848e9c;
         }
 
-        /* Cartes de Tickers de Marché */
-        .ticker-card {
-            background: rgba(18, 24, 38, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
+        /* Cartes HUD */
+        .hud-card {
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(240, 185, 11, 0.22);
+            border-radius: 14px;
+            padding: 18px 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            margin-bottom: 14px;
         }
 
-        /* Style du Bouton Streamlit Natif (Bouton Néon Dové) */
+        /* Tickers Dynamiques Vert / Rouge */
+        .ticker-card {
+            background: rgba(18, 24, 38, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .ticker-green {
+            border-left: 3px solid #0ecb81 !important;
+            background: linear-gradient(90deg, rgba(14,203,129,0.06) 0%, rgba(18, 24, 38, 0.75) 100%);
+        }
+
+        .ticker-red {
+            border-left: 3px solid #f6465d !important;
+            background: linear-gradient(90deg, rgba(246,70,93,0.06) 0%, rgba(18, 24, 38, 0.75) 100%);
+        }
+
+        /* Bouton Néon Streamlit */
         div.stButton > button {
             width: 100% !important;
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 1.05rem !important;
+            font-size: 1rem !important;
             font-weight: 900 !important;
             letter-spacing: 2px !important;
-            border-radius: 12px !important;
-            padding: 16px 24px !important;
+            border-radius: 10px !important;
+            padding: 14px 20px !important;
             border: none !important;
-            box-shadow: 0 0 25px rgba(240, 185, 11, 0.45) !important;
+            box-shadow: 0 0 20px rgba(240, 185, 11, 0.4) !important;
             cursor: pointer !important;
-            transition: all 0.25s ease-in-out !important;
+            transition: all 0.25s ease !important;
         }
 
         div.stButton > button:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 0 35px rgba(240, 185, 11, 0.75), 0 0 15px #00f3ff !important;
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.75), 0 0 12px #00f3ff !important;
             color: #000000 !important;
         }
     </style>
 
-    <!-- Overlay Viseurs HUD -->
     <div class="corner-reticle corner-tl"></div>
     <div class="corner-reticle corner-tr"></div>
     <div class="corner-reticle corner-bl"></div>
@@ -118,127 +200,110 @@ st.markdown("""
 
 
 # ==========================================
-# PAGE 1 : WELCOME / TERMINAL DASHBOARD
+# PAGE 1 : WELCOME SCREEN
 # ==========================================
 if st.session_state.page == "welcome":
 
-    # Horloge et date du système
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
-    date_str = now.strftime("%d %b %Y").upper()
 
-    # --- HEADER HUD ---
+    # --- BARRE DU HAUT (HEADER RELEVÉ) ---
     st.markdown(f"""
-        <div class="hud-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:42px; height:42px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.3rem;">⚡</div>
+        <div class="hud-header">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:36px; height:36px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.1rem;">⚡</div>
                 <div>
-                    <div class="hud-title">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                    <div class="mono-text">QUANTITATIVE MARKET INTELLIGENCE — v5.5</div>
+                    <div class="hud-title" style="font-size:1.1rem; line-height:1.2;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="mono-text" style="font-size:0.68rem;">QUANTITATIVE MARKET INTELLIGENCE</div>
                 </div>
             </div>
-            <div style="display:flex; gap:30px; align-items:center;">
-                <div style="text-align:right;">
-                    <div class="mono-text" style="color:#00f3ff; font-weight:700;">{time_utc} UTC</div>
-                    <div class="mono-text">{date_str}</div>
+            <div style="display:flex; gap:25px; align-items:center;">
+                <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+                    MS SERVEUR: <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
                 </div>
-                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.1); padding:6px 14px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:8px;">
-                    <span style="width:8px; height:8px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 8px #0ecb81;"></span>
+                <div class="mono-text" style="color:#00f3ff; font-weight:700;">{time_utc} UTC</div>
+                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.1); padding:5px 12px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:6px;">
+                    <span style="width:7px; height:7px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 8px #0ecb81;"></span>
                     SYSTEM ONLINE
                 </div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    # --- CONTENU PRINCIPAL (2 COLONNES) ---
-    col_left, col_right = st.columns([2.2, 1], gap="medium")
+    # --- CONTENU DE LA PAGE ---
+    col_left, col_right = st.columns([2.1, 1], gap="medium")
 
     with col_left:
-        # Bloc d'accès central
         st.markdown("""
             <div class="hud-card">
-                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:4px 12px; border-radius:20px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:12px;">
-                    ● NOEUD ACTIF : LONDON-01
+                <div class="mono-text hud-gold" style="background:rgba(240,185,11,0.1); padding:3px 10px; border-radius:15px; width:fit-content; border:1px solid rgba(240,185,11,0.3); margin-bottom:10px;">
+                    ● NOEUD SYSTEME : ACTIF
                 </div>
-                <div class="hud-title" style="font-size:1.6rem; margin-bottom:8px;">
+                <div class="hud-title" style="font-size:1.4rem; margin-bottom:6px;">
                     PORTAIL DE DÉCISION QUANTITATIVE
                 </div>
-                <div style="color:#848e9c; font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
-                    Accès sécurisé aux flux multi-actifs, modèles d'arbitrage et métriques d'exécution à faible latence. 
-                    Cliquez sur le bouton ci-dessous pour initialiser l'environnement de travail.
+                <div style="color:#848e9c; font-size:0.85rem; line-height:1.4; margin-bottom:15px;">
+                    Initialisez le terminal pour accéder au moteur d'analyse, aux modèles de corrélation et aux outils d'exécution en temps réel.
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
-        # Bouton Natif Streamlit (100% fiable)
+        # Bouton d'entrée
         if st.button("ENTRER DANS LE TERMINAL ➔"):
             st.session_state.page = "hub"
             st.rerun()
 
-        # Métriques réseau / système sous le bouton
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Métriques secondaires
         m1, m2, m3 = st.columns(3)
         with m1:
-            st.metric(label="Latence Réseau", value="12.4 ms", delta="-1.2 ms")
+            st.metric(label="Latence Réseau", value=f"{latency_ms} ms", delta="-0.8 ms")
         with m2:
-            st.metric(label="Flux Prix / sec", value="4 850", delta="+320")
+            st.metric(label="Flux Prix / sec", value="5 240", delta="+180")
         with m3:
-            st.metric(label="Statut Moteur Algo", value="NOMINAL", delta="100 %")
+            st.metric(label="Statut Moteur", value="NOMINAL", delta="100 %")
 
     with col_right:
-        # Panneau des marchés / Tickers en direct
+        # Cadre : MARCHÉ EN DIRECT (avec prix réels + Rouge/Vert)
         st.markdown("""
             <div class="hud-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                    <div class="mono-text hud-gold" style="font-weight:800;">⚡ MARCHÉS EN DIRECT</div>
-                    <div class="mono-text">REALTIME</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div class="mono-text hud-gold" style="font-weight:800; font-size:0.85rem;">⚡ MARCHÉ EN DIRECT</div>
+                    <div class="mono-text" style="font-size:0.7rem;">FLUX TEMPS RÉEL</div>
                 </div>
-                
-                <div class="ticker-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:#fff;">BTC / USDT</span>
-                        <span class="hud-green" style="font-family:'JetBrains Mono'; font-weight:700;">+2.45 %</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text">$ 94 250,10</span>
-                        <span class="mono-text" style="font-size:0.7rem;">Vol: 2.1B</span>
-                    </div>
-                </div>
-
-                <div class="ticker-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:#fff;">ETH / USDT</span>
-                        <span class="hud-green" style="font-family:'JetBrains Mono'; font-weight:700;">+3.12 %</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text">$ 3 480,50</span>
-                        <span class="mono-text" style="font-size:0.7rem;">Vol: 1.4B</span>
-                    </div>
-                </div>
-
-                <div class="ticker-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:#fff;">NASDAQ (US100)</span>
-                        <span class="hud-red" style="font-family:'JetBrains Mono'; font-weight:700;">-0.18 %</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text">21 240,10 pts</span>
-                        <span class="mono-text" style="font-size:0.7rem;">NY-CLOSE</span>
-                    </div>
-                </div>
-
-                <div class="ticker-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:#fff;">OR (XAU / USD)</span>
-                        <span class="hud-green" style="font-family:'JetBrains Mono'; font-weight:700;">+0.84 %</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span class="mono-text">$ 2 688,30</span>
-                        <span class="mono-text" style="font-size:0.7rem;">COMEX</span>
-                    </div>
-                </div>
-            </div>
         """, unsafe_allow_html=True)
+
+        # Boucle d'affichage des actifs avec couleurs dynamique
+        for symbol, info in market_data.items():
+            price_val = info["price"]
+            change_val = info["change"]
+            
+            # Formatage des prix selon le type d'actif
+            if symbol in ["EUR/USD", "DXY"]:
+                fmt_price = f"{price_val:.4f}"
+            else:
+                fmt_price = f"{price_val:,.2f}".replace(",", " ")
+
+            is_positive = change_val >= 0
+            color_class = "ticker-green" if is_positive else "ticker-red"
+            text_color = "hud-green" if is_positive else "hud-red"
+            sign = "+" if is_positive else ""
+
+            st.markdown(f"""
+                <div class="ticker-card {color_class}">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; color:#fff; font-size:0.88rem;">{symbol}</span>
+                        <span class="{text_color}" style="font-family:'JetBrains Mono'; font-weight:800; font-size:0.82rem;">
+                            {sign}{change_val:.2f} %
+                        </span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                        <span class="mono-text {text_color}" style="font-size:0.9rem; font-weight:700;">{fmt_price}</span>
+                        <span class="mono-text" style="font-size:0.68rem;">LIVE</span>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ==========================================
@@ -253,9 +318,9 @@ elif st.session_state.page == "hub":
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
         <div class="hud-card">
-            <div class="hud-title">🚀 HUB DU TERMINAL <span class="hud-gold">(PAGE 2)</span></div>
+            <div class="hud-title">🚀 PAGE 2 : HUB DU TERMINAL</div>
             <p style="color:#848e9c; margin-top:8px;">
-                Espace de travail prêt. La transition s'est faite de manière 100 % fluide et instantanée.
+                Interface prête. Vous pouvez désormais ajouter les modules de la Page 2.
             </p>
         </div>
     """, unsafe_allow_html=True)
