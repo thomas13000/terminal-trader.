@@ -49,7 +49,7 @@ if st.session_state.page == "welcome":
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px; /* Très peu d'espace en dessous pour éviter le scroll */
+            margin-bottom: 5px;
         }
         .top-title {
             font-family: 'Courier New', Courier, monospace;
@@ -95,7 +95,7 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    # --- 2. LE DASHBOARD (GLOBE GÉANT AJUSTÉ POUR NE PAS SCROLLER) ---
+    # --- 2. LE DASHBOARD (GLOBE ENTIER SANS COUPURE) ---
     html_dashboard = """
     <!DOCTYPE html>
     <html>
@@ -107,13 +107,13 @@ if st.session_state.page == "welcome":
           margin: 0; background: transparent; color: #fff; 
           font-family: 'Share Tech Mono', monospace; 
           display: flex; justify-content: space-between; align-items: center; 
-          height: 520px; /* Ajusté pour éviter le scroll vertical */
+          height: 620px; /* Augmenté pour laisser respirer le globe */
           padding: 0 20px; 
           overflow: hidden;
           position: relative;
       }
       
-      /* GLOBE TERRESTRE (Immense mais adapté) */
+      /* GLOBE TERRESTRE (Ajusté pour être 100% visible) */
       .globe-container { 
           position: absolute;
           top: 50%;
@@ -122,12 +122,12 @@ if st.session_state.page == "welcome":
           z-index: 1; 
       }
       .globe { 
-          width: 580px; 
-          height: 580px; 
+          width: 560px; /* Légèrement réduit pour rentrer parfaitement dans la hauteur de 620px */
+          height: 560px; 
           border-radius: 50%; 
           background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg'); 
           background-size: cover;
-          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 100px rgba(240, 185, 11, 0.15);
+          box-shadow: inset -50px -50px 80px rgba(0,0,0,0.95), 0 0 50px rgba(240, 185, 11, 0.15); /* Halo réduit pour ne pas déborder */
           animation: spin 45s linear infinite;
           opacity: 0.85;
       }
@@ -137,7 +137,7 @@ if st.session_state.page == "welcome":
       .panel { 
           background: rgba(13, 17, 23, 0.6); 
           border: 1px solid rgba(240, 185, 11, 0.2); 
-          border-radius: 4px; /* Plus carré, plus institutionnel */
+          border-radius: 4px; 
           padding: 25px; 
           box-shadow: 0 0 20px rgba(0,0,0,0.8); 
           backdrop-filter: blur(4px); 
@@ -219,46 +219,40 @@ if st.session_state.page == "welcome":
     </html>
     """
     
-    # Hauteur ajustée (520px) pour éviter absolument le scroll
-    components.html(html_dashboard, height=520)
+    # La hauteur du iframe passe à 620px pour correspondre au CSS et afficher le globe en entier
+    components.html(html_dashboard, height=620)
 
-    # --- 3. NOUVEAU BOUTON : DESIGN PROFESSIONNEL / MINIMALISTE ---
+    # --- 3. BOUTON CONNECT SYSTEM ---
     st.markdown("""
         <style>
-        /* Centrer le conteneur du bouton */
         div.stButton {
             display: flex;
             justify-content: center;
-            margin-top: -15px; /* Remonte légèrement le bouton vers le globe */
+            margin-top: -15px; 
         }
-        
-        /* Design du bouton lui-même */
         div.stButton > button {
             background-color: transparent !important;
-            color: #848e9c !important; /* Gris clair par défaut */
-            border: 1px solid rgba(240, 185, 11, 0.3) !important; /* Bordure fine dorée semi-transparente */
+            color: #848e9c !important; 
+            border: 1px solid rgba(240, 185, 11, 0.3) !important; 
             font-family: 'Courier New', Courier, monospace !important;
             font-size: 0.95rem !important;
             font-weight: 600 !important;
-            letter-spacing: 4px !important; /* Lettres espacées (institutionnel) */
+            letter-spacing: 4px !important; 
             padding: 12px 40px !important;
-            border-radius: 2px !important; /* Coins presque carrés */
+            border-radius: 2px !important; 
             transition: all 0.4s ease !important;
             text-transform: uppercase !important;
-            width: auto !important; /* Ne prend plus toute la largeur, s'ajuste au texte */
+            width: auto !important; 
         }
-        
-        /* Effet au survol */
         div.stButton > button:hover {
             background-color: rgba(240, 185, 11, 0.05) !important;
-            border: 1px solid #f0b90b !important; /* Bordure dorée pleine */
-            color: #f0b90b !important; /* Texte doré */
-            box-shadow: 0 0 15px rgba(240, 185, 11, 0.15) !important; /* Légère lueur */
+            border: 1px solid #f0b90b !important; 
+            color: #f0b90b !important; 
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.15) !important; 
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # Bouton avec un nom sérieux et sans container width (largeur automatique centrée)
     if st.button("CONNECT SYSTEM"):
         st.session_state.page = "hub"
         st.rerun()
