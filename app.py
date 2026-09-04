@@ -11,12 +11,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Gestion de la navigation via URL & Session State
+# 2. Gestion stricte de la navigation (State & Query Params)
 if "page" in st.query_params:
     st.session_state.page = st.query_params["page"]
 
 if "page" not in st.session_state:
     st.session_state.page = "welcome"
+
+def go_to_page(page_name):
+    st.session_state.page = page_name
+    st.query_params["page"] = page_name
 
 start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
@@ -32,7 +36,7 @@ st.markdown("""
             visibility: hidden !important;
         }
 
-        /* VERROUILLAGE STRICT DU DÉFILEMENT SUR TOUTE LA PAGE */
+        /* VERROUILLAGE ET AJUSTEMENT DU DÉFILEMENT */
         html, body, .stApp, [data-testid="stAppViewContainer"], .main, [data-testid="stVerticalBlock"] {
             height: 100vh !important;
             max-height: 100vh !important;
@@ -46,7 +50,7 @@ st.markdown("""
 
         /* Conteneur principal fixe */
         .main .block-container {
-            padding: 8px 20px 0px 20px !important;
+            padding: 10px 20px 0px 20px !important;
             max-width: 100vw !important;
             height: 100vh !important;
             max-height: 100vh !important;
@@ -65,14 +69,13 @@ st.markdown("""
         .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
         .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD Page 1 */
+        /* Header HUD */
         .hud-header {
             background: rgba(13, 17, 23, 0.94);
             border: 1.5px solid rgba(240, 185, 11, 0.45);
             border-radius: 12px;
-            padding: 10px 20px;
-            margin-top: 0px;
-            margin-bottom: 10px;
+            padding: 8px 20px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -100,29 +103,29 @@ st.markdown("""
             background: rgba(13, 17, 23, 0.88);
             border: 1px solid rgba(240, 185, 11, 0.25);
             border-radius: 12px;
-            padding: 18px;
+            padding: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Bouton Néon Streamlit Page 1 */
+        /* Boutons Néon Streamlit */
         div.stButton > button {
             width: 100% !important;
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 1.05rem !important;
+            font-size: 1rem !important;
             font-weight: 900 !important;
             letter-spacing: 2px !important;
             border-radius: 8px !important;
-            padding: 14px 20px !important;
+            padding: 12px 20px !important;
             border: none !important;
-            box-shadow: 0 0 25px rgba(240, 185, 11, 0.5) !important;
+            box-shadow: 0 0 20px rgba(240, 185, 11, 0.5) !important;
             cursor: pointer !important;
             transition: all 0.2s ease-in-out !important;
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 35px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.9), 0 0 15px #00f3ff !important;
             color: #000000 !important;
         }
 
@@ -131,13 +134,13 @@ st.markdown("""
             position: fixed;
             top: 50%;
             left: 50%;
-            width: 600px;
-            height: 600px;
-            margin-top: -300px;
-            margin-left: -300px;
+            width: 580px;
+            height: 580px;
+            margin-top: -290px;
+            margin-left: -290px;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.38;
+            opacity: 0.35;
             perspective: 1000px;
         }
 
@@ -182,7 +185,7 @@ st.markdown("""
         </div>
     </div>
 
-    <!-- Viseurs -->
+    <!-- Viseurs HUD -->
     <div class="corner-reticle corner-tl"></div>
     <div class="corner-reticle corner-tr"></div>
     <div class="corner-reticle corner-bl"></div>
@@ -200,14 +203,14 @@ if st.session_state.page == "welcome":
 
     st.markdown(f"""
         <div class="hud-header">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:36px; height:36px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.1rem; box-shadow:0 0 12px rgba(240,185,11,0.6);">⚡</div>
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:34px; height:34px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.05rem; box-shadow:0 0 12px rgba(240,185,11,0.6);">⚡</div>
                 <div>
-                    <div class="hud-title" style="font-size:1.15rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                    <div class="mono-text" style="font-size:0.68rem; letter-spacing:1px; color:#848e9c;">QUANTITATIVE MARKET INTELLIGENCE PLATFORM</div>
+                    <div class="hud-title" style="font-size:1.1rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="mono-text" style="font-size:0.65rem; letter-spacing:1px; color:#848e9c;">QUANTITATIVE MARKET INTELLIGENCE PLATFORM</div>
                 </div>
             </div>
-            <div style="display:flex; gap:20px; align-items:center;">
+            <div style="display:flex; gap:16px; align-items:center;">
                 <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
                     MS SERVEUR : <span style="color:#ffffff; font-weight:700;">{latency_ms} ms</span>
                 </div>
@@ -220,7 +223,7 @@ if st.session_state.page == "welcome":
         </div>
     """, unsafe_allow_html=True)
 
-    col_left, col_right = st.columns([1.4, 1.0], gap="medium")
+    col_left, col_right = st.columns([1.3, 1.0], gap="medium")
 
     with col_left:
         clock_html = """
@@ -235,10 +238,10 @@ if st.session_state.page == "welcome":
                     background: rgba(13, 17, 23, 0.90);
                     border: 1.5px solid #f0b90b;
                     border-radius: 12px;
-                    padding: 14px 20px;
+                    padding: 12px 18px;
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
+                    gap: 8px;
                     box-shadow: 0 0 20px rgba(240, 185, 11, 0.25);
                     max-width: 320px;
                 }
@@ -251,14 +254,14 @@ if st.session_state.page == "welcome":
 
                 .city-badge {
                     font-family: 'Orbitron', sans-serif;
-                    font-size: 0.75rem;
+                    font-size: 0.72rem;
                     font-weight: 900;
                     color: #f0b90b;
                     letter-spacing: 1.2px;
                 }
 
                 .time-val {
-                    font-size: 1.45rem;
+                    font-size: 1.35rem;
                     font-weight: 800;
                     color: #ffffff;
                     letter-spacing: 1.5px;
@@ -313,13 +316,21 @@ if st.session_state.page == "welcome":
         </body>
         </html>
         """
-        components.html(clock_html, height=125, scrolling=False)
+        components.html(clock_html, height=115, scrolling=False)
 
-        st.markdown("<div style='height: 190px;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+            <div class="hud-card" style="margin-top: 15px; margin-bottom: 20px;">
+                <div style="font-family:'Orbitron'; font-size:0.95rem; font-weight:800; color:#f0b90b; letter-spacing:1px;">
+                    ⚡ ACCÈS SYSTEME AUTORISÉ
+                </div>
+                <div style="color:#848e9c; font-size:0.8rem; margin-top:6px; line-height:1.4;">
+                    Bienvenue dans l'interface quantitative. Flux de marché synchronisés en temps réel via passerelle ultra-basse latence.
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
-            st.session_state.page = "hub"
-            st.query_params["page"] = "hub"
+            go_to_page("hub")
             st.rerun()
 
     with col_right:
@@ -331,37 +342,32 @@ if st.session_state.page == "welcome":
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap');
                 
                 * { box-sizing: border-box; }
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background-color: transparent;
-                    font-family: 'Inter', sans-serif;
-                }
+                body { margin: 0; padding: 0; background-color: transparent; font-family: 'Inter', sans-serif; }
 
                 .compact-container {
                     background: rgba(13, 17, 23, 0.95);
                     border: 1.5px solid #f0b90b;
                     border-radius: 12px;
-                    padding: 12px;
+                    padding: 10px;
                     box-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
-                    height: 480px;
+                    gap: 8px;
+                    height: 440px;
                 }
 
                 .container-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding-bottom: 6px;
+                    padding-bottom: 4px;
                     border-bottom: 1px solid rgba(240, 185, 11, 0.3);
                 }
 
                 .title-text {
                     font-family: 'Orbitron', sans-serif;
                     font-weight: 900;
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
                     color: #f0b90b;
                     letter-spacing: 1.2px;
                 }
@@ -377,8 +383,8 @@ if st.session_state.page == "welcome":
                 }
 
                 .pulse-dot {
-                    width: 7px;
-                    height: 7px;
+                    width: 6px;
+                    height: 6px;
                     background-color: #0ecb81;
                     border-radius: 50%;
                     box-shadow: 0 0 8px #0ecb81;
@@ -388,7 +394,7 @@ if st.session_state.page == "welcome":
                     background: rgba(22, 27, 34, 0.85);
                     border: 1px solid rgba(240, 185, 11, 0.22);
                     border-radius: 8px;
-                    height: 95px;
+                    height: 90px;
                     overflow: hidden;
                 }
             </style>
@@ -467,7 +473,7 @@ if st.session_state.page == "welcome":
         </body>
         </html>
         """
-        components.html(market_quotes_html, height=490, scrolling=False)
+        components.html(market_quotes_html, height=450, scrolling=False)
 
 
 # ==========================================
@@ -475,236 +481,90 @@ if st.session_state.page == "welcome":
 # ==========================================
 elif st.session_state.page == "hub":
 
-    page2_header_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&family=Inter:wght@600;700&display=swap');
-            
-            * { box-sizing: border-box; }
-            body { 
-                margin: 0; 
-                padding: 0; 
-                background: transparent; 
-                font-family: 'JetBrains Mono', monospace; 
-            }
+    # Barre supérieure native + HTML synchronisé pour retour Accueil fluide
+    col_hdr_left, col_hdr_mid, col_hdr_right = st.columns([1.2, 1.2, 1.0], gap="small")
 
-            .hud-header-p2 {
-                background: rgba(13, 17, 23, 0.94);
-                border: 1.5px solid rgba(240, 185, 11, 0.45);
-                border-radius: 12px;
-                padding: 8px 18px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.2);
-                backdrop-filter: blur(20px);
-            }
-
-            .left-brand {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .logo-icon {
-                width: 34px;
-                height: 34px;
-                background: linear-gradient(135deg, #f0b90b, #d4a007);
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: 'Orbitron', sans-serif;
-                font-weight: 900;
-                color: #000;
-                font-size: 1.05rem;
-                box-shadow: 0 0 12px rgba(240,185,11,0.6);
-            }
-
-            .title-p2 {
-                font-family: 'Orbitron', sans-serif;
-                font-weight: 900;
-                color: #ffffff;
-                font-size: 1.05rem;
-                letter-spacing: 1.5px;
-                line-height: 1.1;
-            }
-
-            .hud-gold { color: #f0b90b; }
-
-            .subtitle-p2 {
-                font-size: 0.62rem;
-                color: #848e9c;
-                letter-spacing: 1px;
-            }
-
-            .header-clocks-container {
-                display: flex;
-                align-items: center;
-                gap: 18px;
-                background: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(240, 185, 11, 0.25);
-                padding: 5px 16px;
-                border-radius: 8px;
-            }
-
-            .clock-item {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .clock-flag {
-                font-family: 'Orbitron', sans-serif;
-                font-size: 0.7rem;
-                font-weight: 900;
-                color: #f0b90b;
-            }
-
-            .clock-time {
-                font-size: 1.1rem;
-                font-weight: 800;
-                color: #ffffff;
-                letter-spacing: 1px;
-                text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-            }
-
-            .clock-divider {
-                width: 1px;
-                height: 20px;
-                background: rgba(240, 185, 11, 0.3);
-            }
-
-            .right-status {
-                display: flex;
-                align-items: center;
-                gap: 14px;
-            }
-
-            .status-badge {
-                background: rgba(255,255,255,0.05);
-                padding: 6px 12px;
-                border-radius: 6px;
-                border: 1px solid rgba(255,255,255,0.1);
-                font-size: 0.75rem;
-                color: #848e9c;
-                display: flex;
-                align-items: center;
-            }
-
-            .online-badge {
-                background: rgba(14,203,129,0.12);
-                padding: 6px 12px;
-                border-radius: 20px;
-                border: 1px solid rgba(14,203,129,0.3);
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                font-weight: 700;
-                color: #0ecb81;
-                font-size: 0.75rem;
-            }
-
-            .online-dot {
-                width: 6px;
-                height: 6px;
-                background: #0ecb81;
-                border-radius: 50%;
-                box-shadow: 0 0 8px #0ecb81;
-            }
-
-            .hud-btn-accueil {
-                background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%);
-                color: #080b10;
-                font-family: 'Orbitron', sans-serif;
-                font-size: 0.75rem;
-                font-weight: 900;
-                letter-spacing: 1.2px;
-                border-radius: 6px;
-                padding: 7px 16px;
-                border: none;
-                text-decoration: none;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
-                cursor: pointer;
-                transition: all 0.2s ease-in-out;
-                white-space: nowrap;
-            }
-
-            .hud-btn-accueil:hover {
-                box-shadow: 0 0 25px rgba(240, 185, 11, 0.9), 0 0 12px #00f3ff;
-                color: #000000;
-                transform: translateY(-1px);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="hud-header-p2">
-            <div class="left-brand">
-                <div class="logo-icon">⚡</div>
+    with col_hdr_left:
+        st.markdown(f"""
+            <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:6px 14px; display:flex; align-items:center; gap:10px; height:52px;">
+                <div style="width:30px; height:30px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.95rem;">⚡</div>
                 <div>
-                    <div class="title-p2">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                    <div class="subtitle-p2">QUANTITATIVE WORKSPACE</div>
+                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; font-size:0.95rem; line-height:1;">TERMINAL TRADER <span style="color:#f0b90b;">PRO</span></div>
+                    <div style="font-family:'JetBrains Mono'; font-size:0.58rem; color:#848e9c; letter-spacing:0.8px;">QUANTITATIVE WORKSPACE</div>
                 </div>
             </div>
+        """, unsafe_allow_html=True)
 
-            <div class="header-clocks-container">
+    with col_hdr_mid:
+        header_clocks_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@800;900&display=swap');
+                body { margin: 0; padding: 0; background: transparent; font-family: 'JetBrains Mono', monospace; }
+                .clocks-box {
+                    background: rgba(13, 17, 23, 0.94);
+                    border: 1.5px solid rgba(240, 185, 11, 0.45);
+                    border-radius: 10px;
+                    padding: 6px 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-around;
+                    height: 52px;
+                }
+                .clock-item { display: flex; align-items: center; gap: 6px; }
+                .flag { font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: #f0b90b; }
+                .val { font-size: 0.95rem; font-weight: 800; color: #ffffff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
+                .divider { width: 1px; height: 18px; background: rgba(240, 185, 11, 0.3); }
+            </style>
+        </head>
+        <body>
+            <div class="clocks-box">
                 <div class="clock-item">
-                    <span class="clock-flag">🇫🇷 PARIS</span>
-                    <span class="clock-time" id="p2-paris">--:--:--</span>
+                    <span class="flag">🇫🇷 PARIS</span>
+                    <span class="val" id="p2-paris">--:--:--</span>
                 </div>
-
-                <div class="clock-divider"></div>
-
+                <div class="divider"></div>
                 <div class="clock-item">
-                    <span class="clock-flag">🇺🇸 NEW YORK</span>
-                    <span class="clock-time" id="p2-ny">--:--:--</span>
+                    <span class="flag">🇺🇸 NEW YORK</span>
+                    <span class="val" id="p2-ny">--:--:--</span>
                 </div>
             </div>
+            <script>
+                function updateP2Clocks() {
+                    const now = new Date();
+                    document.getElementById('p2-paris').innerText = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    document.getElementById('p2-ny').innerText = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+                setInterval(updateP2Clocks, 1000);
+                updateP2Clocks();
+            </script>
+        </body>
+        </html>
+        """
+        components.html(header_clocks_html, height=52, scrolling=False)
 
-            <div class="right-status">
-                <div class="status-badge">
-                    MS SERVEUR : <span style="color:#ffffff; font-weight:700; margin-left:4px;">__LATENCY__ ms</span>
+    with col_hdr_right:
+        col_btn1, col_btn2 = st.columns([1.1, 1.0])
+        with col_btn1:
+            st.markdown(f"""
+                <div style="background:rgba(13,17,23,0.94); border:1.5px solid rgba(240,185,11,0.45); border-radius:10px; padding:6px 10px; height:52px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-size:0.7rem; color:#848e9c;">
+                    MS : <span style="color:#ffffff; font-weight:700; margin-left:4px;">{latency_ms} ms</span>
                 </div>
-                <div class="online-badge">
-                    <span class="online-dot"></span>
-                    ONLINE
-                </div>
-                <a href="?page=welcome" target="_top" class="hud-btn-accueil">
-                    ← ACCUEIL
-                </a>
-            </div>
-        </div>
-
-        <script>
-            function updateP2Clocks() {
-                const now = new Date();
-                const parisStr = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const nyStr = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                document.getElementById('p2-paris').innerText = parisStr;
-                document.getElementById('p2-ny').innerText = nyStr;
-            }
-            setInterval(updateP2Clocks, 1000);
-            updateP2Clocks();
-        </script>
-    </body>
-    </html>
-    """.replace("__LATENCY__", str(latency_ms))
-
-    components.html(page2_header_html, height=62, scrolling=False)
+            """, unsafe_allow_html=True)
+        with col_btn2:
+            if st.button("← ACCUEIL"):
+                go_to_page("welcome")
+                st.rerun()
 
     st.markdown("""
         <div class="hud-card" style="margin-top:10px;">
             <div class="hud-title" style="font-size:1.1rem; color:#f0b90b;">
-                🚀 WORKSPACE QUANTITATIF PRÊT
+                🚀 WORKSPACE QUANTITATIF ACTIF
             </div>
             <p style="color:#848e9c; margin-top:8px; font-size:0.85rem;">
-                La barre supérieure est désormais parfaitement unifiée et alignée.
+                Le bouton <strong>← ACCUEIL</strong> permet de revenir à l'écran titre instantanément.
             </p>
         </div>
     """, unsafe_allow_html=True)
