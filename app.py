@@ -16,15 +16,10 @@ if "page" not in st.session_state:
 # Fonction pour récupérer les actus en direct de Yahoo Finance
 def fetch_yahoo_news():
   try:
-    # Flux RSS officiel Yahoo Finance Actualités & Marchés
     feed = feedparser.parse("https://finance.yahoo.com/news/rssindex")
     news_items = []
-    for entry in feed.entries[
-        :5
-    ]:  # Récupère les 5 dernières dépêches en direct
-      title = entry.title
-      # Nettoyage rapide du titre si besoin
-      news_items.append(title)
+    for entry in feed.entries[:8]:  # Récupère 8 actus pour alimenter le défilé
+      news_items.append(entry.title)
     return (
         news_items
         if news_items
@@ -462,7 +457,7 @@ elif st.session_state.page == "hub":
     components.html(heatmap_panel_html, height=480)
 
   # ==========================
-  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE LIVE
+  # COLONNE CENTRE : CALENDRIER ÉCO + FLUX YAHOO FINANCE LIVE (DÉFILEMENT AUTO)
   # ==========================
   with col_center:
     calendar_panel_html = """
@@ -534,13 +529,13 @@ elif st.session_state.page == "hub":
     # Récupération dynamique des flux Yahoo Finance
     live_news = fetch_yahoo_news()
 
-    # Construction dynamique des blocs HTML pour les actus Yahoo Finance
+    # Construction des blocs HTML avec couleurs alternées
     news_html_blocks = ""
     colors = ["#f0b90b", "#58a6ff", "#3fb950", "#d29922", "#bc8cff"]
     for i, title in enumerate(live_news):
       color = colors[i % len(colors)]
       news_html_blocks += f"""
-        <div style="margin-bottom: 6px; border-left: 2px solid {color}; padding-left: 6px;">
+        <div style="margin-bottom: 10px; border-left: 2px solid {color}; padding-left: 6px; line-height: 1.4;">
             <span style="color: {color}; font-weight: bold;">[YAHOO LIVE]</span> : {title}
         </div>
         """
@@ -589,20 +584,48 @@ elif st.session_state.page == "hub":
               border-radius: 3px;
               padding: 8px;
               flex-grow: 1;
-              overflow-y: auto;
+              overflow-y: hidden; /* Cache la barre de défilement pour un rendu propre */
               font-size: 0.75rem;
               color: #8b949e;
+              position: relative;
+          }}
+          .scroll-inner {{
+              position: absolute;
+              width: 95%;
           }}
         </style>
         </head>
         <body>
         <div class="panel-heading">
             <span>🌐 FLUX LIVE YAHOO FINANCE</span>
-            <span><div class="live-dot-green"></div>EN DIRECT</span>
+            <span><div class="live-dot-green"></div>EN DIRECT (AUTO-SCROLL)</span>
         </div>
-        <div class="macro-content">
-            {news_html_blocks}
+        <div class="macro-content" id="scroll-container">
+            <div class="scroll-inner" id="scroll-inner">
+                {news_html_blocks}
+                <div style="height: 40px;"></div>
+            </div>
         </div>
+        
+        <script>
+        const container = document.getElementById('scroll-container');
+        const inner = document.getElementById('scroll-inner');
+        
+        // Fonction de défilement automatique fluide
+        function autoScroll() {{
+            if (container.scrollTop >= inner.scrollHeight - container.clientHeight) {{
+                container.scrollTop = 0; // Revient en haut en boucle
+            }} else {{
+                container.scrollTop += 0.6; // Vitesse de défilement
+            }}
+        }}
+        
+        let scrollInterval = setInterval(autoScroll, 40);
+        
+        // Pause le défilement lorsque la souris survole le panneau
+        container.onmouseover = () => clearInterval(scrollInterval);
+        container.onmouseout = () => scrollInterval = setInterval(autoScroll, 40);
+        </script>
         </body>
         </html>
         """
