@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import yfinance as yf
-import pandas as pd
+import requests
 
 # ==========================================
 # CONFIGURATION DE LA PAGE
@@ -20,49 +19,56 @@ if "page" not in st.session_state:
     st.session_state.page = "welcome"
 
 # ==========================================
-# RÉCURÉPATION INDIVIDUELLE ULTRA-ROBUSTE
+# RÉCUPÉRATION DES PRIX EN DIRECT VIA TRADINGVIEW
 # ==========================================
-@st.cache_data(ttl=30)
-def get_market_data():
-    # Dictionnaire de secours avec des valeurs réalistes
+@st.cache_data(ttl=10)
+def get_tradingview_data():
     data = {
-        "eur": {"price": 1.0850, "pct": 0.45, "up": True},
-        "nas": {"price": 19250.0, "pct": 1.12, "up": True},
-        "dxy": {"price": 104.20, "pct": -0.15, "up": False},
-        "gold": {"price": 2360.5, "pct": 0.80, "up": True}
+        "eur": {"price": 1.0850, "pct": 0.0, "up": True},
+        "nas": {"price": 19000.0, "pct": 0.0, "up": True},
+        "dxy": {"price": 104.0, "pct": 0.0, "up": True},
+        "gold": {"price": 2350.0, "pct": 0.0, "up": True}
     }
-    
-    tickers_map = {
-        "eur": "EURUSD=X",
-        "nas": "NQ=F",
-        "dxy": "DX-Y.NYB",
-        "gold": "GC=F"
-    }
-    
-    for key, symbol in tickers_map.items():
-        try:
-            df = yf.download(symbol, period="5d", progress=False)
-            if not df.empty and "Close" in df.columns:
-                # Gère le format multi-index ou simple index de yfinance
-                close_series = df["Close"]
-                if isinstance(close_series, pd.DataFrame):
-                    close_series = close_series.iloc[:, 0]
+    try:
+        url = "https://scanner.tradingview.com/global/scan"
+        payload = {
+            "symbols": {
+                "tickers": ["FX_IDC:EURUSD", "TVC:IXIC", "TVC:DXY", "COMEX:GC1!"]
+            },
+            "columns": ["close", "change"]
+        }
+        response = requests.post(url, json=payload, timeout=5)
+        if response.status_code == 200:
+            result = response.json()
+            for item in result.get("data", []):
+                s_name = item["s"]
+                values = item["d"]
+                price = values[0]
+                pct = values[1]
                 
-                close_series = close_series.dropna()
-                if len(close_series) >= 2:
-                    current = float(close_series.iloc[-1])
-                    previous = float(close_series.iloc[-2])
-                    pct = ((current - previous) / previous) * 100
-                    
-                    data[key]["price"] = current
-                    data[key]["pct"] = pct
-                    data[key]["up"] = pct >= 0
-        except Exception as e:
-            print(f"Erreur pour {symbol}: {e}")
-            
+                if price is not None:
+                    if "EURUSD" in s_name:
+                        data["eur"]["price"] = float(price)
+                        data["eur"]["pct"] = float(pct) if pct else 0.0
+                        data["eur"]["up"] = data["eur"]["pct"] >= 0
+                    elif "IXIC" in s_name:
+                        data["nas"]["price"] = float(price)
+                        data["nas"]["pct"] = float(pct) if pct else 0.0
+                        data["nas"]["up"] = data["nas"]["pct"] >= 0
+                    elif "DXY" in s_name:
+                        data["dxy"]["price"] = float(price)
+                        data["dxy"]["pct"] = float(pct) if pct else 0.0
+                        data["dxy"]["up"] = data["dxy"]["pct"] >= 0
+                    elif "GC1" in s_name:
+                        data["gold"]["price"] = float(price)
+                        data["gold"]["pct"] = float(pct) if pct else 0.0
+                        data["gold"]["up"] = data["gold"]["pct"] >= 0
+    except Exception as e:
+        print("Erreur TradingView:", e)
+        
     return data
 
-market = get_market_data()
+market = get_tradingview_data()
 
 # ==========================================
 # PAGE 1 : ACCUEIL SANS SCROLL & PRO
