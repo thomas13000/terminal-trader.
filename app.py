@@ -19,7 +19,7 @@ start_time = time.time()
 latency_ms = round((time.time() - start_time) * 1000 + 12, 1)
 
 # ==========================================
-# STYLES CSS (Zéro Scroll & Alignement Haut Max)
+# STYLES CSS + GLOBE 3D EN FOND DE PAGE
 # ==========================================
 st.markdown("""
     <style>
@@ -39,37 +39,39 @@ st.markdown("""
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Remontée maximale du conteneur haut */
+        /* Conteneur principal collé en haut avec bon remplissage */
         .main .block-container {
-            padding: 2px 20px 0px 20px !important;
+            padding: 8px 24px 0px 24px !important;
             max-width: 100vw !important;
             height: 100vh !important;
             overflow: hidden !important;
+            position: relative;
+            z-index: 2;
         }
 
         /* Viseurs 4 coins */
         .corner-reticle {
-            position: fixed; width: 20px; height: 20px; z-index: 99; pointer-events: none;
-            border: 2px solid rgba(240, 185, 11, 0.4);
+            position: fixed; width: 22px; height: 22px; z-index: 99; pointer-events: none;
+            border: 2px solid rgba(240, 185, 11, 0.5);
         }
-        .corner-tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
-        .corner-tr { top: 4px; right: 4px; border-left: none; border-bottom: none; }
-        .corner-bl { bottom: 4px; left: 4px; border-right: none; border-top: none; }
-        .corner-br { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+        .corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+        .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
-        /* Header HUD */
+        /* Header HUD Agrandie pour meubler le haut */
         .hud-header {
-            background: rgba(13, 17, 23, 0.90);
-            border: 1px solid rgba(240, 185, 11, 0.3);
-            border-radius: 10px;
-            padding: 6px 16px;
+            background: rgba(13, 17, 23, 0.92);
+            border: 1.5px solid rgba(240, 185, 11, 0.4);
+            border-radius: 12px;
+            padding: 12px 24px;
             margin-top: 0px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(240, 185, 11, 0.15);
         }
 
         .hud-title {
@@ -84,13 +86,13 @@ st.markdown("""
 
         .mono-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: #848e9c;
         }
 
         .hud-card {
-            background: rgba(13, 17, 23, 0.85);
-            border: 1px solid rgba(240, 185, 11, 0.22);
+            background: rgba(13, 17, 23, 0.88);
+            border: 1px solid rgba(240, 185, 11, 0.25);
             border-radius: 12px;
             padding: 18px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
@@ -102,7 +104,7 @@ st.markdown("""
             background: linear-gradient(135deg, #f0b90b 0%, #d4a007 100%) !important;
             color: #080b10 !important;
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 1rem !important;
+            font-size: 1.05rem !important;
             font-weight: 900 !important;
             letter-spacing: 2px !important;
             border-radius: 8px !important;
@@ -113,11 +115,69 @@ st.markdown("""
         }
 
         div.stButton > button:hover {
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.8), 0 0 12px #00f3ff !important;
+            box-shadow: 0 0 35px rgba(240, 185, 11, 0.8), 0 0 15px #00f3ff !important;
             color: #000000 !important;
+        }
+
+        /* ==========================================
+           GLOBE 3D ANIME EN FOND DE PAGE (PURE CSS)
+           ========================================== */
+        .bg-globe-wrapper {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 580px;
+            height: 580px;
+            margin-top: -290px;
+            margin-left: -290px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.14;
+            perspective: 1000px;
+        }
+
+        .bg-globe-sphere {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: spinGlobeBg 22s linear infinite;
+        }
+
+        .bg-globe-ring {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1.5px solid #f0b90b;
+            box-shadow: 0 0 10px rgba(240, 185, 11, 0.3);
+        }
+
+        @keyframes spinGlobeBg {
+            0% { transform: rotateX(20deg) rotateY(0deg); }
+            100% { transform: rotateX(20deg) rotateY(360deg); }
         }
     </style>
 
+    <!-- Globe 3D tournant en fond de page -->
+    <div class="bg-globe-wrapper">
+        <div class="bg-globe-sphere">
+            <div class="bg-globe-ring" style="transform: rotateY(0deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateY(30deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateY(60deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateY(90deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateY(120deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateY(150deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateX(30deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateX(60deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateX(90deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateX(120deg);"></div>
+            <div class="bg-globe-ring" style="transform: rotateX(150deg);"></div>
+        </div>
+    </div>
+
+    <!-- Viseurs -->
     <div class="corner-reticle corner-tl"></div>
     <div class="corner-reticle corner-tr"></div>
     <div class="corner-reticle corner-bl"></div>
@@ -133,35 +193,35 @@ if st.session_state.page == "welcome":
     now = datetime.utcnow()
     time_utc = now.strftime("%H:%M:%S")
 
-    # --- BARRE DU HAUT COLLÉE EN HAUT ---
+    # --- BARRE DU HAUT (AGRANDIE POUR BIEN MEUBLER LE HAUT) ---
     st.markdown(f"""
         <div class="hud-header">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:28px; height:28px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:0.9rem;">⚡</div>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:36px; height:36px; background:linear-gradient(135deg, #f0b90b, #d4a007); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-weight:900; color:#000; font-size:1.1rem; box-shadow:0 0 10px rgba(240,185,11,0.5);">⚡</div>
                 <div>
-                    <div class="hud-title" style="font-size:0.95rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
-                    <div class="mono-text" style="font-size:0.6rem;">QUANTITATIVE MARKET INTELLIGENCE</div>
+                    <div class="hud-title" style="font-size:1.15rem; line-height:1.1;">TERMINAL TRADER <span class="hud-gold">PRO</span></div>
+                    <div class="mono-text" style="font-size:0.68rem; letter-spacing:1px; color:#848e9c;">QUANTITATIVE MARKET INTELLIGENCE PLATFORM</div>
                 </div>
             </div>
-            <div style="display:flex; gap:18px; align-items:center;">
-                <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex; gap:20px; align-items:center;">
+                <div class="mono-text" style="background:rgba(255,255,255,0.05); padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
                     MS SERVEUR : <span style="color:#00f3ff; font-weight:700;">{latency_ms} ms</span>
                 </div>
-                <div class="mono-text" style="color:#00f3ff; font-weight:700;">{time_utc} UTC</div>
-                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.1); padding:3px 8px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:5px;">
-                    <span style="width:6px; height:6px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 6px #0ecb81;"></span>
-                    ONLINE
+                <div class="mono-text" style="color:#00f3ff; font-weight:700; font-size:0.85rem;">{time_utc} UTC</div>
+                <div class="mono-text hud-green" style="background:rgba(14,203,129,0.12); padding:5px 12px; border-radius:20px; border:1px solid rgba(14,203,129,0.3); display:flex; align-items:center; gap:6px; font-weight:700;">
+                    <span style="width:7px; height:7px; background:#0ecb81; border-radius:50%; display:inline-block; box-shadow:0 0 8px #0ecb81;"></span>
+                    SYSTEM ONLINE
                 </div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    # --- DISPOSITION EN 2 COLONNES ---
-    col_left, col_right = st.columns([1.5, 1.5], gap="medium")
+    # --- COLONNES : REDUCTION DE LA LARGEUR DE LA COLONNE DROITE ---
+    col_left, col_right = st.columns([1.4, 1.0], gap="medium")
 
     with col_left:
-        # Cadre Horloges Superposées (Heures en Blanc) + Globe Or
-        clock_globe_html = """
+        # Cadre Horloges Superposées (Heures en Blanc, Cadre refermé sans globe)
+        clock_html = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -173,47 +233,39 @@ if st.session_state.page == "welcome":
                     background: rgba(13, 17, 23, 0.90);
                     border: 1.5px solid #f0b90b;
                     border-radius: 12px;
-                    padding: 16px 22px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    box-shadow: 0 0 20px rgba(240, 185, 11, 0.2);
-                }
-
-                .clocks-container {
+                    padding: 16px 24px;
                     display: flex;
                     flex-direction: column;
-                    gap: 16px;
+                    gap: 12px;
+                    box-shadow: 0 0 20px rgba(240, 185, 11, 0.2);
                 }
 
                 .clock-row {
                     display: flex;
                     align-items: center;
-                    gap: 16px;
+                    justify-content: space-between;
                 }
 
                 .city-badge {
                     font-family: 'Orbitron', sans-serif;
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     font-weight: 900;
                     color: #f0b90b;
                     letter-spacing: 1.5px;
-                    width: 110px;
                 }
 
                 /* HEURES EN BLANC PUR */
                 .time-val {
-                    font-size: 1.5rem;
+                    font-size: 1.6rem;
                     font-weight: 800;
                     color: #ffffff;
-                    letter-spacing: 1.5px;
+                    letter-spacing: 2px;
                     text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
                 }
 
                 .time-sub {
-                    font-size: 0.6rem;
+                    font-size: 0.65rem;
                     color: #848e9c;
-                    margin-left: 8px;
                 }
 
                 .horizontal-divider {
@@ -221,60 +273,28 @@ if st.session_state.page == "welcome":
                     height: 1px;
                     background: rgba(240, 185, 11, 0.25);
                 }
-
-                /* GLOBE OR ANIME EN CSS */
-                .globe-wrapper {
-                    position: relative;
-                    width: 100px;
-                    height: 100px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .globe-svg {
-                    width: 90px;
-                    height: 90px;
-                    animation: spinGlobe 14s linear infinite;
-                    filter: drop-shadow(0 0 8px rgba(240, 185, 11, 0.5));
-                }
-
-                @keyframes spinGlobe {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
             </style>
         </head>
         <body>
             <div class="hud-clock-card">
-                <div class="clocks-container">
-                    <!-- 1. PARIS -->
-                    <div class="clock-row">
-                        <div class="city-badge">🇫🇷 PARIS</div>
-                        <div class="time-val" id="paris-time">--:--:--</div>
-                        <div class="time-sub">CET</div>
-                    </div>
-
-                    <div class="horizontal-divider"></div>
-
-                    <!-- 2. NEW YORK -->
-                    <div class="clock-row">
-                        <div class="city-badge">🇺🇸 NEW YORK</div>
-                        <div class="time-val" id="ny-time">--:--:--</div>
-                        <div class="time-sub">EST</div>
+                <!-- 1. PARIS -->
+                <div class="clock-row">
+                    <div class="city-badge">🇫🇷 PARIS</div>
+                    <div>
+                        <span class="time-val" id="paris-time">--:--:--</span>
+                        <span class="time-sub">CET</span>
                     </div>
                 </div>
 
-                <!-- GLOBE ANIME OR (#f0b90b) -->
-                <div class="globe-wrapper">
-                    <svg class="globe-svg" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="44" fill="none" stroke="#f0b90b" stroke-width="1.8" opacity="0.95"/>
-                        <ellipse cx="50" cy="50" rx="44" ry="16" fill="none" stroke="#f0b90b" stroke-width="1.2" opacity="0.75"/>
-                        <ellipse cx="50" cy="50" rx="16" ry="44" fill="none" stroke="#f0b90b" stroke-width="1.2" opacity="0.75"/>
-                        <line x1="6" y1="50" x2="94" y2="50" stroke="#f0b90b" stroke-width="1" opacity="0.6"/>
-                        <line x1="50" y1="6" x2="50" y2="94" stroke="#f0b90b" stroke-width="1" opacity="0.6"/>
-                        <circle cx="50" cy="50" r="3" fill="#f0b90b"/>
-                    </svg>
+                <div class="horizontal-divider"></div>
+
+                <!-- 2. NEW YORK -->
+                <div class="clock-row">
+                    <div class="city-badge">🇺🇸 NEW YORK</div>
+                    <div>
+                        <span class="time-val" id="ny-time">--:--:--</span>
+                        <span class="time-sub">EST</span>
+                    </div>
                 </div>
             </div>
 
@@ -293,17 +313,17 @@ if st.session_state.page == "welcome":
         </body>
         </html>
         """
-        components.html(clock_globe_html, height=130, scrolling=False)
+        components.html(clock_html, height=125, scrolling=False)
 
-        # Espace vertical pour abaisser le bouton Entrer
-        st.markdown("<div style='height: 220px;'></div>", unsafe_allow_html=True)
+        # Espacement pour placer le bouton d'entrée plus bas
+        st.markdown("<div style='height: 230px;'></div>", unsafe_allow_html=True)
 
         if st.button("ENTRER DANS LE TERMINAL ➔"):
             st.session_state.page = "hub"
             st.rerun()
 
     with col_right:
-        # Cadre marchés encore plus allongé (Hauteur 520px)
+        # Cadre Marchés : Hauteur 520px conservée, largeur resserrée par la colonne
         market_quotes_html = """
         <!DOCTYPE html>
         <html>
