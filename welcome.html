@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J.A.R.V.I.S. — QUANTUM MARKETS</title>
+    <title>J.A.R.V.I.S. — GLOBAL QUANTUM TERMINAL</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,12 +15,12 @@
         :root {
             --cyan-core: #00f3ff;
             --cyan-glow: rgba(0, 243, 255, 0.4);
-            --blue-deep: #0066ff;
-            --bg-dark: #040810;
-            --bg-glass: rgba(6, 16, 32, 0.75);
-            --border-hud: rgba(0, 243, 255, 0.3);
+            --blue-deep: #0055ff;
+            --bg-dark: #02050b;
+            --bg-glass: rgba(4, 12, 24, 0.82);
+            --border-hud: rgba(0, 243, 255, 0.35);
             --text-main: #d0f8ff;
-            --text-muted: #52788d;
+            --text-muted: #4a7288;
             --green-up: #00ffaa;
             --red-down: #ff3366;
             --font-display: 'Orbitron', sans-serif;
@@ -38,24 +38,21 @@
 
         #webgl-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
 
-        /* HUD Overlay HUD Jarvis Grid */
         .jarvis-grid {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none;
             background: 
-                radial-gradient(circle at 50% 50%, transparent 20%, rgba(4, 8, 16, 0.92) 85%),
+                radial-gradient(circle at 50% 50%, transparent 20%, rgba(2, 5, 11, 0.92) 85%),
                 linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* Reticles JARVIS */
-        .reticle { position: fixed; width: 40px; height: 40px; border: 2px solid var(--cyan-core); opacity: 0.6; pointer-events: none; z-index: 10; }
+        .reticle { position: fixed; width: 35px; height: 35px; border: 2px solid var(--cyan-core); opacity: 0.6; pointer-events: none; z-index: 10; }
         .r-tl { top: 20px; left: 20px; border-right: 0; border-bottom: 0; }
         .r-tr { top: 20px; right: 20px; border-left: 0; border-bottom: 0; }
         .r-bl { bottom: 20px; left: 20px; border-right: 0; border-top: 0; }
         .r-br { bottom: 20px; right: 20px; border-left: 0; border-top: 0; }
 
-        /* Top Banner */
         .jarvis-header {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             width: calc(100vw - 80px); max-width: 1500px; z-index: 20;
@@ -66,16 +63,14 @@
             transition: all 0.6s ease;
         }
 
-        .header-title { font-family: var(--font-display); font-size: 1.1rem; color: #fff; letter-spacing: 3px; display: flex; align-items: center; gap: 10px; }
+        .header-title { font-family: var(--font-display); font-size: 1rem; color: #fff; letter-spacing: 3px; display: flex; align-items: center; gap: 10px; }
         .header-title span { color: var(--cyan-core); text-shadow: 0 0 10px var(--cyan-glow); }
 
-        /* Clocks Section */
-        .clocks-container { display: flex; gap: 20px; }
+        .clocks-container { display: flex; gap: 24px; }
         .clock-box { text-align: right; }
         .clock-label { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; }
         .clock-val { font-size: 0.95rem; font-weight: 700; color: var(--cyan-core); }
 
-        /* Left Control Panel */
         .control-panel {
             position: fixed; top: 100px; left: 40px; width: 340px; z-index: 20;
             background: var(--bg-glass); border: 1px solid var(--border-hud);
@@ -84,7 +79,8 @@
             transition: all 0.6s ease;
         }
 
-        .panel-status { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); border-bottom: 1px solid var(--border-hud); padding-bottom: 8px; }
+        .panel-status { display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; border-bottom: 1px solid var(--border-hud); padding-bottom: 10px; }
+        .status-row { display: flex; justify-content: space-between; }
         .status-online { color: var(--green-up); font-weight: bold; }
 
         .btn-jarvis-launch {
@@ -104,7 +100,6 @@
             box-shadow: 0 0 30px var(--cyan-core);
         }
 
-        /* Right Market Panel */
         .market-panel {
             position: fixed; top: 100px; right: 40px; width: 360px; z-index: 20;
             display: flex; flex-direction: column; gap: 10px;
@@ -127,7 +122,6 @@
         .up { color: var(--green-up); }
         .down { color: var(--red-down); }
 
-        /* Mode Transition WARP */
         .warping .jarvis-header { transform: translate(-50%, -150%); opacity: 0; }
         .warping .control-panel { transform: translateX(-150%); opacity: 0; }
         .warping .market-panel { transform: translateX(150%); opacity: 0; }
@@ -149,7 +143,7 @@
 
     <header class="jarvis-header">
         <div class="header-title">
-            <span>❖ J.A.R.V.I.S.</span> MARKETS SYSTEM
+            <span>❖ J.A.R.V.I.S.</span> GLOBAL MAPPER
         </div>
         <div class="clocks-container">
             <div class="clock-box">
@@ -169,11 +163,21 @@
 
     <div class="control-panel">
         <div class="panel-status">
-            <span>SYSTEME AI: <span class="status-online">ACTIF</span></span>
-            <span>LATENCE: <span id="ping-num" style="color:var(--cyan-core)">12ms</span></span>
+            <div class="status-row">
+                <span>RÉSEAU :</span>
+                <span class="status-online">CONNECTÉ</span>
+            </div>
+            <div class="status-row">
+                <span>AUDIO ACDC :</span>
+                <span id="audio-status" style="color:var(--text-muted)">CHARGEMENT...</span>
+            </div>
+            <div class="status-row">
+                <span>LATENCE :</span>
+                <span id="ping-num" style="color:var(--cyan-core)">11ms</span>
+            </div>
         </div>
-        <div style="font-size:0.75rem; color:var(--text-main); line-height:1.4;">
-            Verrouillage orbital prêt. Module d'analyse prédictif connecté au flux boursier mondial.
+        <div style="font-size:0.72rem; color:var(--text-main); line-height:1.4;">
+            Cartographie continentale vectorielle active. Flux boursiers synchronisés en direct.
         </div>
         <button class="btn-jarvis-launch" id="btn-launch">Initialiser la Séquence</button>
     </div>
@@ -181,21 +185,34 @@
     <div class="market-panel" id="ticker-list"></div>
 
     <script>
-        // Renomme ton fichier localement 'acdc.mp3' à la racine de ton dossier
-        const acdcAudio = new Audio('acdc.mp3');
+        // GESTION AUDIO AVEC DIAGNOSTIC INTELLIGENT
+        const acdcAudio = new Audio('./acdc.mp3');
+        acdcAudio.preload = 'auto';
 
-        // HORLOGES TEMPS RÉEL (Correctement corrigées)
+        const audioStatusEl = document.getElementById('audio-status');
+
+        acdcAudio.addEventListener('canplaythrough', () => {
+            audioStatusEl.textContent = 'PRÊT';
+            audioStatusEl.style.color = 'var(--green-up)';
+        });
+
+        acdcAudio.addEventListener('error', () => {
+            audioStatusEl.textContent = 'INTROUVABLE (acdc.mp3)';
+            audioStatusEl.style.color = 'var(--red-down)';
+        });
+
+        // HORLOGES TEMPS RÉEL EXACTES
         function refreshClocks() {
             const now = new Date();
             document.getElementById('clk-paris').textContent = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour12: false });
             document.getElementById('clk-ny').textContent = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
             document.getElementById('clk-tokyo').textContent = now.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false });
-            document.getElementById('ping-num').textContent = (10 + Math.floor(Math.random() * 6)) + 'ms';
+            document.getElementById('ping-num').textContent = (10 + Math.floor(Math.random() * 5)) + 'ms';
         }
         setInterval(refreshClocks, 1000);
         refreshClocks();
 
-        // DONNÉES DE MARCHÉ DYNAMIQUES ET COMPLÈTES
+        // FLUX DE MARCHÉ COMPLETS ET ACTIFS
         const marketData = [
             { sym: 'BTC/USD', name: 'Bitcoin Core', price: 96850.20, chg: '+3.42%', up: true },
             { sym: 'ETH/USD', name: 'Ethereum', price: 2740.80, chg: '+2.15%', up: true },
@@ -246,7 +263,6 @@
 
         initMarketPanel();
 
-        // Mettre à jour périodiquement les prix pour simuler un vrai direct
         setInterval(() => {
             marketData.forEach((item, i) => {
                 const delta = (Math.random() - 0.49) * (item.price * 0.002);
@@ -256,96 +272,151 @@
             });
         }, 2000);
 
-        // THREE.JS - SCÈNE STYLE JARVIS HOLOGRAMME
+        // GÉNÉRATION DE LA TEXTURE DES CONTINENTS DANS UN CANVAS 2D EN TEMPS RÉEL
+        function createEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            // Fond Océan sombre avec grille
+            ctx.fillStyle = '#020916';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Quadrillage de coordonnées
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.12)';
+            ctx.lineWidth = 2;
+            for (let x = 0; x <= canvas.width; x += 128) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += 128) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            // Dessin holographique des formes continentales
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.45)';
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 4;
+
+            function drawLand(path) {
+                ctx.beginPath();
+                path.forEach((pt, i) => {
+                    const x = (pt[0] + 180) * (canvas.width / 360);
+                    const y = (90 - pt[1]) * (canvas.height / 180);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Polygones simplifiés des continents principaux
+            drawLand([[-130,50],[-120,60],[-70,60],[-60,45],[-80,25],[-105,20],[-120,30]]); // Amérique du Nord
+            drawLand([[-80,10],[-50,0],[-40,-15],[-60,-50],[-75,-20],[-80,10]]); // Amérique du Sud
+            drawLand([[-10,35],[30,35],[35,60],[20,70],[-10,60]]); // Europe
+            drawLand([[-20,35],[45,30],[50,0],[40,-35],[15,-35],[-15,0]]); // Afrique
+            drawLand([[40,35],[140,35],[140,70],[80,70],[60,50]]); // Asie
+            drawLand([[110,-10],[155,-10],[150,-40],[115,-35]]); // Australie
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // SCÈNE THREE.JS AVEC GLOBE CONTINENTAL
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 30);
+        camera.position.set(0, 0, 28);
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const jarvisGroup = new THREE.Group();
-        scene.add(jarvisGroup);
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
 
-        // Sphère centrale Holo
-        const sphereGeo = new THREE.SphereGeometry(7.5, 48, 48);
-        const sphereMat = new THREE.MeshBasicMaterial({
-            color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.15
+        // Globe avec texture continentale
+        const earthGeo = new THREE.SphereGeometry(8.5, 64, 64);
+        const earthMat = new THREE.MeshBasicMaterial({
+            map: createEarthTexture(),
+            transparent: true,
+            opacity: 0.9
         });
-        const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
-        jarvisGroup.add(sphereMesh);
+        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+        globeGroup.add(earthMesh);
 
-        // Anneaux concentriques JARVIS Arc Reactor
-        function createRing(radius, color, speedX, speedY) {
-            const ringGeo = new THREE.RingGeometry(radius, radius + 0.12, 64);
-            const ringMat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
-            const ring = new THREE.Mesh(ringGeo, ringMat);
-            ring.userData = { speedX, speedY };
-            jarvisGroup.add(ring);
-            return ring;
+        // Halo d'atmosphère externe
+        const atmosphereGeo = new THREE.SphereGeometry(8.8, 64, 64);
+        const atmosphereMat = new THREE.MeshBasicMaterial({
+            color: 0x00f3ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.12
+        });
+        const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+        globeGroup.add(atmosphere);
+
+        // Points d'impact lumineux (Capitales boursières)
+        function addHubPin(lat, lon) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const r = 8.6;
+
+            const x = -(r * Math.sin(phi) * Math.cos(theta));
+            const y = r * Math.cos(phi);
+            const z = r * Math.sin(phi) * Math.sin(theta);
+
+            const pinGeo = new THREE.SphereGeometry(0.2, 16, 16);
+            const pinMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+            const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+            pinMesh.position.set(x, y, z);
+            globeGroup.add(pinMesh);
         }
 
-        const rings = [
-            createRing(8.8, 0x00f3ff, 0.005, 0.01),
-            createRing(9.6, 0x0066ff, -0.008, 0.004),
-            createRing(10.5, 0x00f3ff, 0.002, -0.009)
-        ];
+        addHubPin(48.85, 2.35);   // Paris
+        addHubPin(40.71, -74.00); // New York
+        addHubPin(35.67, 139.65); // Tokyo
 
-        // Particules flottantes
-        const pGeo = new THREE.BufferGeometry();
-        const pCount = 1200;
-        const pPos = new Float32Array(pCount * 3);
-        for (let i = 0; i < pCount * 3; i++) {
-            pPos[i] = (Math.random() - 0.5) * 40;
-        }
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const pMat = new THREE.PointsMaterial({ size: 0.1, color: 0x00f3ff, transparent: true, opacity: 0.5 });
-        const particles = new THREE.Points(pGeo, pMat);
-        scene.add(particles);
-
-        // ANIMATION & TRANSITION CINÉMATIQUE
+        // ANIMATION & WARP
         let isWarping = false;
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
             const time = clock.getElapsedTime();
 
             if (!isWarping) {
-                jarvisGroup.rotation.y = time * 0.15;
-                rings.forEach(r => {
-                    r.rotation.x += r.userData.speedX;
-                    r.rotation.y += r.userData.speedY;
-                });
+                globeGroup.rotation.y = time * 0.1;
             }
-            particles.rotation.y = time * 0.03;
             renderer.render(scene, camera);
         }
         animate();
 
-        // LANCEMENT DE LA SÉQUENCE
+        // DÉCLENCHEMENT DÉTERMINISTE DE L'AUDIO AU CLIC
         document.getElementById('btn-launch').addEventListener('click', () => {
             if (isWarping) return;
             isWarping = true;
             document.body.classList.add('warping');
 
-            // Lecture Audio
+            // Force la lecture synchrone sur l'action de l'utilisateur
             acdcAudio.currentTime = 0;
-            acdcAudio.play().catch(e => console.log('Bloqué par navigateur:', e));
+            const playPromise = acdcAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.warn("Lecture bloquée par le navigateur :", err);
+                });
+            }
 
             const flash = document.getElementById('flash-overlay');
             let startTime = performance.now();
 
             function warpStep(now) {
-                let progress = (now - startTime) / 3500; // 3.5 secondes
+                let progress = (now - startTime) / 3200;
                 if (progress < 1.0) {
-                    camera.position.z = 30 - Math.pow(progress, 3) * 22;
-                    camera.fov = 45 + progress * 35;
+                    camera.position.z = 28 - Math.pow(progress, 3) * 20;
+                    camera.fov = 45 + progress * 40;
                     camera.updateProjectionMatrix();
-                    jarvisGroup.rotation.y += progress * 0.2;
+                    globeGroup.rotation.y += progress * 0.25;
 
                     if (progress > 0.85) {
                         flash.style.opacity = (progress - 0.85) / 0.15;
@@ -354,7 +425,7 @@
                 } else {
                     flash.style.opacity = '1';
                     setTimeout(() => {
-                        alert('CONNEXION JARVIS ÉTABLIE — SYSTÈME PRÊT');
+                        alert('CONNEXION RÉSEAU GLOBAL ÉTABLIE — SYSTÈME PRÊT');
                         location.reload();
                     }, 300);
                 }
