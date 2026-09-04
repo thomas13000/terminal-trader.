@@ -543,7 +543,6 @@
             gap: 12px;
         }
 
-        /* Responsive Mobile Adjustments */
         @media (max-width: 1024px) {
             .left-hero-panel { width: 320px; left: 20px; top: 90px; }
             .right-sidebar { width: 270px; right: 20px; top: 90px; }
@@ -560,17 +559,14 @@
 </head>
 <body>
 
-    <!-- 3D Three.js Render Viewport -->
     <canvas id="webgl-canvas"></canvas>
 
-    <!-- Tactical Grid & Corner Reticles -->
     <div class="hud-grid-overlay"></div>
     <div class="corner-reticle corner-tl"></div>
     <div class="corner-reticle corner-tr"></div>
     <div class="corner-reticle corner-bl"></div>
     <div class="corner-reticle corner-br"></div>
 
-    <!-- Top HUD Header Bar -->
     <header class="hud-header">
         <div class="brand-container">
             <div class="brand-logo">⚡</div>
@@ -591,7 +587,6 @@
         </div>
     </header>
 
-    <!-- Left Main Hero HUD Card -->
     <div class="left-hero-panel">
         <div class="panel-badge">
             <span class="status-dot"></span> SESSION EN DIRECT
@@ -629,14 +624,12 @@
         </div>
     </div>
 
-    <!-- Right Live Market Sidebar -->
     <aside class="right-sidebar">
         <div class="sidebar-title">
             <span>⚡ SURVEILLANCE MARCHÉS</span>
             <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">LIVE TICKERS</span>
         </div>
 
-        <!-- Ticker 1: US100 (Nasdaq) -->
         <div class="ticker-card" id="card-us100">
             <div class="ticker-info">
                 <div class="ticker-symbol">US100</div>
@@ -649,7 +642,6 @@
             </div>
         </div>
 
-        <!-- Ticker 2: S&P 500 (US500) -->
         <div class="ticker-card" id="card-us500">
             <div class="ticker-info">
                 <div class="ticker-symbol">US500</div>
@@ -662,7 +654,6 @@
             </div>
         </div>
 
-        <!-- Ticker 3: DXY -->
         <div class="ticker-card" id="card-dxy">
             <div class="ticker-info">
                 <div class="ticker-symbol">DXY</div>
@@ -675,7 +666,6 @@
             </div>
         </div>
 
-        <!-- Ticker 4: BTC / USDT -->
         <div class="ticker-card" id="card-btc">
             <div class="ticker-info">
                 <div class="ticker-symbol">BTC / USDT</div>
@@ -688,7 +678,6 @@
             </div>
         </div>
 
-        <!-- Ticker 5: GOLD (XAU/USD) -->
         <div class="ticker-card" id="card-gold">
             <div class="ticker-info">
                 <div class="ticker-symbol">XAU / USD</div>
@@ -702,7 +691,6 @@
         </div>
     </aside>
 
-    <!-- Bottom Hub Focus Navigation Deck -->
     <nav class="bottom-deck">
         <div class="hub-chip active" onclick="focusHub('ALL', this)">GLOBAL VIEW</div>
         <div class="deck-divider"></div>
@@ -715,7 +703,6 @@
         <div class="hub-chip" onclick="focusHub('TYO', this)">TOKYO</div>
     </nav>
 
-    <!-- Full Terminal Mode Workspace Modal -->
     <div id="terminal-overlay">
         <div class="terminal-header">
             <div class="brand-container">
@@ -739,7 +726,6 @@
                     <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--green-up);">● DIRECT WEBSOCKET FEED</span>
                 </div>
                 
-                <!-- Terminal Candlestick Workspace Renderer -->
                 <div style="flex-grow:1; background:#0b0e14; border-radius:10px; border:1px solid rgba(255,255,255,0.08); padding:15px; display:flex; flex-direction:column; justify-content:space-between;">
                     <div style="display:flex; gap:20px; font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);">
                         <span>O: <b style="color:#fff;">96,410.0</b></span>
@@ -798,7 +784,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Group Hierarchy
         const globeGroup = new THREE.Group();
         const arcsGroup = new THREE.Group();
         const ringsGroup = new THREE.Group();
@@ -813,7 +798,6 @@
 
         const GLOBE_RADIUS = 8.5;
 
-        // Background Cyberpunk Starfield Particles
         (function createSpacefield() {
             const starGeo = new THREE.BufferGeometry();
             const count = 2000;
@@ -833,7 +817,6 @@
             starsGroup.add(new THREE.Points(starGeo, starMat));
         })();
 
-        // Core Dark Globe Mesh
         const coreGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 0.98, 64, 64);
         const coreMat = new THREE.MeshBasicMaterial({
             color: 0x0a101d,
@@ -843,7 +826,6 @@
         const coreMesh = new THREE.Mesh(coreGeo, coreMat);
         globeGroup.add(coreMesh);
 
-        // Custom Rim Atmosphere Shader
         const auraGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.18, 64, 64);
         const auraMat = new THREE.ShaderMaterial({
             vertexShader: `
@@ -895,12 +877,12 @@
             const colorDark = new THREE.Color(0x1a2638);
 
             function isLand(lat, lon) {
-                if (lat > 15 && lat < 72 && lon > -168 && lon < -52) return true; // North America
-                if (lat > -56 && lat < 12 && lon > -82 && lon < -34) return true; // South America
-                if (lat > 35 && lat < 70 && lon > -10 && lon < 45) return true;  // Europe
-                if (lat > -35 && lat < 37 && lon > -18 && lon < 51) return true; // Africa
-                if (lat > 5 && lat < 75 && lon > 45 && lon < 180) return true;  // Asia
-                if (lat > -44 && lat < -10 && lon > 112 && lon < 154) return true;// Australia
+                if (lat > 15 && lat < 72 && lon > -168 && lon < -52) return true;
+                if (lat > -56 && lat < 12 && lon > -82 && lon < -34) return true;
+                if (lat > 35 && lat < 70 && lon > -10 && lon < 45) return true;
+                if (lat > -35 && lat < 37 && lon > -18 && lon < 51) return true;
+                if (lat > 5 && lat < 75 && lon > 45 && lon < 180) return true;
+                if (lat > -44 && lat < -10 && lon > 112 && lon < 154) return true;
                 return false;
             }
 
@@ -948,14 +930,12 @@
         FINANCIAL_HUBS.forEach(hub => {
             const pos = latLonToVector3(hub.lat, hub.lon, GLOBE_RADIUS);
 
-            // Glowing Pin Sphere
             const pinGeo = new THREE.SphereGeometry(0.18, 16, 16);
             const pinMat = new THREE.MeshBasicMaterial({ color: hub.color });
             const pinMesh = new THREE.Mesh(pinGeo, pinMat);
             pinMesh.position.copy(pos);
             hubsGroup.add(pinMesh);
 
-            // Pulsing Ring Beacon
             const ringBeaconGeo = new THREE.RingGeometry(0.2, 0.4, 32);
             const ringBeaconMat = new THREE.MeshBasicMaterial({
                 color: hub.color,
@@ -994,7 +974,6 @@
             const line = new THREE.Line(curveGeo, curveMat);
             arcsGroup.add(line);
 
-            // Flowing Photon Particle
             const photonGeo = new THREE.SphereGeometry(0.12, 12, 12);
             const photonMat = new THREE.MeshBasicMaterial({ color: 0xf0b90b });
             const photon = new THREE.Mesh(photonGeo, photonMat);
@@ -1021,19 +1000,20 @@
         });
 
         let isDragging = false;
+        let isTransitioning = false;
         let prevMousePos = { x: 0, y: 0 };
         let targetRotation = { x: 0.2, y: 0 };
         let currentRotation = { x: 0.2, y: 0 };
 
         window.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'CANVAS') {
+            if (e.target.tagName === 'CANVAS' && !isTransitioning) {
                 isDragging = true;
                 prevMousePos = { x: e.clientX, y: e.clientY };
             }
         });
 
         window.addEventListener('mousemove', (e) => {
-            if (isDragging) {
+            if (isDragging && !isTransitioning) {
                 const deltaX = e.clientX - prevMousePos.x;
                 const deltaY = e.clientY - prevMousePos.y;
 
@@ -1047,10 +1027,13 @@
         window.addEventListener('mouseup', () => { isDragging = false; });
 
         window.addEventListener('wheel', (e) => {
-            camera.position.z = Math.max(14, Math.min(45, camera.position.z + e.deltaY * 0.02));
+            if (!isTransitioning) {
+                camera.position.z = Math.max(14, Math.min(45, camera.position.z + e.deltaY * 0.02));
+            }
         });
 
         window.focusHub = function(hubId, element) {
+            if (isTransitioning) return;
             document.querySelectorAll('.hub-chip').forEach(chip => chip.classList.remove('active'));
             element.classList.add('active');
 
@@ -1099,7 +1082,6 @@
         }
         initSparklines();
 
-        // Clocks Refresh (Paris & New York)
         function updateClocks() {
             const now = new Date();
             
@@ -1116,7 +1098,6 @@
             document.getElementById('clock-paris').textContent = parisTime;
             document.getElementById('clock-ny').textContent = nyTime;
             
-            // Random Ping Generator
             document.getElementById('ping-val').textContent = Math.floor(12 + Math.random() * 6);
         }
         setInterval(updateClocks, 1000);
@@ -1129,31 +1110,85 @@
                 setTimeout(() => overlay.classList.add('active'), 10);
             } else {
                 overlay.classList.remove('active');
-                setTimeout(() => overlay.style.display = 'none', 600);
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    isTransitioning = false;
+                }, 600);
             }
         };
 
+        // Audio Object initialization
+        const acdcAudio = new Audio('AC%20DC%20Back%20In%20Black%20(1).mp3');
+
         function launchTerminalWarp() {
-            let warpProgress = 0;
-            const warpInterval = setInterval(() => {
-                warpProgress += 0.05;
-                camera.position.z -= 0.9;
-                starsGroup.rotation.z += 0.1;
-                if (warpProgress >= 1.0) {
-                    clearInterval(warpInterval);
-                    toggleTerminalOverlay(true);
-                    camera.position.z = 28; // Reset back
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const btn = document.getElementById('btn-enter-app');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.6';
+
+            // Start Audio at 10 seconds
+            acdcAudio.currentTime = 10;
+            acdcAudio.volume = 1.0;
+            acdcAudio.play().catch(e => console.warn('Audio non démarré:', e));
+
+            const DURATION = 25; // 25s Total Transition
+            const startTime = clock.getElapsedTime();
+
+            // South of France Coordinates (Lat 43.5, Lon 5.4)
+            const targetLatRad = 43.5 * (Math.PI / 180);
+            const targetLonRad = -5.4 * (Math.PI / 180) - Math.PI / 2;
+
+            const startX = targetRotation.x;
+            const startY = targetRotation.y;
+            const startCamZ = camera.position.z;
+            const targetCamZ = 9.8; // Close-up view on South of France
+
+            function animateWarp() {
+                const elapsed = clock.getElapsedTime() - startTime;
+                const progress = Math.min(elapsed / DURATION, 1.0);
+
+                // Smooth Easing (easeInOutCubic)
+                const ease = progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                targetRotation.x = startX + (targetLatRad - startX) * ease;
+                targetRotation.y = startY + (targetLonRad - startY) * ease;
+                camera.position.z = startCamZ + (targetCamZ - startCamZ) * ease;
+
+                // Audio Fade-Out over 5 seconds (between 20s and 25s elapsed)
+                if (elapsed >= 20 && elapsed <= 25) {
+                    const fadeProgress = (elapsed - 20) / 5;
+                    acdcAudio.volume = Math.max(0, 1.0 - fadeProgress);
                 }
-            }, 20);
+
+                if (progress < 1.0) {
+                    requestAnimationFrame(animateWarp);
+                } else {
+                    acdcAudio.pause();
+                    acdcAudio.volume = 1.0;
+                    toggleTerminalOverlay(true);
+
+                    // Reset controls state
+                    setTimeout(() => {
+                        camera.position.z = 28;
+                        btn.style.pointerEvents = 'all';
+                        btn.style.opacity = '1';
+                    }, 1000);
+                }
+            }
+
+            animateWarp();
         }
 
         document.getElementById('btn-enter-app').addEventListener('click', launchTerminalWarp);
 
-        // Global Keyboard Shortcuts (ENTER: Launch, R: Reset View)
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Enter') {
+            if (e.code === 'Enter' && !isTransitioning) {
                 launchTerminalWarp();
-            } else if (e.code === 'KeyR') {
+            } else if (e.code === 'KeyR' && !isTransitioning) {
                 targetRotation.x = 0.2;
                 targetRotation.y = 0;
                 camera.position.z = 28;
@@ -1172,7 +1207,7 @@
             currentRotation.y += (targetRotation.y - currentRotation.y) * 0.05;
 
             globeGroup.rotation.x = currentRotation.x;
-            globeGroup.rotation.y = currentRotation.y + time * 0.03;
+            globeGroup.rotation.y = isTransitioning ? currentRotation.y : currentRotation.y + time * 0.03;
 
             ringsGroup.rotation.z = time * 0.05;
             starsGroup.rotation.y = time * 0.01;
